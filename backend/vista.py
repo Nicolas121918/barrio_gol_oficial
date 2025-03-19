@@ -1,0 +1,810 @@
+from fastapi import FastAPI,UploadFile,File ,Form , Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+import bcrypt
+from pydantic import BaseModel
+from conexion import engine, get_db
+from modelo import Base, Contacto,Jugador,Contacto_usuarios,Equipos,UserVideos,Torneos,partidos,Equipos,Registro
+from schemas import RegistroBase as clie,LoginRequest
+from schemas import ContactForm
+from schemas import Contactousuers
+from schemas import JugadorForm
+from schemas import DatosTeams
+from modelo import Like
+from schemas import Torneo,Partidos,DatosTeams
+from typing import List, Optional
+
+from fastapi.middleware.cors import CORSMiddleware
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi import HTTPException
+import logging
+from sqlalchemy import func
+
+
+app = FastAPI()
+app.mount("/micarpeta", StaticFiles(directory="micarpeta"), name="micarpeta")
+app.mount("/logosteams", StaticFiles(directory="logosteams"), name="logosteams")
+app.mount("/videos", StaticFiles(directory="videos"), name="videos")
+app.mount("/logosteams", StaticFiles(directory="logosteams"), name="logosteams")
+app.mount("/logostorneos", StaticFiles(directory="logostorneos"), name="logostorneos")
+app.mount("/logospartidos", StaticFiles(directory="logospartidos"), name="logospartidos")
+
+
+
+## permisos endpoints
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],  
+)
+Base.metadata.create_all(bind=engine)
+
+
+
+## Endpoint Para Login
+@app.post("/iniciar")
+async def iniciar_sesion(login: LoginRequest, db: Session = Depends(get_db)):
+    cliente = db.query(Registro).filter(Registro.correo == login.correo).first()
+    
+    if not cliente:     
+        raise HTTPException(status_code=400, detail="Usuario no existe")
+    
+    if not bcrypt.checkpw(login.contraseña.encode('utf-8'), cliente.contraseña.encode('utf-8')):
+        raise HTTPException(status_code=400, detail="Contraseña incorrecta")
+    
+    return {
+        "documento": cliente.documento,
+        "nombreUsuario": cliente.nombre,
+        "correo": cliente.correo,
+        "ciudad": cliente.ciudad,
+        "descripcion": cliente.descripcion,
+        "fechaNacimiento": cliente.fecha_nacimiento,
+        "imagen" : cliente.imagen,
+        "celular" : cliente.celular,
+        "Edad" : cliente.Edad,
+        "posicion" : cliente.posicion,
+        "equiposTiene": cliente.equipo_tiene,  # Se añade la clave correcta
+    }
+## Endpoint Para Registrar usuarios
+@app.post("/insertarc", response_model=clie)
+async def registrar_cliente(
+    documento: int = Form(...),
+    fecha_nacimiento : str = Form(...),
+    nombre: str = Form(...),
+    ciudad : str = Form(...),
+    descripcion : str = Form(...),
+    correo: str = Form(...),
+    contraseña: str = Form(...),
+    file: UploadFile = File(None),
+    celular : str = Form(...),
+    Edad : int = Form(...),
+    posicion : str = Form(...),
+    equipos_tiene: Optional[int] = Form(None),
+    db: Session = Depends(get_db)
+):
+    cliente_existente = db.query(Registro).filter(Registro.correo == correo).first()
+    documento_existente = db.query(Registro).filter(Registro.documento == documento).first()
+
+    if cliente_existente:
+        raise HTTPException(status_code=400, detail="El correo ya está registrado")
+    if documento_existente:
+        raise HTTPException(status_code=400, detail="El documento ya está registrado")
+    if file and file.content_type not in ["image/jpeg", "image/png", "image/gif", "image/bmp", "image/svg+xml", "image/webp"]:
+        raise HTTPException(status_code=400, detail="Formato de archivo no soportado")
+    
+    if file:
+        file_location = f"micarpeta/{file.filename}"
+        os.makedirs("micarpeta", exist_ok=True)
+        with open(file_location, "wb") as buffer:
+            buffer.write(await file.read())
+        ruta_Imagen = f"micarpeta/{file.filename}"
+
+    encriptacion = bcrypt.hashpw(contraseña.encode('utf-8'), bcrypt.gensalt())
+
+    nuevo_cliente = Registro(
+        descripcion=descripcion,
+        documento=documento,
+        celular=celular,
+        fecha_nacimiento=fecha_nacimiento,
+        nombre=nombre,
+        correo=correo,
+        ciudad=ciudad,
+        Edad=Edad,
+        posicion=posicion,
+        contraseña=encriptacion.decode('utf-8'),
+        imagen=ruta_Imagen if file else None,
+        equipo_tiene=equipos_tiene  # Se añade la asignación correcta
+    )
+    # Crear el registro en la tabla de datos de contacto del usuario
+    datos_contacto_usuario = Contacto_usuarios(
+        nombre=nombre,
+        email=correo,
+        celular=celular,
+        usuario_documento=documento  # Relacionamos con el usuario creado
+    )
+    
+    db.add(nuevo_cliente)
+    db.add(datos_contacto_usuario)
+    db.commit()
+    db.refresh(nuevo_cliente)
+
+    return nuevo_cliente
+
+
+
+#endpoint para ver los videos
+from sqlalchemy.orm import joinedload
+
+from sqlalchemy.orm import joinedload
+from modelo import UserVideos, Like
+
+@app.get("/listarvideos")
+async def listar_videos(db: Session = Depends(get_db)):
+    lista_videos = (
+        db.query(UserVideos)
+        .options(joinedload(UserVideos.usuario))  # Cargar la relación con Usuario
+        .all()
+    )
+
+    if not lista_videos:
+        raise HTTPException(status_code=404, detail="No hay videos todavía")
+
+    return [
+        {
+            "id": video.id,  # ✅ Agregar el ID del video
+            "url": video.url,
+            "uploaderName": video.usuario.nombre if video.usuario else "Desconocido",
+            "uploaderProfilePic": video.usuario.imagen if video.usuario and video.usuario.imagen else "default.png",
+            "description": video.descripcion if video.descripcion else "Sin descripción",
+            "likes": db.query(Like).filter(Like.video_id == video.id).count(),  # Contar likes
+        }
+        for video in lista_videos
+    ]
+@app.delete("/eliminarvideo/{video_id}")
+async def eliminar_video(video_id: int, db: Session = Depends(get_db)):
+    video = db.query(UserVideos).filter(UserVideos.id == video_id).first()
+
+    if not video:
+        raise HTTPException(status_code=404, detail="Video no encontrado")
+
+    db.delete(video)
+    db.commit()
+
+    return {"message": "Video eliminado correctamente"}
+
+
+
+@app.get("/listarvideosdef/{documento}")
+async def listar_videos_por_documento(documento: str, db: Session = Depends(get_db)):
+    lista_videos = (
+        db.query(UserVideos)
+        .filter(UserVideos.usuario_documento == documento)
+        .options(joinedload(UserVideos.usuario))  # Cargar la relación con Usuario
+        .all()
+    )
+
+    if not lista_videos:
+        raise HTTPException(status_code=404, detail="No hay videos para este usuario")
+
+    return [
+        {
+            "id": video.id,
+            "url": video.url,
+            "uploaderName": video.usuario.nombre if video.usuario else "Desconocido",
+            "uploaderProfilePic": video.usuario.imagen if video.usuario and video.usuario.imagen else "default.png",
+            "description": video.descripcion.strip() if video.descripcion else "Sin descripción",
+            "likes": db.query(Like).filter(Like.video_id == video.id).count(),
+        }
+        for video in lista_videos
+    ]
+
+
+
+@app.post("/likes/{video_id}/{usuario_id}")
+async def toggle_like(video_id: int, usuario_id: int, db: Session = Depends(get_db)):
+    # Verificar si el video existe
+    video = db.query(UserVideos).filter(UserVideos.id == video_id).first()
+    if not video:
+        raise HTTPException(status_code=404, detail="Video no encontrado")
+
+    # Buscar si el usuario ya dio like a este video
+    like_existente = db.query(Like).filter(Like.video_id == video_id, Like.usuario_id == usuario_id).first()
+
+    if like_existente:
+        # Si el like ya existe, eliminarlo y restar un like al video
+        db.delete(like_existente)
+        video.likes = max(0, video.likes - 1)  # Evita valores negativos
+        mensaje = "Like eliminado"
+    else:
+        # Si el like no existe, agregarlo y sumar un like al video
+        nuevo_like = Like(video_id=video_id, usuario_id=usuario_id)
+        db.add(nuevo_like)
+        video.likes += 1  # Aumenta el contador de likes
+        mensaje = "Like agregado"
+
+    # Guardar cambios en la base de datos
+    db.commit()
+    db.refresh(video)  # Asegura que la actualización se refleje en la consulta
+
+    return {"message": mensaje, "likes": video.likes}
+
+@app.get("/like/{video_id}")
+async def contar_likes(video_id: int, db: Session = Depends(get_db)):
+    total_likes = db.query(Like).filter(Like.video_id == video_id).count()
+    return {"video_id": video_id, "likes": total_likes}
+
+
+
+
+
+
+## Endpoint Para Enviar el Formulario De contacto
+@app.post("/contacto/")
+async def crear_contacto(form_data: ContactForm, db: Session = Depends(get_db)):
+
+    nuevo_contacto = Contacto(
+        nombre=form_data.nombre,
+        queja_reclamo_quest=form_data.queja_reclamo_quest,
+        email=form_data.email,
+        celular=form_data.celular,
+        comentario=form_data.comentario,
+        fecha_radicacion = form_data.fecha_radicacion,
+        ciudad = form_data.ciudad
+    )
+
+
+    db.add(nuevo_contacto)
+    db.commit()
+    db.refresh(nuevo_contacto)  
+    
+    return {"message": "Formulario enviado correctamente", "data": nuevo_contacto}
+
+@app.get("/api/usuario/{user_id}", response_model=clie) 
+def obtener_usuario(user_id: int, db: Session = Depends(get_db)):
+    usuario = db.query(Registro).filter(Registro.documento == user_id).first()
+    if usuario is None:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return usuario
+
+## Endpoint Para Crear la tabla de datos basicos apartir de las pqrs del usuario
+@app.post("/contactos/")
+async def crear_contacto(form_data: Contactousuers, db: Session = Depends(get_db)):
+
+    nuevo_contacto = Contacto_usuarios(
+        nombre=form_data.nombre,
+        email=form_data.email,
+        celular=form_data.celular,
+    )
+  
+    db.add(nuevo_contacto)
+    db.commit()
+    db.refresh(nuevo_contacto) 
+    
+    return {"message": "Formulario enviado correctamente", "data": nuevo_contacto}
+
+@app.post("/jugadores/")
+async def crear_jugador(form_data: JugadorForm, db: Session = Depends(get_db)):
+    nuevo_jugador = Jugador(
+        nombre=form_data.nombre,
+        Edad=form_data.Edad,
+        posicion=form_data.posicion,
+        email=form_data.email,
+        celular=form_data.celular,
+        equipo=form_data.equipo,
+    )
+    db.add(nuevo_jugador)
+    db.commit()
+    db.refresh(nuevo_jugador)
+    
+    return {"message": "Formulario Enviado correctamente En pocas horas Recibira Notificaciones de su Solicitud", "data": nuevo_jugador}
+
+## Endpoint Para Crear los Equipos
+@app.post("/Teams")
+async def registrar_cliente(
+    nombreteam: str = Form(...),
+    Descripcion: str = Form(...),
+    numeropeople: int = Form(...),
+    documento_cap: int = Form(...),
+    capitanteam: str = Form(...),
+    requisitos_join: str = Form(...),
+    location: str = Form(...),
+    logoteam: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    file_location = f"logosteams/{logoteam.filename}"
+    os.makedirs("logosteams", exist_ok=True)
+    with open(file_location, "wb") as buffer:
+        buffer.write(await logoteam.read())
+
+    ruta_Imagen = f"logosteams/{logoteam.filename}"
+    
+    # Buscar al capitán en la base de datos por su documento
+    capitan = db.query(Registro).filter(Registro.documento == documento_cap).first()
+    if not capitan:
+        raise HTTPException(status_code=404, detail="Capitán no encontrado en la base de datos")
+
+    # Crear el equipo
+    nuevo_Team = Equipos(
+        nombreteam=nombreteam,
+        Descripcion=Descripcion,
+        numeropeople=numeropeople,
+        capitanteam=capitanteam,
+        requisitos_join=requisitos_join,
+        location=location,
+        logoTeam=ruta_Imagen,
+        capitan_documento=capitan.documento,  # Asociar el documento del capitán
+    )
+
+
+    db.add(nuevo_Team)
+    db.commit()
+    db.refresh(nuevo_Team)  # Para obtener el ID generado por la base de datos
+
+    # Actualizar el equipo_tiene del capitán con el ID del nuevo equipo
+    capitan.equipo_tiene = nuevo_Team.Id_team
+    db.commit()  # Guardar el cambio en la base de datos
+
+    return nuevo_Team
+
+
+@app.get("/equipos/es_capitan/{documento}", response_model=bool)
+async def es_capitan(documento: int, db: Session = Depends(get_db)):
+    equipo = db.query(Equipos).filter(Equipos.capitan_documento == documento).first()
+    return equipo is not None
+
+## Endpoint para lista los equipos
+@app.get("/listarteams", response_model=list[DatosTeams])
+async def listar_clientes(db: Session=Depends(get_db)):
+    lista_Equipos=db.query(Equipos).all()
+    if not lista_Equipos:
+        raise HTTPException(status_code=404, detail="No hay Equipos Todavia")
+    return lista_Equipos
+
+
+
+
+@app.delete("/equipos/eliminar/{id_equipo}")
+async def eliminar_equipo(
+    id_equipo: int,
+    db: Session = Depends(get_db)
+):
+    # Buscar el equipo en la base de datos
+    equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
+    if not equipo:
+        raise HTTPException(status_code=404, detail="Equipo no encontrado")
+
+    # Desasociar a todos los miembros del equipo
+    db.query(Registro).filter(Registro.equipo_tiene == id_equipo).update({"equipo_tiene": 0})
+
+    # Eliminar el equipo
+    db.delete(equipo)
+    db.commit()
+    return {"mensaje": f"El equipo {equipo.nombreteam} ha sido eliminado y todos los miembros quedaron sin equipo"}
+
+
+
+## endpoint para listar nombre de  equipos
+@app.get("/equipo/lista", response_model=List[str])
+async def listar_equipos(db: Session = Depends(get_db)):
+    lista_Equipos = db.query(Equipos.nombreteam).all() 
+    if not lista_Equipos:
+        raise HTTPException(status_code=404, detail="No hay Equipos Todavia")
+    return [equipo.nombreteam for equipo in lista_Equipos]  
+
+
+@app.get('/verificar-equipo/{id_usuario}')
+def verificar_equipo(id_usuario: int, db: Session = Depends(get_db)):
+    equipo = db.query(Equipos).filter(Equipos.id_usuario == id_usuario).first()
+    if equipo:
+        return {"asociado": True, "Id_team": equipo.Id_team, "nombreteam": equipo.nombreteam}
+    return {"asociado": False}
+
+@app.post("/equipos/unirse")
+async def unirse_equipo(
+    documento_user: str = Form(...),  # Cambio de int a str porque documento es string
+    id_equipo: int = Form(...),
+    db: Session = Depends(get_db)
+):
+    # Verificar si el usuario existe
+    usuario = db.query(Registro).filter(Registro.documento == documento_user).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    # Verificar si el equipo existe
+    equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()  # Asegurar que usas la columna correcta
+    if not equipo:
+        raise HTTPException(status_code=404, detail="Equipo no encontrado")
+
+    # Verificar si el usuario ya está en un equipo
+    if usuario.equipo_tiene and usuario.equipo_tiene != 0:
+        raise HTTPException(status_code=400, detail="El usuario ya pertenece a un equipo")
+
+    # Asociar usuario al equipo
+    usuario.equipo_tiene = equipo.Id_team  # Actualizar con el ID correcto
+    db.commit()
+
+    return {"mensaje": f"{usuario.nombre} se ha unido al equipo {equipo.nombreteam}"}
+@app.post("/equipos/salir")
+async def salir_equipo(
+    documento_user: str = Form(...),  # Cambié int -> str porque en el modelo es String(50)
+    db: Session = Depends(get_db)
+):
+    # Verificar si el usuario existe
+    usuario = db.query(Registro).filter(Registro.documento == documento_user).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    # Verificar si el usuario está en un equipo
+    if usuario.equipo_tiene == 0:
+        raise HTTPException(status_code=400, detail="El usuario no pertenece a ningún equipo")
+
+    # Eliminar la relación con el equipo
+    usuario.equipo_tiene = 0  # Cambiar a 0 en lugar de None
+    db.commit()
+
+    return {"mensaje": f"has salido del equipo"}
+
+@app.get("/equipos/{id_equipo}/miembros")
+async def listar_miembros(id_equipo: int, db: Session = Depends(get_db)):
+    miembros = db.query(Registro).filter(Registro.equipo_tiene == id_equipo).all()
+    if not miembros:
+        raise HTTPException(status_code=404, detail="Este equipo no tiene miembros")
+    return [{"nombre": miembro.nombre, "documento": miembro.documento} for miembro in miembros]
+
+@app.get("/equipos/{id_equipo}", response_model=DatosTeams)
+async def obtener_equipo(id_equipo: int, db: Session = Depends(get_db)):
+    equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
+    if not equipo:
+        raise HTTPException(status_code=404, detail="Equipo no encontrado")
+    return equipo
+@app.get("/id_equipo/{documento}")
+def obtener_equipo_por_documento(documento: int, db: Session = Depends(get_db)):
+    # Buscar al usuario en la base de datos por su documento
+    usuario = db.query(Registro).filter(Registro.documento == documento).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Buscar el equipo donde el usuario es capitán
+    equipo = db.query(Equipos).filter(Equipos.capitan_documento == usuario.documento).first()
+    if not equipo:
+        raise HTTPException(status_code=404, detail="El usuario no lidera ningún equipo")
+    
+    return {"Id_team": equipo.Id_team}
+
+
+@app.get("/equipos/{id_equipo}/detalle", response_model=dict)
+async def obtener_equipo_detalle(id_equipo: int, db: Session = Depends(get_db)):
+    equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
+    if not equipo:
+        raise HTTPException(status_code=404, detail="Equipo no encontrado")
+
+    miembros = db.query(Registro).filter(Registro.equipo_tiene == id_equipo).all()
+
+    return {
+        "equipo": {
+            "id": equipo.Id_team,
+            "nombre": equipo.nombreteam,
+            "descripcion": equipo.Descripcion,
+            "numero_integrantes": equipo.numeropeople,
+            "capitan": equipo.capitanteam,
+            "ubicacion": equipo.location,
+            "logo": equipo.logoTeam,
+        },
+        "miembros": [{"nombre": miembro.nombre, "documento": miembro.documento} for miembro in miembros]
+    }
+
+@app.get("/equipos/disponibles")  # No espera un ID
+async def listar_equipos_disponibles(db: Session = Depends(get_db)):
+    equipos = db.query(Equipos).all()
+    if not equipos:
+        raise HTTPException(status_code=404, detail="No hay equipos disponibles")
+    return equipos
+
+
+@app.put("/usuario/actualizar-foto")
+async def actualizar_foto_perfil(
+    correo: str,  # El correo se enviará en el cuerpo de la solicitud
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    # Busca el usuario por correo
+    usuario = db.query(Registro).filter(Registro.correo == correo).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    # Verifica el formato de archivo
+    if file.content_type not in ["image/jpeg", "image/png", "image/gif", "image/bmp", "image/svg+xml", "image/webp"]:
+        raise HTTPException(status_code=400, detail="Formato de archivo no soportado")
+    # Guarda el archivo
+    file_location = f"micarpeta/{file.filename}"
+    os.makedirs("micarpeta", exist_ok=True)
+    with open(file_location, "wb") as buffer:
+        buffer.write(await file.read())
+
+    # Actualiza la foto de perfil
+    usuario.imagen = file_location
+    db.commit()
+    db.refresh(usuario)
+    return {"message": "Foto de perfil actualizada", "ruta": file_location}
+
+
+@app.put("/usuario/actualizar-nombre")
+async def actualizar_nombre(
+    correo: str = Query(...),
+    nombre: str = Form(...),  # Recibimos el nombre como parámetro en el cuerpo del formulario
+    db: Session = Depends(get_db)
+):
+    # Buscar el usuario por correo
+    usuario = db.query(Registro).filter(Registro.correo == correo).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    # Actualizar el nombre del usuario
+    usuario.nombre = nombre
+    db.commit()
+    db.refresh(usuario)
+
+    return {"message": "Nombre actualizado", "nombre": usuario.nombre}
+
+
+## Endpoint Para Actualizar la ciudad sin ID en la URL
+@app.put("/usuario/actualizar-ciudad")
+async def actualizar_ciudad(
+    correo: str = Query(...),
+    ciudad: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    # Busca el usuario por correo
+    usuario = db.query(Registro).filter(Registro.correo == correo).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    # Actualiza la ciudad
+    usuario.ciudad = ciudad
+    db.commit()
+    db.refresh(usuario)
+
+    return {"message": "Ciudad actualizada", "ciudad": usuario.ciudad}
+
+
+## Endpoint Para Actualizar la descripción sin ID en la URL
+@app.put("/usuario/actualizar-descripcion")
+async def actualizar_descripcion(
+    correo: str = Query(...),
+    descripcion: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    # Busca el usuario por correo
+    usuario = db.query(Registro).filter(Registro.correo == correo).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    # Actualiza la descripción
+    usuario.descripcion = descripcion
+    db.commit()
+    db.refresh(usuario)
+    return {"message": "Descripción actualizada", "descripcion": usuario.descripcion}
+
+
+# Configurar logs para ver errores en la consola
+logging.basicConfig(level=logging.INFO)
+# Endpoint para crear torneos
+@app.post("/crearTorneo")
+async def crear_evento(
+    correo_usuario : str = Form(...),
+    nombre: str = Form(...),
+    fecha: str = Form(...),
+    ubicacion: str = Form(...),
+    numPartidos:int = Form(...),  
+    apuestaTorneo: float = Form(...),  
+    precioArbitrajeTorneo: float = Form(...),
+    precioInscripcion: float = Form(...), 
+    reglasTorneo: str = Form(...),
+    numeroparticipantes : int = Form(...),
+    logoTeam: UploadFile = File(...),
+    db: Session = Depends(get_db)
+    
+):
+    logging.info(f"Correo recibido: {correo_usuario}")
+     # Buscar al usuario en la base de datos por su email sin importar espacios o mayusculas    
+    usuario = db.query(Registro).filter(Registro.correo.ilike(correo_usuario.strip())).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+
+
+    file_location = f"logostorneos/{logoTeam.filename}"
+    os.makedirs("logostorneos", exist_ok=True)
+    with open(file_location, "wb") as buffer:
+        buffer.write(await logoTeam.read())
+
+    ruta_Imagen = f"logostorneos/{logoTeam.filename}"
+
+    # Crear una instancia de Torneos con los datos recibidos
+    nuevo_evento = Torneos(
+        nombre=nombre,
+        fecha=fecha,
+        ubicacion=ubicacion,
+        numPartidos=numPartidos,
+        apuestaTorneo=apuestaTorneo,
+        precioArbitrajeTorneo=precioArbitrajeTorneo,
+        precioInscripcion=precioInscripcion,
+        reglasTorneo=reglasTorneo,
+        numeroparticipantes=numeroparticipantes,
+        Documento_Creador_Torneo = usuario.documento,
+        Nombre_Creador_Torneo = usuario.nombre,
+        logoTeam=ruta_Imagen if logoTeam else None
+    )
+
+    # Agregar el nuevo evento a la base de datos
+    db.add(nuevo_evento)
+    db.commit()
+
+    # Devolver el evento creado como respuesta
+    return nuevo_evento
+
+
+
+# Endpoint para crear Partidos
+@app.post("/crearPartidos")
+async def crear_partidos(
+    correo_usuario : str = Form(...),
+    hora: str = Form(...),
+    name: str = Form(...),
+    apuesta: float = Form(...),
+    ubicacionpartido: str = Form(...),
+    logomatch: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    # Buscar al usuario en la base de datos por su email
+    usuario = db.query(Registro).filter(Registro.correo == correo_usuario).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    file_location = f"logospartidos/{logomatch.filename}"
+    os.makedirs("logospartidos", exist_ok=True)
+    with open(file_location, "wb") as buffer:
+        buffer.write(await logomatch.read())
+
+    ruta_Imagen = f"logospartidos/{logomatch.filename}"
+
+    # Crear una instancia de Torneos con los datos recibidos
+    nuevo_partido = partidos(
+        hora=hora,
+        name=name,
+        apuesta=apuesta,
+        ubicacionpartido=ubicacionpartido,
+        Documento_Creador_P = usuario.documento,
+        Nombre_Creador_Partido = usuario.nombre,
+        logomatch=ruta_Imagen if logomatch else None
+    )
+
+    # Agregar el nuevo evento a la base de datos
+    db.add(nuevo_partido)
+    db.commit()
+    db.refresh(nuevo_partido)
+
+## Endpoint Para Subir Video
+@app.post("/subirvideo", response_model=dict)
+async def subir_video(
+    correo: str = Form(...),  
+    video: UploadFile = File(...),
+    descripcion: str = Form(...),  # Nuevo campo
+    db: Session = Depends(get_db),
+):
+    if video.content_type not in ["video/mp3", "video/mp4", "video/mkv", "video/avi", "video/mov", "video/webm"]:
+        raise HTTPException(status_code=400, detail="Formato de video no soportado")
+
+    usuario = db.query(Registro).filter(Registro.correo == correo).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    video_location = f"videos/{video.filename}"
+    os.makedirs("videos", exist_ok=True)
+    with open(video_location, "wb") as buffer:
+        buffer.write(await video.read())
+
+    ruta_video = f"videos/{video.filename}"
+    nuevo_video = UserVideos(
+        url=ruta_video,
+        descripcion=descripcion,  # Guardar la descripción
+        usuario_documento=usuario.documento
+    )
+
+    db.add(nuevo_video)
+    db.commit()
+    db.refresh(nuevo_video)
+
+    return {"mensaje": "Video subido correctamente", "ruta": ruta_video}
+
+
+
+@app.get("/listartorneos/{excluir_id}", response_model=List[Torneo])
+async def listar_torneos(excluir_id: str, db: Session = Depends(get_db)):
+    # Limpiar el nombre del usuario a excluir
+    excluir_id = excluir_id.strip().lower()
+    lista_Torneos = db.query(Torneos).filter(func.lower(Torneos.Nombre_Creador_Torneo) != excluir_id).all() 
+
+    if not lista_Torneos:
+        raise HTTPException(status_code=404, detail="No hay Torneos disponibles")
+    return lista_Torneos
+
+
+
+@app.get("/listarpartidos/{excluir_name}", response_model=List[Partidos])
+async def listar_partidos(excluir_name: str, db: Session = Depends(get_db)):
+    excluir_name = excluir_name.strip().lower()
+    lista_Partidos = db.query(partidos).filter(func.lower(partidos.Nombre_Creador_Partido) != excluir_name).all()
+
+    if not lista_Partidos:
+        raise HTTPException(status_code=404, detail="No hay partidos disponibles")
+    return lista_Partidos
+
+
+
+
+  # lista los torneos de un usuario
+@app.get("/listartorneosi/{documento_creador}", response_model=List[Torneo])
+async def listar_torneos(documento_creador: str, db: Session = Depends(get_db)):
+    # Limpiar el documento del usuario a buscar
+    documento_creador = documento_creador.strip()
+
+    lista_Torneos = db.query(Torneos).filter(Torneos.Documento_Creador_Torneo == documento_creador).all() 
+
+    if not lista_Torneos:
+        raise HTTPException(status_code=404, detail="No hay Torneos disponibles para este creador")
+
+    return lista_Torneos
+
+
+@app.get("/listarpartidosi/{id_partido}", response_model=List[Partidos])
+async def listar_partidos(id_partido: int, db: Session = Depends(get_db)):
+    lista_Partidos = db.query(partidos).filter(partidos.id_Partido == id_partido).all()
+    if not lista_Partidos:
+        raise HTTPException(status_code=404, detail="No hay partidos disponibles con ese ID")
+    return lista_Partidos
+
+
+
+
+
+
+# Endpoint GET para obtener todos los usuarios
+@app.get("/usuarios", response_model=list[clie])
+async def obtener_usuarios(db: Session = Depends(get_db)):
+    
+    # Consultar todos los registros de usuarios en la base de datos
+    usuarios = db.query(Registro).all()
+
+    # Si no hay usuarios registrados, lanzar un error 404
+    if not usuarios:
+        raise HTTPException(status_code=404, detail="No se encontraron usuarios")
+
+    # Devolver los usuarios encontrados
+    return usuarios
+
+@app.put("/usuarios/actualizar/{documento_user}")
+def actualizar_equipo(
+    documento_user: int,
+    db: Session = Depends(get_db)
+):
+    
+    # documento capitan conexion equipos
+    equipo = db.query(Equipos).filter(Equipos.capitan_documento == documento_user).first()
+
+    if not equipo:
+        raise HTTPException(status_code=404, detail="No se encontró un equipo con ese documento de capitán")
+    
+
+    # documento tiene equipo tabla registro 
+    usuario = db.query(Registro).filter(Registro.documento == documento_user).first()
+
+    if not usuario:
+        raise HTTPException(status_code=404, detail="No se encontró un usuario con ese documento")
+
+    usuario.equipo_tiene = equipo.Id_team
+    db.commit()
+    db.refresh(usuario)
+
+    return {"mensaje": "Equipo del usuario actualizado correctamente", "usuario": usuario}

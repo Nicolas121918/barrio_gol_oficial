@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "computed": "^0.0.1",
+    "pinia": "^3.0.1",
+    "pinia-plugin-persistedstate": "^4.2.0",
+    "vue-router": "^4.5.0"
+  }
+}
