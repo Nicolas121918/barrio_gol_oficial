@@ -27,10 +27,12 @@ import ganadortorneo from "@/components/ganadortorneo.vue";
 import jugadorestorneo from "@/components/jugadorestorneo.vue";
 import targetas from "@/components/targetas.vue";
 import Galeria from "@/components/galeria.vue";
-import tienda from "@/components/tienda.vue";
+import tienda from "@/components/test.vue";
 import Calendario from "@/components/calendario.vue";
 import Vender from "@/components/vender.vue";
 import Creartorneo from "@/components/creartorneo.vue";
+import One_video from "@/components/one_video.vue";
+import Store from "@/components/store.vue";
 
 
 
@@ -91,6 +93,11 @@ const routes=[
         component: equipo,
         
       },
+      {
+      path: "/one_video/:id",
+      name: "One_Video",
+      component: One_video
+    },
       {
         path: '/videos',
         name: 'videos',
@@ -205,7 +212,7 @@ const routes=[
       {
         path: '/store',
         name: 'store',
-        component: tienda
+        component: Store
       },
       {
         path: '/calendario',

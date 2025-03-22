@@ -9,7 +9,6 @@
       <h1>GALERIA DE EQUIPO</h1>
       <p>somos los mejorses </p>
       <!-- Botón para subir publicación -->
-      
        <div class="caja">
         <div v-if="!isUploading">
         <input

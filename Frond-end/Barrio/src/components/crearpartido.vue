@@ -11,8 +11,6 @@
       <label>Nombre Partido :</label>
       <input type="text" v-model="form.name" required />
 
-
-
       <input type="hidden" v-model="form.correo_usuario" />
 
       <!-- Hora -->

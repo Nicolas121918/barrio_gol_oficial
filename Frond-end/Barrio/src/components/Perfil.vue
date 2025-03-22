@@ -401,8 +401,6 @@ transition: all 0.5s ease;
 }
 
 
-@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
-
 #datos {
   font-family: 'Anton', sans-serif; /* Fuente gruesa y de impacto */
   color: #00ffea; /* Azul neón estilo sci-fi */

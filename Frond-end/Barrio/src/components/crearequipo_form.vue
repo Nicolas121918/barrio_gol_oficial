@@ -2,8 +2,13 @@
   <header>
     <headerapp></headerapp>
   </header>
+  
   <form @submit.prevent="Insertar_team" class="crear_equipo_form">
-    <div class="crear_equipo_form-title"><span>CREA TU PRIMER EQUIPO AQUI</span></div>
+    <div class="contenedor-boton">
+  <button @click="volver" class="btn-volver">Volver</button>
+</div>
+    <div class="crear_equipo_form-title"><span>CREA TU EQUIPO AQUI 🥇⚽</span></div>
+    
 
     <div class="crear_equipo_input-container">
       <p class="arrina">Nombre:</p>
@@ -76,6 +81,7 @@ const id_team = ref('');
 onMounted(() => {
   const datosusuario = movistore.usuario.nombreUsuario;
   const document_cap = movistore.usuario.documento
+  
   console.log(datosusuario);
   if (datosusuario && document_cap) {
     capitanteam.value = movistore.usuario.nombreUsuario; 
@@ -93,6 +99,10 @@ const onFileChange = (event) => {
     logoPreview.value = URL.createObjectURL(file);
   }
 };
+const volver = () => {
+  router.go(-1); // Vuelve a la página anterior
+};
+
 const Insertar_team = async () => {
   const formData = new FormData();
   formData.append('nombreteam', nombreteam.value);
@@ -172,6 +182,7 @@ const Insertar_team = async () => {
     console.error(error);
   }
 };
+
 </script>
 
 
@@ -300,4 +311,65 @@ const Insertar_team = async () => {
   box-shadow: 0 0 15px rgba(218, 165, 32, 0.8);
   animation: fadeInScale 0.5s ease-out;
 }
+.contenedor-boton {
+  display: flex;
+  justify-content: flex-start; /* Alinea a la izquierda */
+}
+.btn-volver {
+  display: inline-block;
+  margin-bottom: 10%;
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #FFD700, #FFC300);
+  color: #1a1a1a;
+  font-weight: bold;
+  font-size: 17px;
+  border: 2px solid #B8860B;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+.btn-volver::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
+  transform: rotate(25deg);
+  transition: opacity 0.6s;
+  opacity: 0;
+}
+
+.btn-volver:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #FFC300, #FFD700);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+.btn-volver:hover::before {
+  opacity: 1;
+  animation: shine 1s ease forwards;
+}
+
+@keyframes shine {
+  0% {
+    transform: translate(-100%, -100%) rotate(25deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100%, 100%) rotate(25deg);
+    opacity: 0;
+  }
+}
+
 </style>

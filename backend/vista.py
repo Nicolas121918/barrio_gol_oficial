@@ -155,6 +155,7 @@ async def listar_videos(db: Session = Depends(get_db)):
         {
             "id": video.id,  # ✅ Agregar el ID del video
             "url": video.url,
+            "documento": video.usuario.documento,
             "uploaderName": video.usuario.nombre if video.usuario else "Desconocido",
             "uploaderProfilePic": video.usuario.imagen if video.usuario and video.usuario.imagen else "default.png",
             "description": video.descripcion if video.descripcion else "Sin descripción",
@@ -162,6 +163,7 @@ async def listar_videos(db: Session = Depends(get_db)):
         }
         for video in lista_videos
     ]
+
 @app.delete("/eliminarvideo/{video_id}")
 async def eliminar_video(video_id: int, db: Session = Depends(get_db)):
     video = db.query(UserVideos).filter(UserVideos.id == video_id).first()
@@ -266,8 +268,21 @@ def obtener_usuario(user_id: int, db: Session = Depends(get_db)):
     usuario = db.query(Registro).filter(Registro.documento == user_id).first()
     if usuario is None:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return usuario
-
+    
+    return {
+        "documento": usuario.documento,
+        "nombre": usuario.nombre,
+        "ciudad": usuario.ciudad,
+        "descripcion": usuario.descripcion,
+        "celular": usuario.celular,
+        "correo": usuario.correo,
+        "contraseña": usuario.contraseña,
+        "fecha_nacimiento": usuario.fecha_nacimiento,
+        "Edad": usuario.Edad,
+        "posicion": usuario.posicion,
+        "imagen": usuario.imagen,
+        "equipos_tiene": usuario.equipo_tiene  # Cambio aquí
+    }
 ## Endpoint Para Crear la tabla de datos basicos apartir de las pqrs del usuario
 @app.post("/contactos/")
 async def crear_contacto(form_data: Contactousuers, db: Session = Depends(get_db)):
@@ -356,14 +371,8 @@ async def es_capitan(documento: int, db: Session = Depends(get_db)):
 
 ## Endpoint para lista los equipos
 @app.get("/listarteams", response_model=list[DatosTeams])
-async def listar_clientes(db: Session=Depends(get_db)):
-    lista_Equipos=db.query(Equipos).all()
-    if not lista_Equipos:
-        raise HTTPException(status_code=404, detail="No hay Equipos Todavia")
-    return lista_Equipos
-
-
-
+async def listar_clientes(db: Session = Depends(get_db)):
+    return db.query(Equipos).all()  # Listado sin error
 
 @app.delete("/equipos/eliminar/{id_equipo}")
 async def eliminar_equipo(
@@ -426,6 +435,27 @@ async def unirse_equipo(
     db.commit()
 
     return {"mensaje": f"{usuario.nombre} se ha unido al equipo {equipo.nombreteam}"}
+
+
+@app.get("/equipos/{id_equipo}/lider", response_model=dict)
+async def obtener_lider_equipo(id_equipo: int, db: Session = Depends(get_db)):
+    equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
+    if not equipo:
+        raise HTTPException(status_code=404, detail="Equipo no encontrado")
+
+    if not equipo.capitan:  # La relación debería traer el objeto Registro del capitán
+        raise HTTPException(status_code=404, detail="Líder del equipo no encontrado en la base de datos")
+
+    return {
+        "lider": {
+            "nombre": equipo.capitan.nombre,
+            "documento": equipo.capitan.documento,
+            "correo": equipo.capitan.correo,
+            "telefono": equipo.capitan.celular,
+        }
+    }
+
+
 @app.post("/equipos/salir")
 async def salir_equipo(
     documento_user: str = Form(...),  # Cambié int -> str porque en el modelo es String(50)
@@ -446,6 +476,36 @@ async def salir_equipo(
 
     return {"mensaje": f"has salido del equipo"}
 
+@app.post("/equipos/expulsar")
+async def expulsar_miembro(
+    id_team: int = Form(...),
+    documento_miembro: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    # Buscar el equipo
+    equipo = db.query(Equipos).filter(Equipos.Id_team == id_team).first()
+    if not equipo:
+        raise HTTPException(status_code=404, detail="Equipo no encontrado")
+
+    # Buscar al miembro dentro del equipo
+    miembro = db.query(Registro).filter(
+        Registro.documento == documento_miembro,
+        Registro.equipo_tiene == id_team
+    ).first()
+
+    if not miembro:
+        raise HTTPException(status_code=404, detail="Miembro no encontrado en el equipo")
+
+    # Evitar que el capitán sea expulsado
+    if miembro.documento == equipo.capitan_documento:
+        raise HTTPException(status_code=403, detail="No puedes expulsar al capitán del equipo")
+
+    # Expulsar (quitar del equipo)
+    miembro.equipo_tiene = 0
+    db.commit()
+
+    return {"mensaje": f"{miembro.nombre} ha sido expulsado del equipo"}
+    
 @app.get("/equipos/{id_equipo}/miembros")
 async def listar_miembros(id_equipo: int, db: Session = Depends(get_db)):
     miembros = db.query(Registro).filter(Registro.equipo_tiene == id_equipo).all()
@@ -453,12 +513,13 @@ async def listar_miembros(id_equipo: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Este equipo no tiene miembros")
     return [{"nombre": miembro.nombre, "documento": miembro.documento} for miembro in miembros]
 
-@app.get("/equipos/{id_equipo}", response_model=DatosTeams)
+@app.get("/equipos_traer/{id_equipo}", response_model=DatosTeams)
 async def obtener_equipo(id_equipo: int, db: Session = Depends(get_db)):
     equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
     if not equipo:
         raise HTTPException(status_code=404, detail="Equipo no encontrado")
     return equipo
+
 @app.get("/id_equipo/{documento}")
 def obtener_equipo_por_documento(documento: int, db: Session = Depends(get_db)):
     # Buscar al usuario en la base de datos por su documento
@@ -473,14 +534,20 @@ def obtener_equipo_por_documento(documento: int, db: Session = Depends(get_db)):
     
     return {"Id_team": equipo.Id_team}
 
-
 @app.get("/equipos/{id_equipo}/detalle", response_model=dict)
 async def obtener_equipo_detalle(id_equipo: int, db: Session = Depends(get_db)):
     equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
     if not equipo:
         raise HTTPException(status_code=404, detail="Equipo no encontrado")
 
-    miembros = db.query(Registro).filter(Registro.equipo_tiene == id_equipo).all()
+    # Obtener el documento del capitán
+    documento_capitan = equipo.capitan_documento  # Aquí ya tenemos el documento correcto
+
+    # Filtrar miembros excluyendo al capitán
+    miembros = db.query(Registro).filter(
+        Registro.equipo_tiene == id_equipo, 
+        Registro.documento != documento_capitan  # Excluir al capitán por su documento
+    ).all()
 
     return {
         "equipo": {
@@ -488,19 +555,33 @@ async def obtener_equipo_detalle(id_equipo: int, db: Session = Depends(get_db)):
             "nombre": equipo.nombreteam,
             "descripcion": equipo.Descripcion,
             "numero_integrantes": equipo.numeropeople,
-            "capitan": equipo.capitanteam,
+            "capitan": equipo.capitanteam,  # Mantiene el nombre del capitán en los detalles
             "ubicacion": equipo.location,
             "logo": equipo.logoTeam,
         },
         "miembros": [{"nombre": miembro.nombre, "documento": miembro.documento} for miembro in miembros]
     }
 
-@app.get("/equipos/disponibles")  # No espera un ID
-async def listar_equipos_disponibles(db: Session = Depends(get_db)):
-    equipos = db.query(Equipos).all()
-    if not equipos:
-        raise HTTPException(status_code=404, detail="No hay equipos disponibles")
-    return equipos
+
+@app.get("/equipos/{id_equipo}/integrantes")
+async def contar_integrantes(id_equipo: int, db: Session = Depends(get_db)):
+    equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
+
+    if not equipo:
+        raise HTTPException(status_code=404, detail="Equipo no encontrado")
+
+    # Contar todos los miembros asociados al equipo
+    conteo = db.query(Registro).filter(
+        Registro.equipo_tiene == id_equipo
+    ).count()
+
+    return conteo
+
+#equipo actualizar------
+
+from fastapi import Form, File, UploadFile, HTTPException
+import os
+
 
 
 @app.put("/usuario/actualizar-foto")
@@ -528,6 +609,32 @@ async def actualizar_foto_perfil(
     db.refresh(usuario)
     return {"message": "Foto de perfil actualizada", "ruta": file_location}
 
+@app.put("/equipos/actualizar/{id_equipo}")
+async def actualizar_equipo(
+    id_equipo: int,
+    nueva_descripcion: str = Form(None),
+    nuevo_logo: UploadFile = File(None),
+    db: Session = Depends(get_db)
+):
+    equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
+
+    if not equipo:
+        raise HTTPException(status_code=404, detail="Equipo no encontrado")
+
+    if nueva_descripcion:
+        equipo.Descripcion = nueva_descripcion
+
+    if nuevo_logo:
+        # Guardar el nuevo logo
+        file_location = f"logosteams/{nuevo_logo.filename}"
+        os.makedirs("logosteams", exist_ok=True)
+        with open(file_location, "wb") as buffer:
+            buffer.write(await nuevo_logo.read())
+
+        equipo.logoTeam = file_location
+
+    db.commit()
+    return {"mensaje": "Equipo actualizado correctamente"}
 
 @app.put("/usuario/actualizar-nombre")
 async def actualizar_nombre(
@@ -688,7 +795,7 @@ async def crear_partidos(
 ## Endpoint Para Subir Video
 @app.post("/subirvideo", response_model=dict)
 async def subir_video(
-    correo: str = Form(...),  
+    correo: str = Form(...),
     video: UploadFile = File(...),
     descripcion: str = Form(...),  # Nuevo campo
     db: Session = Depends(get_db),

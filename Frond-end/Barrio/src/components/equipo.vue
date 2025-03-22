@@ -68,32 +68,56 @@ export default {
 
 
 <style scoped>
-
-
 .crear-equipo-container {
   text-align: center;
-  margin-top: 50%;
+  margin-bottom: 20px;
 }
 
 .boton-crear {
   display: inline-block;
-  background-color: #4a90e2;
-  color: white;
+  background-color: gold;
+  color: black;
   font-weight: bold;
-  padding: 12px 20px;
-  border-radius: 8px;
+  padding: 15px 25px;
+  border-radius: 12px;
   text-decoration: none;
-  transition: 0.3s;
+  font-size: 1.2rem;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+  border: 2px solid black;
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+  text-transform: uppercase;
+  font-family: 'Audiowide', cursive;
+  position: relative;
+  overflow: hidden;
+  margin-top: 30%;
+}
+
+.boton-crear::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: skewX(-45deg);
+  transition: left 0.5s;
+}
+
+.boton-crear:hover::before {
+  left: 100%;
 }
 
 .boton-crear:hover {
-  background-color: #357abd;
+  background-color: #d4af37;
+  transform: scale(1.1) rotate(-2deg);
+  box-shadow: 0 6px 15px rgba(255, 215, 0, 0.7);
 }
-
 
 .busqueda-container {
   display: flex;
   justify-content: center;
   margin-bottom: 15px;
 }
+
 </style>

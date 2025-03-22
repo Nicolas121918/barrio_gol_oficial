@@ -1,3 +1,4 @@
+
 <template>
    <header>
     <Headerapp/>
@@ -20,28 +21,38 @@
             :muted="false"
             @click="togglePlayPause(index)"
           ></video>
+          
           <div class="video-info">
-            <img :src="getProfilePic(video.uploaderProfilePic)" alt="Profile" class="profile-pic" /> 
-            <div class="details">
-              <h3>{{ video.uploaderName }}</h3>
-              <p>{{ video.description }}</p>
-            </div>
-            <div class="video-actions">
-              <button
+            <button  class="profile-button" @click="verPerfil(video.documento)">
+      <div class="top-section">
+        <img :src="getProfilePic(video.uploaderProfilePic)" alt="Profile" class="profile-pic" /> 
+        <h2 class="uploader-name">{{ video.uploaderName }}</h2>
+      </div>
+      <p class="descripcion">descripcion video:</p>
+      <p class="descripcion2">{{ video.description }}</p>
+    </button> 
+    <div class="video-actions">
+      <div class="video-actions">
+        <button
   @click="likeVideo(index)"
   class="like-button"
   :class="{'zoom-in': likedIndex === index}"
 >
   <img 
-    :src="likedVideos[video.id] ? '../assets/imagenes/balondeoro.png' : 'ruta/corazon.png'" 
+    :src="likedVideos[video.id] 
+      ? '/imagenes/balondeoro.png' 
+      : '/imagenes/corazon.png'" 
     alt="Like"
     class="like-icon"
+    @error="setFallback(video.id)"
   />
   {{ video.likes }}
 </button>
 
+
             </div>
-          </div>
+    </div>
+  </div>
         </div>
       </transition-group>
     </div>
@@ -69,6 +80,8 @@ export default {
       videosurls: [],
       currentIndex: 0,
       likedVideos: {},
+      balonDeOro: '../assets/imagenes/like.png',
+      balonGris: '../assets/imagenes/borrar.png',
     };
   },
   computed: {
@@ -76,7 +89,7 @@ export default {
       return this.videosurls[this.currentIndex] || null;
     },
   },
-  mounted() {
+  mounted() { 
     this.getvideosurl();
     this.loadLikedVideos();
   },
@@ -84,12 +97,20 @@ export default {
     handleScroll(event) {
       event.deltaY > 0 ? this.nextVideo() : this.previousVideo();
     },
+    verPerfil(documento) {
+    this.$router.push(`/perfiles/${documento}`); // Redirige usando el documento
+  },
     nextVideo() {
       if (this.currentIndex < this.videosurls.length - 1) {
         this.currentIndex++;
         this.playCurrentVideo();
       }
     },
+    setFallback(videoId) {
+    this.likedVideos[videoId] = this.likedVideos[videoId] 
+      ? this.balonDeOro 
+      : this.balonGris;
+  },
     previousVideo() {
       if (this.currentIndex > 0) {
         this.currentIndex--;
@@ -97,8 +118,12 @@ export default {
       }
     },
     getProfilePic(path) {
-      return path ? `http://127.0.0.1:8000/${path}` : "default.png";
-    },
+  // Si hay una ruta, devuelve la URL completa; de lo contrario, usa la imagen por defecto
+  return path 
+    ? `http://127.0.0.1:8000/${path}` 
+    : "default.png";
+},
+
     pauseOthers(currentIndex) {
       if (this.$refs.videoPlayer) {
         this.$refs.videoPlayer.forEach((video, index) => {
@@ -125,36 +150,40 @@ export default {
       this.pauseOthers(index);
     },
     async likeVideo(index) {
-      const movistore = useUsuarios();
-      console.log(movistore.usuario.documento)
-      if (!movistore.usuario.documento) {
-        console.error("⚠ No se encontró un usuario válido en el store.");
-        console.error(movistore.usuario.documento);
-        return;
-      }
-      console.log("✅ Usuario encontrado:", movistore.usuario);
-      const video = this.videosurls[index];
-      try {
-        await axios.post(
-          `http://127.0.0.1:8000/likes/${video.id}/${movistore.usuario.documento}`
-        );
-        const likeCountResponse = await axios.get(
-          `http://127.0.0.1:8000/like/${video.id}`
-        );
-        this.videosurls[index].likes = likeCountResponse.data.likes;
-        this.videosurls = [...this.videosurls];
-        this.likedVideos[video.id] = !this.likedVideos[video.id];
-        localStorage.setItem("likedVideos", JSON.stringify(this.likedVideos));
-      } catch (error) {
-        console.error("Error al dar/quitar like:", error);
-      }
-    },
-    loadLikedVideos() {
-      const storedLikes = localStorage.getItem("likedVideos");
-      if (storedLikes) {
-        this.likedVideos = JSON.parse(storedLikes);
-      }
-    },
+  const movistore = useUsuarios();
+  if (!movistore.usuario.documento) {
+    console.error("⚠ No se encontró un usuario válido en el store.");
+    return;
+  }
+
+  const video = this.videosurls[index];
+  try {
+    // Alternar el estado de like localmente antes de la petición
+    this.likedVideos = { ...this.likedVideos, [video.id]: !this.likedVideos[video.id] };
+    
+    await axios.post(`http://127.0.0.1:8000/likes/${video.id}/${movistore.usuario.documento}`);
+    
+    // Obtener el número de "likes" actualizados
+    const likeCountResponse = await axios.get(`http://127.0.0.1:8000/like/${video.id}`);
+    
+    // Actualizar el número de likes en el estado
+    this.videosurls[index].likes = likeCountResponse.data.likes;
+    
+    // Guardar en localStorage
+    localStorage.setItem("likedVideos", JSON.stringify(this.likedVideos));
+    
+  } catch (error) {
+    console.error("Error al dar/quitar like:", error);
+  }
+},
+loadLikedVideos() {
+  const storedLikes = localStorage.getItem("likedVideos");
+  if (storedLikes) {
+    this.likedVideos = JSON.parse(storedLikes) || {};
+  }
+},
+
+    
     async getvideosurl() {
       try {
         const response = await axios.get("http://localhost:8000/listarvideos");
@@ -168,8 +197,11 @@ export default {
       }
     },
     getUrlvideo(path) {
-      return path.startsWith("http") ? path : `http://127.0.0.1:8000/${path}`;
-    },
+  // Verifica si la URL ya es absoluta (empieza con "http")
+  return path.startsWith("http") 
+    ? path 
+    : `http://127.0.0.1:8000/${path}`;
+},
     goToUpload() {
       alert("Función para subir videos. Aquí puedes redirigir a otra página.");
     },
@@ -304,15 +336,10 @@ export default {
   border-radius: 10%;
 }
 
-.video-info {
-  padding: 1.5rem;
-  width: 30%;
-  display: flex;
-  flex-direction: column;
-}
+
 
 .profile-pic {
-  width: 60px;
+  width: 100px;
   height: 60px;
   border-radius: 50%;
   margin-bottom: 1.5rem;
@@ -331,7 +358,8 @@ export default {
 }
 
 .video-actions {
-  margin-bottom: 1.5rem;
+  margin-top: 40%;
+
 }
 
 .like-button {
@@ -378,7 +406,7 @@ export default {
 }
 
 .video-navigation button {
-  background: #3498db;
+  background: #f7ba05;
   color: white;
   padding: 1.2rem 1.8rem;
   border-radius: 50px;
@@ -390,7 +418,7 @@ export default {
 }
 
 .video-navigation button:hover {
-  background: #2980b9;
+  background: #dd9f0573;
   transform: scale(1.1);
 }
 
@@ -418,6 +446,145 @@ export default {
   width: 20px;
   height: 20px;
   margin-right: 5px;
+}
+.video-info {
+  
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative; /* Importante para manejar la superposición */
+}
+
+/* Botón estilizado */
+
+
+
+
+/* Contenedor de imagen + nombre */
+.top-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Imagen de perfil */
+.profile-pic {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Nombre del usuario */
+.uploader-name {
+  font-size: 13px;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* Caja flotante de descripción */
+.descripcion-box {
+  position: absolute;
+  top: -80px; /* Se posiciona arriba del botón */
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 10px;
+  width: 250px;
+  text-align: center;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+
+  /* Scroll cuando el contenido es largo */
+  max-height: 50px;  /* Ajusta la altura máxima */
+  overflow-y: auto;  /* Activa el scroll vertical */
+}
+
+/* Para que la barra de scroll sea más estética */
+.descripcion-box::-webkit-scrollbar {
+  width: 5px;
+}
+
+.descripcion-box::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 5px;
+}
+
+.descripcion-box::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+/* Descripción */
+.descripcion {
+  font-size: 14px;
+  opacity: 0.9;
+  color: rgb(255, 255, 255);
+  height: auto;
+  padding: 3%;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+  width: auto;
+}
+.descripcion2{
+  font-size: 16px;
+  opacity: 0.9;
+  color: rgb(255, 255, 255);
+  height: auto;
+  padding: 3%;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+  width: auto;
+  text-decoration: underline;
+
+}
+
+.profile-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #000000, #666666);
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s;
+  width: 100%;
+  min-width: 80%;
+  max-width: 80%;
+  min-height: 180px;
+  max-height: 200px;
+  
+  /* Evita que el contenido se salga */
+  overflow: hidden;
+}
+
+.profile-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  
+  /* Permite scroll interno si el contenido es grande */
+  max-height: 160px; /* Ajusta según necesidad */
+  overflow-y: auto;
+  padding-right: 5px; /* Espacio para la barra de scroll */
+}
+
+/* Personalización de la barra de scroll */
+.profile-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.profile-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+.profile-content::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 </style>

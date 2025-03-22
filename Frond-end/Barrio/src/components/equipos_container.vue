@@ -1,40 +1,61 @@
-  <template>
+<template>
   <div class="container">
-      <div class="contenido">
-        <!-- Barra de búsqueda -->
-        <div class="busqueda-container" v-if="teams.length > 0">
-          <input
-            v-model="buscadorteams"
-            type="text"
-            placeholder="Buscar equipo..."
-            class="input-busqueda"
-          />
-        </div>
-        <!-- Lista de equipos -->
-        <div class="lista-equipos">
-          <ul>
-            <li v-for="(i, index) in filtradordeequipos" :key="index" class="tarjeta-equipo">
-              <div class="contenido-tarjeta">
-                <img :src="getImagenUrl(i.logoTeam)" class="logo-equipo" alt="Logo del equipo" />
-                <div class="info-equipo">
-                  <h3 class="nombre-equipo">{{ i.nombreteam }}</h3>
-                  <p class="texto-secundario"><strong>Capitán:</strong> {{ i.capitanteam }}</p>
-                  <p class="texto-secundario"><strong>Ubicación:</strong> {{ i.location }}</p>
-                  <p class="texto-secundario descripcion">
-                    <strong>Descripción:</strong> {{ i.Descripcion }}
-                  </p>
-                  <p class="texto-secundario"><strong>Integrantes:</strong> {{ i.numeropeople }}</p>
-                  <button @click="unirseEquipo(i.Id_team)">Unirse</button>
+    <div class="contenido">
+      <!-- Barra de búsqueda -->
+      <div class="busqueda-container" v-if="teams.length > 0">
+        <input
+          v-model="buscadorteams"
+          type="text"
+          placeholder="Buscar equipo..."
+          class="input-busqueda"
+        />
+      </div>
 
-                </div>
+      <!-- Lista de equipos -->
+      <div class="lista-equipos">
+        <ul>
+          <li
+            v-for="(i, index) in filtradordeequipos"
+            :key="index"
+            class="tarjeta-equipo"
+          >
+            <div class="contenido-tarjeta">
+              <img
+                :src="getImagenUrl(i.logoTeam)"
+                class="logo-equipo"
+                alt="Logo del equipo"
+              />
+              <div class="info-equipo">
+                <h3 class="nombre-equipo">{{ i.nombreteam }}</h3>
+                <p class="texto-secundario">
+                  <strong>Capitán:</strong> {{ i.capitanteam }}
+                </p>
+                <p class="texto-secundario">
+                  <strong>Ubicación:</strong> {{ i.location }}
+                </p>
+                <p class="texto-secundario descripcion">
+                  <strong>Descripción:</strong> {{ i.Descripcion }}
+                </p>
+                <p class="texto-secundario">
+                  <strong>Integrantes:</strong> {{ i.numeropeople }}
+                </p>
+                <button @click="unirseEquipo(i.Id_team)">Unirse</button>
               </div>
-            </li>
-          </ul>
+            </div>
+          </li>
+        </ul>
+
+        <!-- Mensaje si no hay equipos -->
+        <div v-if="teams.length === 0" class="mensaje-sin-equipos">
+          <p>No hay equipos disponibles aún.</p>
         </div>
       </div>
     </div>
-  </template>
-  <script>
+  </div>
+</template>
+
+
+<script>
   import { ref, onMounted, computed } from 'vue';
   import Swal from 'sweetalert2';
   import axios from 'axios';
@@ -59,8 +80,16 @@
           const response = await axios.get('http://localhost:8000/listarteams');
           teams.value = response.data;
         } catch (error) {
-          console.error("Error al obtener los equipos", error);
-        }
+  console.error("Error al obtener los equipos:", error);
+  if (error.response) {
+    console.error("Respuesta del servidor:", error.response.data);
+    console.error("Código de estado:", error.response.status);
+  } else if (error.request) { 
+    console.error("No hubo respuesta del servidor:", error.request);
+  } else {
+    console.error("Error desconocido:", error.message);
+  }
+}
       };
 
       const unirseEquipo = async (idEquipo) => {
@@ -124,144 +153,135 @@
     },
   };
   </script>
-
-<style scoped>
-
-.container {
-  display: flex;
-  justify-content: center;
-  padding: 5%;
-}
-
-.contenido {
-  width: 100%;
-  max-width: 1200px;
-}
-
-.crear-equipo-container {
-  text-align: center;
-
-}
-
-.boton-crear {
-  display: inline-block;
-  background-color: #4a90e2;
-  color: white;
-  font-weight: bold;
-  padding: 12px 20px;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: 0.3s;
-}
-
-.boton-crear:hover {
-  background-color: #357abd;
-}
-
-
-.busqueda-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-}
-
-.input-busqueda {
-  width: 100%;
-  max-width: 400px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  outline: none;
-  transition: 0.3s;
-}
-
-.input-busqueda:focus {
-  border-color: #4a90e2;
-}
-
-.lista-equipos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  justify-content: center;
-  padding: 10px;
-}
-
-
-.tarjeta-equipo {
-  background-color: #1e1e1e;
-  border-radius: 30px;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
-  padding: 50px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  transition: 0.3s;
-  width: 100%;
-  margin-top: 5%;
-}
-
-.tarjeta-equipo:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 16px rgba(255, 255, 255, 0.3);
-}
-
-.logo-equipo {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 50%;
-  margin-bottom: 10px;
-  border: 3px solid #4a90e2;
-}
-
-
-.info-equipo {
-  width: 100%;
-}
-
-.nombre-equipo {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #ffffff;
-  margin-bottom: 5px;
-}
-
-.texto-secundario {
-  color: #b0b0b0;
-  font-size: 0.95rem;
-  margin-bottom: 5px;
-}
-
-.descripcion {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  color: #d0d0d0;
-}
-
-.boton-unirse {
-  margin-top: 10px;
-  background-color: #38a169;
-  color: white;
-  font-weight: bold;
-  padding: 12px 18px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s;
-  width: 100%;
-  max-width: 220px;
-}
-
-.boton-unirse:hover {
-  background-color: #2f855a;
-}
-
-
-@media (max-width: 768px) {
-  .lista-equipos {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  <style scoped> 
+  .container {
+    display: flex;
+    justify-content: center;
+    padding: 5%;
+  
   }
+  
+  .contenido {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+   
+  }
+  
+  .busqueda-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  
+  .input-busqueda {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid gold;
+    background-color: #1e1e1e;
+    color: white;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .input-busqueda:focus {
+    border-color: #d4af37;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+  
+  .lista-equipos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+  }
+  
+  .tarjeta-equipo {
+    background-color: #1e1e1e;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    width: 320px;
+    border: 3px solid gold;
+    margin-bottom: 10%;
+  }
+  
+  .tarjeta-equipo:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 0 20px white;
+  }
+  
+  .logo-equipo {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 15px;
+    border: 4px solid gold;
+  }
+  
+  .nombre-equipo {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: gold;
+    margin-bottom: 10px;
+  }
+  
+  .texto-secundario {
+    color: #b0b0b0;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  
+  .descripcion {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #d0d0d0;
+  }
+  
+  button {
+    margin-top: 15px;
+    background-color: gold;
+    color: black;
+    font-weight: bold;
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    width: 100%;
+    max-width: 240px;
+  }
+  
+  button:hover {
+    background-color: #d4af37;
+    transform: scale(1.05);
+  }
+  
+  @media (max-width: 768px) {
+    .lista-equipos {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+  
+  .mensaje-sin-equipos {
+  text-align: center;
+  margin-top: 30px;
+  color: #777;
+  font-size: 1.2rem;
 }
-</style>
+
+  </style>

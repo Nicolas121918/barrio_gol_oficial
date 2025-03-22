@@ -48,5 +48,8 @@ export const useUsuarios = defineStore("usuario", {
       };
     }
   },
+  actualizarEquipo(equipoId) {
+    this.usuario.equipo_tiene = equipoId;
+  },  
   persist: true, // Asegura la persistencia en localStorage
 });

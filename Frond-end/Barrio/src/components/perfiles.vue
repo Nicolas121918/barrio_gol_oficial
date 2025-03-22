@@ -6,17 +6,20 @@
     <button class="back-button" @click="goBack">Volver</button>
 
     <div class="usuario">
+      
       <div class="team-info" v-if="team.name" @mouseover="isTeamInfoVisible = true" @mouseleave="isTeamInfoVisible = false">
-        <img class="team-logo" :src="team.logo" alt="Logo del equipo" />
+        
+        <img class="team-logo" :src="teamLogoUrl" alt="Logo del equipo" />
+        
         <div class="team-hover-info" v-if="isTeamInfoVisible || isTeamInfoClicked" @click="toggleTeamInfo">
+          <p class="equipp">Equipo:</p>
           <p><span class="label">Nombre:</span> <strong class="value">{{ team.name }}</strong></p>
           <p><span class="label">Ciudad:</span> <strong class="value">{{ team.city || 'N/A' }}</strong></p>
           <p><span class="label">Descripción:</span> <strong class="value">{{ team.description || 'N/A' }}</strong></p>
-          <button v-if="team.name" @click.stop="sendJoinRequest" class="join-button">Enviar solicitud al equipo</button>
         </div>
       </div>
       <div v-else class="no-team-info">
-        <p><strong>Jugador sin equipo</strong></p>
+        <p><strong class="juador_sin">Jugador sin equipo</strong></p>
       </div>
 
       <div class="profile-info">
@@ -35,7 +38,6 @@
     </div>
 
     <div v-if="showImage" class="image-modal" @click="showImage = false">
-      <img :src="userProfile.picture" alt="Foto de perfil grande" class="large-image" />
       <img class="large-image" :src="profilePictureUrl" alt="Foto de perfil" @click="showImage = true" />
     </div>
 
@@ -65,7 +67,7 @@
                 <img class="likeee" src="../assets/imagenes/like.png" alt=""> {{ video.likes }} Likes
             </p>
             
-            <button class="boton_ver">ver</button>
+            <button @click="verVideo" class="boton_ver">Ver</button>
           </div>
         </div>
       </div>
@@ -95,6 +97,7 @@ export default {
         position: '',
         correo: '',
         description: '',
+        equipos_tiene: '',
         videos: []
       },
       team: {
@@ -118,10 +121,10 @@ export default {
         : 'default.png';
     },
     teamLogoUrl() {
-      return this.team.logo
-        ? `http://127.0.0.1:8000/${this.team.logo}`
-        : 'default-team.png';
-    },
+  return this.team && this.team.logo
+    ? `http://127.0.0.1:8000/${this.team.logo}`
+    : 'default-team.png';
+},
     // Filtrar videos según el nombre ingresado en searchQuery
     filteredVideos() {
       if (!this.searchQuery) {
@@ -145,18 +148,20 @@ export default {
           position: userResponse.data.posicion || 'N/A',
           correo: userResponse.data.correo,
           description: userResponse.data.descripcion || 'N/A',
+          equipos_tiene: userResponse.data.equipos_tiene || 0, 
           videos: []
         };
-
-        if (userResponse.data.equipo) {
-          this.team = {
-            logo: userResponse.data.equipo.logo || '',
-            name: userResponse.data.equipo.nombre || '',
-            city: userResponse.data.equipo.ciudad || '',
-            description: userResponse.data.equipo.descripcion || ''
-          };
-        }
-
+        if (userResponse.data.equipos_tiene > 0) {
+  const teamResponse = await axios.get(`http://localhost:8000/equipos_traer/${userResponse.data.equipos_tiene}`);
+  this.team = {
+    logo: teamResponse.data.logoTeam || '',
+    name: teamResponse.data.nombreteam || '',
+    city: teamResponse.data.location || '',
+    description: teamResponse.data.Descripcion || ''
+  };
+} else {
+  this.team = { logo: '', name: '', city: '', description: '' }; // Objeto vacío en lugar de null
+}
         const videosResponse = await axios.get(`http://localhost:8000/listarvideosdef/${documento}`);
         this.userProfile.videos = videosResponse.data.map(video => ({
           url: `http://127.0.0.1:8000/${video.url}`,
@@ -174,12 +179,11 @@ export default {
     pauseVideo(event) {
       event.target.pause();
     },
+    verVideo(id) {
+      this.$router.push(`/one_video/${id}`);
+    },
     toggleTeamInfo() {
       this.isTeamInfoClicked = !this.isTeamInfoClicked;
-    },
-    sendJoinRequest(event) {
-      event.stopPropagation();
-      alert('Solicitud enviada al equipo');
     },
     goBack() {
       this.$router.go(-1);
@@ -268,7 +272,7 @@ export default {
 }
 
 .team-hover-info .value {
-  color: rgb(255, 255, 255);
+  color: rgb(70, 70, 70);
   font-weight: normal;
   
 }
@@ -612,5 +616,20 @@ export default {
   color: rgba(255, 215, 0, 0.7);
 }
   
-
+.juador_sin {
+  color: #000000; /* Rojo suave para destacar */
+  font-weight: bold;
+  font-size: 15px;
+  background-color: #a3a3a3; /* Fondo rosado claro */
+  padding: 5px 10px;
+  border-radius: 5px;
+  display: inline-block;
+  text-align: center;
+  min-width: 200px;
+}
+.equipp{
+  text-align: center;
+  color: #000000;
+  font-size: 17px;
+}
 </style>
