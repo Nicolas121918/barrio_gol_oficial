@@ -223,8 +223,10 @@ const onFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
     imageUrl.value = URL.createObjectURL(file);
+    fileInput.value = file; // Guardar el archivo seleccionado
   }
 };
+
 
 const calcularedad = () => {
   if (!fechaNacimiento.value) {
@@ -275,6 +277,7 @@ const iniciarSesion = async () => {
         documento: iniciar.data.documento,
         equipo_tiene: iniciar.data.equiposTiene,
       };
+
       await usuariosStore.setUsuario(userData); // Esperar a que se actualice el estado
 
       router.push("/Perfil").then(() => {

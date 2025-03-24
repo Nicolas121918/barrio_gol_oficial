@@ -1,18 +1,19 @@
-from fastapi import FastAPI,UploadFile,File ,Form , Depends, HTTPException, Query
+from fastapi import FastAPI,UploadFile,File ,Form , Depends, HTTPException, Query,WebSocket
 from sqlalchemy.orm import Session
 import bcrypt
+import uvicorn
 from pydantic import BaseModel
+from fastapi_socketio import SocketManager
 from conexion import engine, get_db
-from modelo import Base, Contacto,Jugador,Contacto_usuarios,Equipos,UserVideos,Torneos,partidos,Equipos,Registro
+from modelo import Base, Contacto,Jugador,Contacto_usuarios,Equipos,UserVideos,Torneos,partidos,Equipos,Registro,Messages as Mensajes
 from schemas import RegistroBase as clie,LoginRequest
 from schemas import ContactForm
 from schemas import Contactousuers
 from schemas import JugadorForm
-from schemas import DatosTeams
+from schemas import DatosTeams,Message
 from modelo import Like
 from schemas import Torneo,Partidos,DatosTeams
 from typing import List, Optional
-
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from fastapi.staticfiles import StaticFiles
@@ -437,13 +438,13 @@ async def unirse_equipo(
     return {"mensaje": f"{usuario.nombre} se ha unido al equipo {equipo.nombreteam}"}
 
 
-@app.get("/equipos/{id_equipo}/lider", response_model=dict)
+""" @app.get("/equipos/{id_equipo}/lider", response_model=dict)
 async def obtener_lider_equipo(id_equipo: int, db: Session = Depends(get_db)):
     equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
     if not equipo:
         raise HTTPException(status_code=404, detail="Equipo no encontrado")
 
-    if not equipo.capitan:  # La relación debería traer el objeto Registro del capitán
+    if not equipo.capitan:  
         raise HTTPException(status_code=404, detail="Líder del equipo no encontrado en la base de datos")
 
     return {
@@ -454,6 +455,36 @@ async def obtener_lider_equipo(id_equipo: int, db: Session = Depends(get_db)):
             "telefono": equipo.capitan.celular,
         }
     }
+ """
+
+
+
+
+@app.get("/equipos/{id_equipo}/lider", response_model=dict)
+async def obtener_lider_equipo(id_equipo: int, db: Session = Depends(get_db)):
+    equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
+    if not equipo:
+        raise HTTPException(status_code=404, detail="Equipo no encontrado")
+    
+    if not equipo.capitan:
+        raise HTTPException(status_code=404, detail="Líder del equipo no encontrado en la base de datos")
+    
+    registro = db.query(Registro).filter(Registro.equipo_tiene == id_equipo).first()
+    
+    return {
+        "lider": {
+            "nombre": equipo.capitan.nombre,
+            "documento": equipo.capitan.documento,
+            "correo": equipo.capitan.correo,
+            "telefono": equipo.capitan.celular,
+            "imagen": registro.imagen,
+            "fecha_nacimiento" : registro.fecha_nacimiento
+        },
+    
+    }
+
+
+
 
 
 @app.post("/equipos/salir")
@@ -559,7 +590,7 @@ async def obtener_equipo_detalle(id_equipo: int, db: Session = Depends(get_db)):
             "ubicacion": equipo.location,
             "logo": equipo.logoTeam,
         },
-        "miembros": [{"nombre": miembro.nombre, "documento": miembro.documento} for miembro in miembros]
+        "miembros": [{"nombre": miembro.nombre, "documento": miembro.documento, "imagen":miembro.imagen , "fecha_nacimiento" : miembro.fecha_nacimiento} for miembro in miembros]
     }
 
 
@@ -856,12 +887,9 @@ async def listar_partidos(excluir_name: str, db: Session = Depends(get_db)):
 async def listar_torneos(documento_creador: str, db: Session = Depends(get_db)):
     # Limpiar el documento del usuario a buscar
     documento_creador = documento_creador.strip()
-
     lista_Torneos = db.query(Torneos).filter(Torneos.Documento_Creador_Torneo == documento_creador).all() 
-
     if not lista_Torneos:
         raise HTTPException(status_code=404, detail="No hay Torneos disponibles para este creador")
-
     return lista_Torneos
 
 
@@ -877,19 +905,20 @@ async def listar_partidos(id_partido: int, db: Session = Depends(get_db)):
 
 
 
-# Endpoint GET para obtener todos los usuarios
-@app.get("/usuarios", response_model=list[clie])
-async def obtener_usuarios(db: Session = Depends(get_db)):
-    
-    # Consultar todos los registros de usuarios en la base de datos
-    usuarios = db.query(Registro).all()
-
+# Endpoint GET para obtener todos los usuarios a diferencia de el usuario actual
+@app.get("/usuarios/{documento_user}", response_model=list[clie])
+async def obtener_usuarios(documento_user : str, db: Session = Depends(get_db)):
+    documento_user = documento_user.strip().lower()
+    # Consultar todos los registros de usuarios en la base de datos en excepcion a el que coincida con documento_user
+    usuarios = db.query(Registro).filter(func.lower(Registro.documento)!=documento_user ).all()
     # Si no hay usuarios registrados, lanzar un error 404
     if not usuarios:
         raise HTTPException(status_code=404, detail="No se encontraron usuarios")
 
     # Devolver los usuarios encontrados
     return usuarios
+
+
 
 @app.put("/usuarios/actualizar/{documento_user}")
 def actualizar_equipo(
@@ -915,3 +944,65 @@ def actualizar_equipo(
     db.refresh(usuario)
 
     return {"mensaje": "Equipo del usuario actualizado correctamente", "usuario": usuario}
+
+
+
+
+# Configurar el manejador de Socket.IO
+socket_manager = SocketManager(app=app, mount_location="/socket.io")
+
+""" Guardar y enviar mensajes en tiempo real """
+@app.post("/chat/send")
+async def send_message(message: Message, db: Session = Depends(get_db)):
+    new_message = Mensajes(
+        team_id=message.team_id,
+        sender=message.sender,
+        content=message.content
+    )
+    db.add(new_message)
+    db.commit()
+    db.refresh(new_message)
+
+    # Emitir el mensaje en tiempo real a los clientes conectados
+    await socket_manager.emit("nuevoMensaje", {
+        "team_id": message.team_id,
+        "sender": message.sender,
+        "content": message.content
+    })
+
+    return {"message": "Mensaje enviado correctamente"}
+
+
+
+""" Obtener los mensajes de un equipo """
+@app.get("/chat/{team_id}")
+def get_messages(team_id: int, db: Session = Depends(get_db)):
+    messages = db.query(Mensajes).filter(Mensajes.team_id == team_id).all()
+    return {"messages": messages}
+
+
+
+
+""" WebSocket para recibir mensajes en tiempo real """
+@app.websocket("/ws/{team_id}")
+async def websocket_endpoint(websocket: WebSocket, team_id: int):
+    await websocket.accept()
+    await socket_manager.connect(websocket)
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            message = {"team_id": team_id, "content": data}
+
+            """ emit funcion para emitir los mensajes a todos los usuarios conectados a el equipo En tiempo real
+            sin recargar pagina """
+            await socket_manager.emit("nuevoMensaje", message)
+    except:
+        await socket_manager.disconnect(websocket)
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+
+    

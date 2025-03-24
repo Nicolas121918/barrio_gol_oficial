@@ -107,5 +107,19 @@ class Partidos(BaseModel):
     logomatch  :   str
     Nombre_Creador_Partido : str
     class Config:
-        from_attributes = True  # ✅ Convierte objetos SQLAlchemy a JSON                                                                                         
+        from_attributes = True  # ✅ Convierte objetos SQLAlchemy a JSON        
+
+
+
+class Message(BaseModel):
+    team_id: int
+    sender: str
+    content: str
+
+
+
+class MessageResponse(BaseModel):
+    sender: str
+    content: str
+    timestamp: datetime                                                                  
     

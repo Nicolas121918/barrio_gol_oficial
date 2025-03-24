@@ -61,6 +61,7 @@ Inspeccionar
 import Headerapp from "./Headerapp.vue";
 import axios from "axios";
 import Perfiles from "./perfiles.vue";
+import { useUsuarios } from "@/stores/usuario";
 export default {
   name: "ProfileViewer",
   components: {
@@ -122,8 +123,9 @@ closeModal() {
       this.searchQuery = localStorage.getItem("searchQuery") || "";
     },
     async getUsuarios() {
+      const movistore = useUsuarios()
     try {
-      const response = await axios.get('http://localhost:8000/usuarios');
+      const response = await axios.get(`http://localhost:8000/usuarios/${movistore.usuario.documento}`);
       this.profiles = response.data; // Asignar los usuarios obtenidos a la variable `usuarios`
     } catch (error) {
       console.error('Error al obtener los torneos:', error);

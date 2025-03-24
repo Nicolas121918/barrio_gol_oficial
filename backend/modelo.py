@@ -1,4 +1,4 @@
-from sqlalchemy import String, Integer, Column, ForeignKey, Float, DateTime, UniqueConstraint
+from sqlalchemy import TIMESTAMP, String, Integer, Column, ForeignKey, Float, DateTime, Text, UniqueConstraint, func
 from datetime import datetime  # Importa datetime desde Python
 from sqlalchemy.orm import relationship
 from conexion import Base  
@@ -154,4 +154,14 @@ class partidos(Base):
     ##conexion de partidos a registro
     creador = relationship("Registro", back_populates="partido")
     Nombre_Creador_Partido = Column(String(50),nullable=False)
+
+
+
+class Messages(Base):
+    __tablename__ = 'Chatmessages'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    team_id = Column(Integer,nullable=False)
+    sender = Column(String(255), nullable=False)
+    content = Column(Text, nullable=False)
+    timestamp = Column(TIMESTAMP, server_default=func.current_timestamp())
 

@@ -42,11 +42,11 @@
     <ul class="members-list2">
       <li class="member-item2 leader" v-if="team.leader && team.leader.name">
         <div class="member-info">
-          <img :src="team.leader.profilePicture" alt="Foto de perfil" class="profile-picture" />
+          <img :src="getImagenUrl(team.leader.profilePicture)" alt="Foto de perfil" class="profile-picture" />
           <span class="nombre2">{{ team.leader.name }}</span>
-          <span class="role">(Líder)</span>
+          <span class="role">(Tu)</span>
           <p class="details">
-            Fecha de Nacimiento: {{ team.leader.birthDate || "No disponible" }}
+            Fecha de Nacimiento: {{ team.leader.fecha_nacimiento || "Sin Fecha De Nacimiento" }}
           </p>
         </div>
       </li>
@@ -64,11 +64,11 @@
         @click="openMemberMenu(member)"
       >
         <div class="member-info">
-          <img :src="member.profilePicture" alt="Foto de perfil" class="profile-picture" />
+          <img :src="getImagenUrl(member.profilePicture)" class="profile-picture" />
           <span class="nombre2">{{ member.name }}</span>
           <span class="role">({{ member.role }})</span>
           <p class="details">
-            Fecha de Nacimiento: {{ member.birthDate || "No disponible" }}
+            Fecha de Nacimiento: {{ member.fecha_nacimiento || "Sin Fecha De Nacimiento" }}
           </p>
         </div>
       </li>
@@ -151,7 +151,7 @@
     <section class="chat-section">
       <h2 class="vamoss2">Chat del Equipo</h2>
       <div class="chat-box">
-        <div v-for="(message, index) in team.chat" :key="index" class="chat-message">
+        <div v-for="(message, index) in chats" :key="index" class="chat-message">
           <strong class="vamoss1">{{ message.sender }}:</strong> <span>{{ message.content }}</span>
         </div>
       </div>
@@ -170,6 +170,7 @@
 <script>
 import { useUsuarios } from '@/stores/usuario';
 import axios from 'axios';
+import { io } from "socket.io-client";
 
 export default {
   components: {
@@ -177,18 +178,18 @@ export default {
   },
   data() {
     return {
+      chats : [],
+      nuevoMensaje: "",
       team: {
-        logo: "https://via.placeholder.com/100",
-        name: "Equipo Campeón",
-        description: "Descripción pequeña del equipo",
+        logo: "",
+        name: "",
+        description: "",
         numero_integrantes: 0,
         integrantes_actuales: 0,
         members: [],
         leader: {}, 
         requests: [],
-        tournaments: ["Torneo A", "Torneo B"],
-        chat: [
-        ],
+        tournaments: [],
       },
       selectedMember: null,
       showMemberMenu: false,
@@ -201,12 +202,137 @@ export default {
     };
   },
   async mounted() {
-    await this.obtenerDatosEquipo(); // Llamar al cargar el componente
-    await this.obtenerLiderEquipo();
-    await this.obtenerCantidadIntegrantes();
+  await this.obtenerDatosEquipo();
+  await this.obtenerLiderEquipo();
+  await this.obtenerCantidadIntegrantes();
+  await this.viewMessages();
+  this.conectarSocket(); // Llamar a la conexión WebSocket
 
-  },
+  const movistore = useUsuarios();
+  const team_Id = movistore.usuario.equipo_tiene;
+  
+  this.socket = io("http://localhost:8000");
+  
+  // Unirse a la sala del equipo
+  this.socket.emit("joinRoom", team_Id);
+
+  // Escuchar nuevos mensajes y agregarlos en tiempo real
+  this.socket.on("nuevoMensaje", (message) => {
+    console.log("📩 Nuevo mensaje recibido en tiempo real:", message);
+    this.chats.push(message); // Agregar el mensaje a la lista sin recargar
+  });
+
+
+},
+
   methods: {
+    
+    async sendMessage() {
+  const movistore = useUsuarios();
+  const team_Id = movistore.usuario.equipo_tiene;
+
+  if (this.newMessage.trim() !== "") {
+  
+    if (this.newMessage.trim() !== "") {
+    const messageData = {
+      team_id: team_Id,
+      sender: movistore.usuario.nombreUsuario,
+      content: this.newMessage,
+    };
+
+    try {
+      await axios.post("http://localhost:8000/chat/send", messageData);
+
+      // Enviar el mensaje por WebSocket a todos los clientes conectados en la sala
+      this.socket.emit("sendMessage", messageData);
+
+      this.newMessage = "";
+    } catch (error) {
+      console.error("❌ Error al enviar el mensaje:", error);
+    }
+  }
+  }
+},
+
+
+
+/* ver mensajes actualizados */
+async viewMessages() { 
+  const movistore = useUsuarios();
+  const team_Id = movistore.usuario.equipo_tiene;
+
+  try {
+    const response = await axios.get(`http://localhost:8000/chat/${team_Id}`);
+    this.chats = response.data.messages;
+  } catch (error) {
+    console.error("❌ Error al obtener los mensajes:", error);
+  }
+},
+
+conectarSocket() {
+  this.socket = io("http://localhost:8000", {
+    path: "/socket.io/",
+    transports: ["websocket", "polling"],
+  });
+
+  this.socket.on("connect", () => {
+    console.log("🔗 Conectado al WebSocket con ID:", this.socket.id);
+  });
+
+  this.socket.on("nuevoMensaje", (mensaje) => {
+    console.log("📩 Nuevo mensaje recibido:", mensaje);
+    this.chats.push(mensaje);
+  });
+
+  this.socket.on("connect_error", (err) => {
+    console.error("❌ Error de conexión:", err.message);
+  });
+},
+
+
+    /* 
+Envia los mensajes a los miembros del chat */
+/* 
+async sendMessage() {
+       const movistore = useUsuarios()
+       const team_Id = movistore.usuario.equipo_tiene
+    if (this.newMessage.trim() !== "") {
+      try {
+        await axios.post("http://localhost:8000/chat/send", {
+          team_id:team_Id,
+          sender: movistore.usuario.nombreUsuario,
+          content: this.newMessage,
+        });
+
+        this.newMessage = "";
+
+      } catch (error) {
+        console.error("Error al enviar el mensaje:", error);
+      }
+    }
+  },
+ */
+
+
+/* Obtiene los mensajes de los miebros del chat */
+/*   async VewMessages() {
+    const movistore = useUsuarios()
+    const team_Id = movistore.usuario.equipo_tiene
+    try {
+      const response = await axios.get(`http://localhost:8000/chat/${team_Id}`);
+      this.chats = response.data.messages;
+    } catch (error) {
+      console.error("Error al obtener los mensajes:", error);
+    }
+  }, */
+
+
+
+
+
+    getImagenUrl(path) {
+    return path ? `http://127.0.0.1:8000/${path}` : '';
+  },
     async obtenerLiderEquipo() {
       try {
         const movistore = useUsuarios();
@@ -219,7 +345,8 @@ export default {
           document: response.data.lider.documento,
           email: response.data.lider.correo,
           phone: response.data.lider.telefono,
-          profilePicture: "https://via.placeholder.com/50", // Se puede cambiar si el backend envía foto
+          profilePicture: response.data.lider.imagen,
+          fecha_nacimiento : response.data.lider.fecha_nacimiento,
           role: "Líder",
         };
 
@@ -243,7 +370,8 @@ export default {
             documento:m.documento,
             name: m.nombre,
             role: "Miembro", 
-            profilePicture: "https://via.placeholder.com/50",
+            profilePicture: m.imagen,
+            fecha_nacimiento: m.fecha_nacimiento
           })),
           tournaments: ["Torneo A", "Torneo B"],
           chat: [],
@@ -254,6 +382,7 @@ export default {
         console.error("Error al obtener datos:", error);
       }
     },  
+    
     
     openMemberMenu(member) {
       this.selectedMember = member;
@@ -308,12 +437,6 @@ verPerfil(documento) {
   this.$router.push(`/perfiles/${documento}`); // Redirige usando el documento
 },
 
-    sendMessage() {
-      if (this.newMessage.trim() !== "") {
-        this.team.chat.push({ sender: "Tú", content: this.newMessage });
-        this.newMessage = "";
-      }
-    },
     openBuzon() {
       this.showBuzon = true;
       this.showConfig = false; // Cerrar configuración si está abierta
@@ -894,7 +1017,6 @@ textarea {
   transform: scale(1.05);
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
 
 .epic-banner {
   text-align: center;
