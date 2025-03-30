@@ -90,10 +90,13 @@ async def registrar_cliente(
     db: Session = Depends(get_db)
 ):
     cliente_existente = db.query(Registro).filter(Registro.correo == correo).first()
+    Name_Exist = db.query(Registro).filter(Registro.nombre == nombre).first()
     documento_existente = db.query(Registro).filter(Registro.documento == documento).first()
 
     if cliente_existente:
         raise HTTPException(status_code=400, detail="El correo ya está registrado")
+    if Name_Exist:
+        raise HTTPException(status_code=400, detail="El Nombre Ya Esta Registrado")
     if documento_existente:
         raise HTTPException(status_code=400, detail="El documento ya está registrado")
     if file and file.content_type not in ["image/jpeg", "image/png", "image/gif", "image/bmp", "image/svg+xml", "image/webp"]:
@@ -820,29 +823,29 @@ async def crear_torneo(
     fecha_inicio: str = Form(...),
     fecha_final: str = Form(...),
     fecha_limite_inscripcion: str = Form(...),
-    dias_de_juego: str = Form(...),
+    # dias_de_juego: str = Form(...),
 
     # Participación y reglas
+    descripcion_reglas: str = Form(...),
     cantidad_participantes: int = Form(...),
     requiere_uniforme: str = Form(...),
-    descripcion_reglas: str = Form(...),
     duracion_partido: str = Form(...),
-    organizacion_partidos: str = Form(...),
+    # organizacion_partidos: str = Form(...),
 
     # Ubicación
     direccion: str = Form(...),
     descripcion_llegada: str = Form(...),
-    ubicacion_mapa: str = Form(...),
+    #ubicacion_mapa: str = Form(...),
 
     # Archivos
     imagen_torneo: UploadFile = File(...),
     foto_cancha: UploadFile = File(...),
-    logoTeam: UploadFile = File(...),
+    #logoTeam: UploadFile = File(...),
 
     # Costos y premios
     precioInscripcion: float = Form(...),
     precioArbitrajeTorneo: float = Form(...),
-    apuestaTorneo: float = Form(...),
+    #apuestaTorneo: float = Form(...),
     premio_principal: str = Form(...),
     premios_adicionales: Optional[str] = Form(None),
 
@@ -856,9 +859,9 @@ async def crear_torneo(
     # Guardar archivos
     os.makedirs("archivos_torneos", exist_ok=True)
 
-    ruta_logo = f"archivos_torneos/{logoTeam.filename}"
+    '''ruta_logo = f"archivos_torneos/{logoTeam.filename}"
     with open(ruta_logo, "wb") as buffer:
-        buffer.write(await logoTeam.read())
+        buffer.write(await logoTeam.read())'''
 
     ruta_imagen_torneo = f"archivos_torneos/{imagen_torneo.filename}"
     with open(ruta_imagen_torneo, "wb") as buffer:
@@ -878,25 +881,25 @@ async def crear_torneo(
         fecha_inicio=fecha_inicio,
         fecha_final=fecha_final,
         fecha_limite_inscripcion=fecha_limite_inscripcion,
-        dias_de_juego=dias_de_juego,
+        #dias_de_juego=dias_de_juego,
 
         cantidad_participantes=cantidad_participantes,
         requiere_uniforme=requiere_uniforme,
         descripcion_reglas=descripcion_reglas,
         duracion_partido=duracion_partido,
-        organizacion_partidos=organizacion_partidos,
+        # organizacion_partidos=organizacion_partidos,
 
         direccion=direccion,
         descripcion_llegada=descripcion_llegada,
-        ubicacion_mapa=ubicacion_mapa,
+        #ubicacion_mapa=ubicacion_mapa,
 
         imagen_torneo=ruta_imagen_torneo,
         foto_cancha=ruta_foto_cancha,
-        logoTeam=ruta_logo,
+        #logoTeam=ruta_logo,
 
         precioInscripcion=precioInscripcion,
         precioArbitrajeTorneo=precioArbitrajeTorneo,
-        apuestaTorneo=apuestaTorneo,
+        #apuestaTorneo=apuestaTorneo,
         premio_principal=premio_principal,
         premios_adicionales=premios_adicionales,
 
@@ -1171,7 +1174,7 @@ async def subir_publicacion(
 def obtener_galeria(id_team: int, db: Session = Depends(get_db)):
     publicaciones = db.query(GaleriaEquipo).filter_by(id_team=id_team).all()
     return publicaciones
-
+ 
 @app.delete("/galeria/{id_publicacion}")
 def eliminar_publicacion(id_publicacion: int, db: Session = Depends(get_db)):
     publicacion = db.query(GaleriaEquipo).filter_by(id=id_publicacion).first()

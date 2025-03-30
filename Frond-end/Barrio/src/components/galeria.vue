@@ -6,7 +6,7 @@
     <div class="padre">
       <button class="botones_" @click="$router.go(-1)">Volver</button>
       <h1>GALERÍA DE EQUIPO</h1>
-      <p>Somos los mejores</p>
+      <p>Dat</p>
 
       <!-- Barra de búsqueda -->
       <div class="caja">
@@ -134,12 +134,15 @@ import Headerapp from "./Headerapp.vue";
 import axios from "axios";
 import { useUsuarios } from "@/stores/usuario";
 
+
 export default {
   components: {
     Headerapp,
   },
   data() {
+    
     return {
+  Galeria : [],
       isUploading: false,
       selectedMediaType: null,
       description: "",
@@ -162,23 +165,8 @@ export default {
       const idTeam = usuariosStore.usuario.equipo_tiene;
 
       if (!idTeam) return;
+      
 
-      axios
-        .get(`http://localhost:8000/galeria/${idTeam}`)
-        .then((res) => {
-          this.posts = res.data.map((item) => ({
-            userName: "Líder",
-            userLogo: "default_logo.jpg",
-            mediaType: item.tipo_media,
-            media: `http://localhost:8000${item.archivo_url}`,
-            description: item.descripcion,
-            id: item.id,
-          }));
-          this.applyFilters();
-        })
-        .catch((err) => {
-          console.error("Error al cargar galería", err);
-        });
     },
     startUpload() {
       this.isUploading = true;

@@ -107,12 +107,12 @@
 
       <div class="form-group">
         <label for="precio_arbitraje">Precio de Arbitraje ($):</label>
-        <input type="number" id="precio_arbitraje" v-model="form.precio_arbitraje" min="1" required />
+        <input type="number" id="precio_arbitraje" v-model="form.precioArbitrajeTorneo" min="1" required />
       </div>
 
       <div class="form-group">
         <label for="precio_inscripcion">Precio de Inscripción ($):</label>
-        <input type="number" id="precio_inscripcion" v-model="form.precio_inscripcion" min="1" required />
+        <input type="number" id="precio_inscripcion" v-model="form.precioInscripcion" min="1" required />
       </div>
 
       <input type="hidden" v-model="form.correo_usuario" />
@@ -152,8 +152,8 @@ export default {
         descripcion_llegada: '',
         premio_principal: '',
         premios_adicionales: '',
-        precio_arbitraje: '',
-        precio_inscripcion: '',
+        precioArbitrajeTorneo: '',
+        precioInscripcion: '',
         correo_usuario: '',
         foto_cancha: null,
         imagen_torneo: null,
@@ -175,7 +175,7 @@ export default {
         'descripcion_reglas', 'cantidad_participantes', 'requiere_uniforme',
         'duracion_partido', 'direccion', 'descripcion_llegada',
         'premio_principal', 'premios_adicionales',
-        'precio_arbitraje', 'precio_inscripcion',
+        'precioArbitrajeTorneo', 'precioInscripcion',
       ];
 
       campos.forEach(campo => {
@@ -217,8 +217,8 @@ export default {
           descripcion_llegada: '',
           premio_principal: '',
           premios_adicionales: '',
-          precio_arbitraje: '',
-          precio_inscripcion: '',
+          precioArbitrajeTorneo: '',
+          precioInscripcion: '',
           correo_usuario: '',
           foto_cancha: null,
           imagen_torneo: null,

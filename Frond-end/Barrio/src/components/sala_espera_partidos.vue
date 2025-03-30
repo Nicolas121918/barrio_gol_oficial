@@ -456,7 +456,6 @@
     align-items: center;
     
   }
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
   
   .vs-text {
     font-family: 'Orbitron', sans-serif;
