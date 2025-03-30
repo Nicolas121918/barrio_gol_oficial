@@ -56,6 +56,12 @@ class DatosTeams(BaseModel):
     requisitos_join : str
     location : str
     logoTeam : Optional[str]=None
+    
+    class PublicacionGaleria(BaseModel):
+        id_team: int
+        descripcion: str
+        tipo_media: str  # 'imagen' o 'video'
+        archivo_url: Optional[str] = None
 
 class videos(BaseModel):
     id: int
@@ -83,32 +89,72 @@ class LikeCountResponse(BaseModel):
     total_likes: int
 
      
+from pydantic import BaseModel
+from typing import Optional, List
+
 class Torneo(BaseModel):
     id_Torneo: int
-    nombre: str
-    fecha: str
-    ubicacion: str
-    numPartidos: int
-    apuestaTorneo: float
-    precioArbitrajeTorneo: float
-    precioInscripcion: float
-    reglasTorneo: str
-    numeroparticipantes : int
-    logoTeam : str
-    Nombre_Creador_Torneo : str
 
+    # Información básica
+    nombre: str
+    tipo: str  # Microfútbol, Penales, 1 vs 1, etc.
+    categoria: str  # Libre, Juvenil, Infantil, etc.
+    formato: str  # Libre, Eliminación directa, Torneo relámpago, etc.
+
+    # Fechas
+    fecha_inicio: str
+    fecha_final: str
+    fecha_limite_inscripcion: str
+    dias_de_juego: Optional[List[str]] = None  # Lista de días o fechas si aplica
+
+    # Participación
+    cantidad_participantes: int
+    requiere_uniforme: str  # Texto libre, por ejemplo: "camiseta blanca", "sí", "no aplica"
+    
+    # Reglas y descripción
+    descripcion_reglas: str
+    duracion_partido: str  # Ejemplo: "2 tiempos de 20 minutos", "1 solo tiempo", etc.
+    organizacion_partidos: str  # Ej: "aleatoria", "manual", "por grupos"
+
+    # Ubicación
+    direccion: str
+    descripcion_llegada: str
+    foto_cancha: Optional[str] = None  # URL o nombre del archivo
+    ubicacion_mapa: Optional[str] = None  # URL de Google Maps (opcional)
+
+    # Recursos visuales
+    imagen_torneo: Optional[str] = None  # Imagen representativa
+
+    # Costos y premios
+    precio_inscripcion: float
+    precio_arbitraje: float
+    premio_principal: str
+    premios_adicionales: Optional[str] = None
+
+    # Creador del torneo
+    nombre_creador: str
 
 class Partidos(BaseModel):
     id_Partido: int
-    name : str                   
+    name: str
     hora: str
+    dia: str
     apuesta: float
     ubicacionpartido: str
-    logomatch  :   str
-    Nombre_Creador_Partido : str
-    class Config:
-        from_attributes = True  # ✅ Convierte objetos SQLAlchemy a JSON        
+    logomatch: Optional[str] = None
+    imagen_cancha: Optional[str] = None
+    tipo_futbol: str
+    equipo_local: str
+    equipo_visitante: Optional[str] = None
+    estado_partido: Optional[str] = "buscando_competidor"
+    ganador: Optional[str] = None
+    Documento_Creador_P: str
 
+    reglas: Optional[str] = None  # <-- NUEVO
+    como_llegar: Optional[str] = None  # <-- NUEVO
+
+    class Config:
+        from_attributes = True
 
 
 class Message(BaseModel):
@@ -117,9 +163,9 @@ class Message(BaseModel):
     content: str
 
 
-
-class MessageResponse(BaseModel):
-    sender: str
-    content: str
-    timestamp: datetime                                                                  
-    
+class ReporteUsuarioSchema(BaseModel):
+    documento_reportado: str
+    documento_reportante: str
+    motivo: str
+    descripcion: Optional[str] = None
+    fecha_reporte: datetime

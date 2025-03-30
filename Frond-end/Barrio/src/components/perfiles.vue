@@ -2,11 +2,14 @@
   <header>
     <Headerapp></Headerapp>
   </header>
+
   <div class="profile-container">
     <button class="back-button" @click="goBack">Volver</button>
 
     <div class="usuario">
-      
+      <div class="reportar">
+        <ReportarUsuario :documentoReportado="userProfile.documento" />
+  </div>
       <div class="team-info" v-if="team.name" @mouseover="isTeamInfoVisible = true" @mouseleave="isTeamInfoVisible = false">
         
         <img class="team-logo" :src="teamLogoUrl" alt="Logo del equipo" />
@@ -78,10 +81,12 @@
 <script>
 import axios from 'axios';
 import Headerapp from './Headerapp.vue';
+import ReportarUsuario from './ReportarUsuario.vue';
 
 export default {
   components: {
-    Headerapp
+    Headerapp,
+    ReportarUsuario
   },
   data() {
     return {
@@ -90,6 +95,7 @@ export default {
       showImage: false,
       searchQuery: '',  // Nuevo campo para la búsqueda
       userProfile: {
+        documento: '', 
         picture: '',
         name: '',
         city: '',
@@ -141,6 +147,7 @@ export default {
       try {
         const userResponse = await axios.get(`http://localhost:8000/api/usuario/${documento}`);
         this.userProfile = {
+          documento: documento,
           picture: userResponse.data.imagen || '',
           name: userResponse.data.nombre,
           city: userResponse.data.ciudad || 'N/A',
@@ -631,5 +638,8 @@ export default {
   text-align: center;
   color: #000000;
   font-size: 17px;
+}
+H12{
+  color: white;
 }
 </style>

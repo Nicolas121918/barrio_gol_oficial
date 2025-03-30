@@ -5,7 +5,7 @@
         <button @click="mostrarFormulario">
         Programar Entrenamiento
       </button>
-      <button class="volver">
+      <button class="volver" @click="$router.go(-1)">
         volver
       </button>
       

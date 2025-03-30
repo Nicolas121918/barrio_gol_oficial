@@ -7,9 +7,54 @@
     <div class="buscador_torneo">
       <div class="search-container">
         <input v-model="searchQuery" type="text" placeholder="Buscar torneos o partidos..." class="search-input" />
-        <router-link class="view-games-button" to="/creartorneo">Crear Torneo</router-link>
-        <router-link class="view-games-button" to="/crearpartido">Crear Partido</router-link>
-        <router-link to="/torneo_creados"><button class="view-games-button2">Creados..</button></router-link>
+        <div class="crear-dropdown relative">
+          <button @click="mostrarOpciones = true" class="crear-btn">
+  Crear ➕
+</button>
+
+<div v-if="mostrarOpciones" class="modal-overlay" @click.self="mostrarOpciones = false">
+  <div class="modal-menu">
+    <router-link to="/creartorneo" class="dropdown-option" @click="mostrarOpciones = false">
+      ➕ Crear Torneo
+    </router-link>
+    <router-link to="/crearpartido" class="dropdown-option" @click="mostrarOpciones = false">
+      ⚽ Crear Partido
+    </router-link>
+  </div>
+</div>
+</div>
+
+<div class="relative inline-block text-left">
+    <button @click="mostrarMenu = !mostrarMenu" class="boton-creados">
+      Creados▼
+    </button>
+
+    <div
+      v-if="mostrarMenu"
+      class="menu-creados absolute right-0 mt-2 w-48 bg-black text-white border border-gold rounded shadow-lg z-50"
+    >
+      <div @click="irATorneos" class="opcion-menu">Torneos Creados</div>
+      <hr class="border-gold my-1" />
+      <div @click="irAPartidos" class="opcion-menu">Partidos Creados</div>
+    </div>
+  </div>
+  <div class="relative inline-block text-left" @mouseleave="mostrarMenu2 = false">
+  <button @click="mostrarMenu2 = !mostrarMenu2" class="boton-creados">
+    Eventos ▼
+  </button>
+
+  <div
+    v-if="mostrarMenu2"
+    class="menu-creados absolute right-0 mt-2 w-48 bg-black text-white border border-gold rounded shadow-lg z-50"
+  >
+    <div @click="irAPartidos2" class="opcion-menu">Partidos en juego</div>
+    <hr class="border-gold my-1" />
+    <div @click="irATorneos2" class="opcion-menu">Torneos en juego</div>
+    <hr class="border-gold my-1" />
+    <div @click="irAFinalizados" class="opcion-menu">Finalizados</div>
+  </div>
+</div>
+
       </div>
     </div>
     <div>
@@ -58,6 +103,11 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import Headerapp from './Headerapp.vue';
 import { useUsuarios } from '@/stores/usuario';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const mostrarMenu2 = ref(false)
+
 
 const torneos = ref([]);
 const partidos = ref([]);
@@ -66,13 +116,34 @@ const activeRules = ref({ torneo: null, partido: null });
 const datos = useUsuarios();
 const nombre = computed(() => datos.usuario?.nombreUsuario);
 const nombrew = computed(() => datos.usuario?.nombreUsuario);
+const mostrarOpciones = ref(false);
+const mostrarMenu = ref(false);
 
 
 console.log( nombre.value)
 console.log(nombrew.value)
 
+const irAPartidos2 = () => {
+  router.push('/partidos_creados')
+  mostrarMenu2.value = false
+}
+const irATorneos2 = () => {
+  router.push('/torneos_en_juego')
+  mostrarMenu2.value = false
+}
+const irAFinalizados = () => {
+  router.push('/finalizados')
+  mostrarMenu2.value = false
+}
 const getImagenUrl = (path) => {
   return path ? `http://127.0.0.1:8000/${path}` : '';
+};
+const irATorneos = () => {
+  router.push('/ganador'); // asegúrate de que la ruta exista
+};
+
+const irAPartidos = () => {
+  router.push('/partidos_creados'); // asegúrate de que esta ruta esté bien escrita
 };
 
 
@@ -155,6 +226,8 @@ onMounted(() => {
   margin-left: -10%;
   width: 100%;
   text-align: center;
+  gap: 50px;
+
 }
 
 .buscador_torneo{
@@ -189,26 +262,6 @@ onMounted(() => {
   transition: background-color 0.3s ease;
   border: 2px solid white;
 
-}
-.view-games-button2{
-  background-color: #0099ff;
-  color: rgb(0, 0, 0);
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  left: 40%;
-  border: 2px solid black
-}
-.view-games-button2:hover{
-  background-color: #2f00ff;
-  color: white;
-} 
-
-.view-games-button:hover {
-  background-color:  #00ccff;
-  color: black;
 }
 
 
@@ -378,7 +431,9 @@ text-align: center;
   margin-top: 2%;
   margin-left: 33%;
   width: 65%;
+  gap: 50px;
   text-align: center;
+
 }
   
 }
@@ -405,6 +460,7 @@ text-align: center;
   margin-left: 28%;
   width: 70%;
   text-align: center;
+  gap: 50px;
 }
   
 }
@@ -431,6 +487,7 @@ margin-top: 20%;
   margin-left: 17%;
   width: 60%;
   text-align: center;
+  gap: 50px;
 }
 }
 
@@ -459,6 +516,7 @@ margin-top: 20%;
   margin-left: 6%;
   width: 70%;
   text-align: center;
+  gap: 50px;
 }
 }
 
@@ -482,6 +540,7 @@ margin-top: 20%;
   margin-left: 5%;
   width: 100%;
   text-align: center;
+  gap: 50px;
 }
 }
 
@@ -505,6 +564,7 @@ margin-top: 20%;
   margin-right: 0%;
   width: 100%;
   text-align: center;
+  gap: 50px;
 }
 }
 
@@ -526,6 +586,7 @@ margin-top: 20%;
   margin-top: 2%;
   margin-right: 0%;
   width: 100%;
+  gap: 50px;
   text-align: center;
 }
 }
@@ -550,5 +611,137 @@ margin-top: 20%;
 }
 
 
+.crear-btn {
+  background-color: black;
+  color: gold;
+  padding: 10px 25px;
+  border: 2px solid gold;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+  z-index: 10;
+  font-size: 16px;
+}
+
+.crear-btn:hover {
+  background-color: gold;
+  color: black;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* fondo oscuro translúcido */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal-menu {
+  background-color: white;
+  border-radius: 12px;
+  padding: 30px 20px;
+  min-width: 280px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  position: relative;
+}
+
+.dropdown-option {
+  display: block;
+  padding: 15px 10px;
+  color: black;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background-color 0.2s, color 0.2s;
+  border: #989898 solid;
+}
+
+.dropdown-option:hover {
+  background-color: rgba(255, 217, 0, 0.489);
+  color: black;
+  border: solid black;
+  border-radius: 6px;
+}
+
+.separator {
+  height: 2px;
+  background-color: gold;
+  margin: 10px 0;
+  border-radius: 2px;
+}
+
+/* Estilo para Torneos */
+.boton-torneos:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(212, 175, 55, 0.6);
+}
+
+/* Estilo para Partidos */
+.boton-partidos {
+  background-color: black;
+  color: white;
+  padding: 12px 28px;
+  border: 2px solid gold;
+  border-radius: 15px;
+  font-weight: 600;
+  font-size: 16px;
+  margin: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.boton-partidos:hover {
+  background-color: gold;
+  color: black;
+  transform: scale(1.05);
+}
+
+.boton-creados {
+  background-color: black;
+  color: gold;
+  padding: 10px 20px;
+  border: 2px solid gold;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+  margin-left: 40px;
+}
+
+.boton-creados:hover {
+  background-color: gold;
+  color: black;
+}
+
+.menu-creados {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.opcion-menu {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  background-color: black;
+  color: white;
+}
+
+.opcion-menu:hover {
+  color: orange;
+  border: 1px solid rgb(255, 255, 255);
+  box-shadow: 0 0 10px white;
+}
+
+.border-gold {
+  border-color: gold;
+}
   </style>
   

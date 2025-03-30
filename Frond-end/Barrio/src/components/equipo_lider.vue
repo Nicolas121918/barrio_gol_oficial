@@ -104,7 +104,6 @@
       
     </section>
     
-
     <!-- Modal de Buzón -->
     <div v-if="showBuzon" class="modal buzón-modal">
       <div id="caja" class="modal-content buzón-content">
@@ -253,9 +252,6 @@ export default {
   }
   }
 },
-
-
-
 /* ver mensajes actualizados */
 async viewMessages() { 
   const movistore = useUsuarios();
@@ -288,48 +284,6 @@ conectarSocket() {
     console.error("❌ Error de conexión:", err.message);
   });
 },
-
-
-    /* 
-Envia los mensajes a los miembros del chat */
-/* 
-async sendMessage() {
-       const movistore = useUsuarios()
-       const team_Id = movistore.usuario.equipo_tiene
-    if (this.newMessage.trim() !== "") {
-      try {
-        await axios.post("http://localhost:8000/chat/send", {
-          team_id:team_Id,
-          sender: movistore.usuario.nombreUsuario,
-          content: this.newMessage,
-        });
-
-        this.newMessage = "";
-
-      } catch (error) {
-        console.error("Error al enviar el mensaje:", error);
-      }
-    }
-  },
- */
-
-
-/* Obtiene los mensajes de los miebros del chat */
-/*   async VewMessages() {
-    const movistore = useUsuarios()
-    const team_Id = movistore.usuario.equipo_tiene
-    try {
-      const response = await axios.get(`http://localhost:8000/chat/${team_Id}`);
-      this.chats = response.data.messages;
-    } catch (error) {
-      console.error("Error al obtener los mensajes:", error);
-    }
-  }, */
-
-
-
-
-
     getImagenUrl(path) {
     return path ? `http://127.0.0.1:8000/${path}` : '';
   },

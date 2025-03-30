@@ -55,9 +55,10 @@
 <script setup>
 import Headerapp from './Headerapp.vue';
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
-import { useUsuarios } from '@/stores/usuario';
 import videos_de_usuario from './videos_de_usuario.vue';
-const usuariosStore = useUsuarios();
+  import { useUsuarios } from '@/stores/usuario';
+
+  const usuariosStore = useUsuarios();
 // Usamos computed para obtener los valores directamente del store
 const nombre = computed(() => usuariosStore.usuario?.nombreUsuario || 'Sin nombre');
 const correo = computed(() => usuariosStore.usuario?.correo || 'Sin correo');

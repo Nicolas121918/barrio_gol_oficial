@@ -118,43 +118,88 @@ class Equipos(Base):
      capitan_documento = Column(String(50), ForeignKey('usuarios.documento'))
      capitan = relationship("Registro", back_populates="equipo")
 
+class GaleriaEquipo(Base):
+    __tablename__ = 'galeria_equipo'
+
+    id = Column(Integer, primary_key=True, index=True)
+    id_team = Column(Integer, ForeignKey('Equipos_de_barrio_gol.Id_team'), nullable=False)
+    descripcion = Column(String(255), nullable=False)
+    tipo_media = Column(String(20), nullable=False)  # 'imagen' o 'video'
+    archivo_url = Column(String(255), nullable=False)
+    
+    equipo = relationship("Equipos", backref="galeria")
 # Tabla de Torneos
 class Torneos(Base):
     __tablename__ = 'Torneos_Barrio_Gol'
+
     id_Torneo = Column(Integer, primary_key=True, index=True)
+
+    # Información básica
     nombre = Column(String(100), nullable=False)
-    fecha = Column(String(50), nullable=False)
-    ubicacion = Column(String(150), nullable=False)
-    numPartidos = Column(Integer, nullable=False)
-    apuestaTorneo    = Column(Float, nullable=False)  
-    precioArbitrajeTorneo = Column(Float, nullable=False)
+    tipo = Column(String(50), nullable=False)
+    categoria = Column(String(50), nullable=False)
+    formato = Column(String(100), nullable=False)
+
+    # Fechas
+    fecha_inicio = Column(String(50), nullable=False)
+    fecha_final = Column(String(50), nullable=False)
+    fecha_limite_inscripcion = Column(String(50), nullable=False)
+    dias_de_juego = Column(String(255), nullable=True)  # Por ejemplo: "Sábado, Domingo, Lunes"
+
+    # Participación y reglas
+    cantidad_participantes = Column(Integer, nullable=False)
+    requiere_uniforme = Column(String(100), nullable=True)
+    descripcion_reglas = Column(String(1000), nullable=False)
+    duracion_partido = Column(String(100), nullable=True)
+    organizacion_partidos = Column(String(100), nullable=True)
+
+    # Ubicación
+    direccion = Column(String(255), nullable=False)
+    descripcion_llegada = Column(String(500), nullable=True)
+    foto_cancha = Column(String(255), nullable=True)
+    ubicacion_mapa = Column(String(255), nullable=True)
+
+    # Imágenes y logos
+    imagen_torneo = Column(String(255), nullable=True)
+    logoTeam = Column(String(255), nullable=True)
+
+    # Costos y premios
     precioInscripcion = Column(Float, nullable=False)
-    reglasTorneo = Column(String(255), nullable=False)
-    numeroparticipantes = Column(Integer, nullable=False)
-    logoTeam = Column(String(255), nullable=False)
-    # Relación con los participantes (usuarios)
+    precioArbitrajeTorneo = Column(Float, nullable=False)
+    apuestaTorneo = Column(Float, nullable=True)
+    premio_principal = Column(String(255), nullable=True)
+    premios_adicionales = Column(String(255), nullable=True)
+
+    # Relación con el creador del torneo
     Documento_Creador_Torneo = Column(String(50), ForeignKey('usuarios.documento'))
-    Nombre_Creador_Torneo = Column(String(255),nullable=False)
-    
+    Nombre_Creador_Torneo = Column(String(255), nullable=False)
+
+    # Relaciones
     participantes = relationship("Registro", back_populates="torneo")
-    #conexion de torneos a registro
-    creadormatch = relationship("Registro",back_populates="Torneos_create")
+    creadormatch = relationship("Registro", back_populates="Torneos_create")
 
-
-# Tabla de Partidos
 class partidos(Base):
     __tablename__ = 'Partidos_Barrio_Gol'
+
     id_Partido = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100),nullable=False)
+    name = Column(String(100), nullable=False)
     hora = Column(String(100), nullable=False)
+    dia = Column(String(50), nullable=False)
     apuesta = Column(Float, nullable=False)
     ubicacionpartido = Column(String(150), nullable=False)
     logomatch = Column(String(255), nullable=True)
-    Documento_Creador_P= Column(String(50), ForeignKey('usuarios.documento'))
-    ##conexion de partidos a registro
-    creador = relationship("Registro", back_populates="partido")
-    Nombre_Creador_Partido = Column(String(50),nullable=False)
+    imagen_cancha = Column(String(255), nullable=True)
+    tipo_futbol = Column(String(50), nullable=False)
+    equipo_local = Column(String(100), nullable=False)
+    equipo_visitante = Column(String(100), nullable=True)
+    estado_partido = Column(String(50), default="buscando_competidor")
+    ganador = Column(String(100), nullable=True)
+    Documento_Creador_P = Column(String(50), ForeignKey('usuarios.documento'))
 
+    reglas = Column(Text, nullable=True)  # <-- NUEVO
+    como_llegar = Column(Text, nullable=True)  # <-- NUEVO
+
+    creador = relationship("Registro", back_populates="partido")
 
 
 class Messages(Base):
@@ -165,3 +210,17 @@ class Messages(Base):
     content = Column(Text, nullable=False)
     timestamp = Column(TIMESTAMP, server_default=func.current_timestamp())
 
+# Tabla de Reportes de Usuario
+class ReporteUsuario(Base):
+    __tablename__ = 'reportes_usuario'
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    documento_reportante = Column(String(50), ForeignKey('usuarios.documento'), nullable=False)
+    documento_reportado = Column(String(50), ForeignKey('usuarios.documento'), nullable=False)
+    motivo = Column(String(100), nullable=False)
+    comentario = Column(String(500), nullable=True)
+    fecha_reporte = Column(DateTime, default=datetime.utcnow)
+
+    # Relaciones con la tabla de usuarios
+    reportante = relationship("Registro", foreign_keys=[documento_reportante], backref="reportes_realizados")
+    reportado = relationship("Registro", foreign_keys=[documento_reportado], backref="reportes_recibidos")

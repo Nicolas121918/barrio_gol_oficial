@@ -8,60 +8,114 @@
 
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" v-model="form.nombre" placeholder="Nombre del evento" required />
+        <input type="text" id="nombre" v-model="form.nombre" placeholder="Nombre del torneo" required />
       </div>
 
       <div class="form-group">
-        <label for="fecha">Fecha:</label>
-        <input type="date" id="fecha" v-model="form.fecha" required />
+        <label for="tipo">Tipo de Torneo:</label>
+        <input type="text" id="tipo" v-model="form.tipo" placeholder="Ej: Microfútbol, Penales, 1 vs 1" required />
       </div>
 
       <div class="form-group">
-        <label for="mapa">Ubicación:</label>
-        <div id="map" class="map"></div>
-        <input type="text" v-model="form.ubicacion" readonly placeholder="Ubicación seleccionada" />
+        <label for="categoria">Categoría:</label>
+        <select id="categoria" v-model="form.categoria" required>
+          <option disabled value="">Selecciona una categoría</option>
+          <option>Libre</option>
+          <option>Juvenil</option>
+          <option>Infantil</option>
+          <option>Mixto</option>
+          <option>Femenino</option>
+          <option>Senior</option>
+        </select>
       </div>
 
       <div class="form-group">
-        <button type="button" class="centered-button" @click="obtenerUbicacionActual">Usar Mi Ubicación</button>
+        <label for="formato">Formato:</label>
+        <select id="formato" v-model="form.formato" required>
+          <option disabled value="">Selecciona un formato</option>
+          <option>Eliminación directa</option>
+          <option>Todos contra todos</option>
+          <option>Grupos + Eliminación</option>
+          <option>Llave ida y vuelta</option>
+        </select>
       </div>
 
       <div class="form-group">
-        <label for="numPartidos">Número de Partidos:</label>
-        <input type="number" id="numPartidos" v-model="form.numPartidos" min="1" required placeholder="Número de partidos del torneo" />
+        <label for="fecha_inicio">Fecha de Inicio:</label>
+        <input type="date" id="fecha_inicio" v-model="form.fecha_inicio" required />
       </div>
 
       <div class="form-group">
-        <label for="numParticipantes">Número de Participantes:</label>
-        <input type="number" id="numParticipantes" v-model="form.numeroparticipantes" min="2" required placeholder="Número de participantes del torneo" />
+        <label for="fecha_final">Fecha Final:</label>
+        <input type="date" id="fecha_final" v-model="form.fecha_final" required />
       </div>
 
       <div class="form-group">
-        <label for="apuestaTorneo">Apuesta por Torneo ($):</label>
-        <input type="number" id="apuestaTorneo" v-model="form.apuestaTorneo" min="1" required placeholder="Monto de apuesta por torneo" />
+        <label for="fecha_limite_inscripcion">Fecha Límite de Inscripción:</label>
+        <input type="date" id="fecha_limite_inscripcion" v-model="form.fecha_limite_inscripcion" required />
       </div>
 
       <div class="form-group">
-        <label for="precioArbitrajeTorneo">Precio de Arbitraje por Torneo ($):</label>
-        <input type="number" id="precioArbitrajeTorneo" v-model="form.precioArbitrajeTorneo" min="1" required placeholder="Precio de arbitraje por torneo" />
+        <label for="descripcion_reglas">Descripción de Reglas:</label>
+        <textarea id="descripcion_reglas" v-model="form.descripcion_reglas" rows="4" placeholder="Reglas generales del torneo" required></textarea>
       </div>
 
       <div class="form-group">
-        <label for="precioInscripcion">Precio de Inscripción ($):</label>
-        <input type="number" id="precioInscripcion" v-model="form.precioInscripcion" min="1" required placeholder="Precio de inscripción al torneo" />
+        <label for="cantidad_participantes">Cantidad de Participantes:</label>
+        <input type="number" id="cantidad_participantes" v-model="form.cantidad_participantes" min="2" required />
       </div>
 
       <div class="form-group">
-        <label for="reglasTorneo">Reglas del Torneo:</label>
-        <textarea id="reglasTorneo" v-model="form.reglasTorneo" rows="4" placeholder="Escribe las reglas del torneo aquí"></textarea>
+        <label for="requiere_uniforme">¿Requiere uniforme? (Especifique):</label>
+        <input type="text" id="requiere_uniforme" v-model="form.requiere_uniforme" placeholder="Ej: Camiseta y pantaloneta del mismo color" />
+      </div>
+
+      <div class="form-group">
+        <label for="duracion_partido">Duración de Partido:</label>
+        <input type="text" id="duracion_partido" v-model="form.duracion_partido" placeholder="Ej: 2 tiempos de 20 min" required />
+      </div>
+
+      <div class="form-group">
+        <label for="direccion">Dirección del Torneo:</label>
+        <input type="text" id="direccion" v-model="form.direccion" placeholder="Dirección del evento" required />
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion_llegada">Descripción para llegar:</label>
+        <textarea id="descripcion_llegada" v-model="form.descripcion_llegada" rows="3" placeholder="Punto de referencia o cómo llegar al sitio"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="foto_cancha">Foto de la Cancha:</label>
+        <input type="file" @change="onFileChangeCancha" accept="image/jpeg, image/png" />
+      </div>
+
+      <div class="form-group">
+        <label for="imagen_torneo">Imagen Representativa del Torneo:</label>
+        <input type="file" @change="onFileChangeTorneo" accept="image/jpeg, image/png" />
+      </div>
+
+      <div class="form-group">
+        <label for="premio_principal">Premio Principal:</label>
+        <input type="text" id="premio_principal" v-model="form.premio_principal" placeholder="Premio principal del torneo" required />
+      </div>
+
+      <div class="form-group">
+        <label for="premios_adicionales">Premios Adicionales (Opcional):</label>
+        <input type="text" id="premios_adicionales" v-model="form.premios_adicionales" placeholder="Ej: Trofeos, medallas, etc." />
+      </div>
+
+      <div class="form-group">
+        <label for="precio_arbitraje">Precio de Arbitraje ($):</label>
+        <input type="number" id="precio_arbitraje" v-model="form.precio_arbitraje" min="1" required />
+      </div>
+
+      <div class="form-group">
+        <label for="precio_inscripcion">Precio de Inscripción ($):</label>
+        <input type="number" id="precio_inscripcion" v-model="form.precio_inscripcion" min="1" required />
       </div>
 
       <input type="hidden" v-model="form.correo_usuario" />
-
-      <div class="form-group">
-        <label class="logotext">Logo del torneo</label>
-        <input type="file" @change="onFileChange" accept="image/jpeg, image/png" />
-      </div>
 
       <div class="form-group">
         <button type="submit" class="centered-button">Crear</button>
@@ -69,7 +123,6 @@
     </form>
   </div>
 </template>
-
 <script>
 import L from 'leaflet';
 import Headerapp from './Headerapp.vue';
@@ -85,38 +138,58 @@ export default {
       datos: useUsuarios(),
       form: {
         nombre: '',
-        fecha: '',
-        ubicacion: '',
-        numPartidos: '',
-        apuestaTorneo: '',
-        precioArbitrajeTorneo: '',
-        precioInscripcion: '',
-        reglasTorneo: '',
-        numeroparticipantes: '',
-        logoTeam: null,
+        tipo: '',
+        categoria: '',
+        formato: '',
+        fecha_inicio: '',
+        fecha_final: '',
+        fecha_limite_inscripcion: '',
+        descripcion_reglas: '',
+        cantidad_participantes: '',
+        requiere_uniforme: '',
+        duracion_partido: '',
+        direccion: '',
+        descripcion_llegada: '',
+        premio_principal: '',
+        premios_adicionales: '',
+        precio_arbitraje: '',
+        precio_inscripcion: '',
         correo_usuario: '',
+        foto_cancha: null,
+        imagen_torneo: null,
       },
     };
   },
   methods: {
-    onFileChange(event) {
-      this.form.logoTeam = event.target.files[0];
+    onFileChangeCancha(event) {
+      this.form.foto_cancha = event.target.files[0];
+    },
+    onFileChangeTorneo(event) {
+      this.form.imagen_torneo = event.target.files[0];
     },
     async crearEvento() {
       const datosenviar = new FormData();
-      datosenviar.append('nombre', this.form.nombre);
-      datosenviar.append('fecha', this.form.fecha);
-      datosenviar.append('ubicacion', this.form.ubicacion);
-      datosenviar.append('numPartidos', this.form.numPartidos);
-      datosenviar.append('apuestaTorneo', this.form.apuestaTorneo);
-      datosenviar.append('precioArbitrajeTorneo', this.form.precioArbitrajeTorneo);
-      datosenviar.append('precioInscripcion', this.form.precioInscripcion);
-      datosenviar.append('reglasTorneo', this.form.reglasTorneo);
-      datosenviar.append('numeroparticipantes', this.form.numeroparticipantes);
-      datosenviar.append('correo_usuario', this.datos.usuario?.correo); 
+      const campos = [
+        'nombre', 'tipo', 'categoria', 'formato',
+        'fecha_inicio', 'fecha_final', 'fecha_limite_inscripcion',
+        'descripcion_reglas', 'cantidad_participantes', 'requiere_uniforme',
+        'duracion_partido', 'direccion', 'descripcion_llegada',
+        'premio_principal', 'premios_adicionales',
+        'precio_arbitraje', 'precio_inscripcion',
+      ];
 
-      if (this.form.logoTeam) {
-        datosenviar.append('logoTeam', this.form.logoTeam);
+      campos.forEach(campo => {
+        datosenviar.append(campo, this.form[campo]);
+      });
+
+      datosenviar.append('correo_usuario', this.datos.usuario?.correo || '');
+
+      if (this.form.foto_cancha) {
+        datosenviar.append('foto_cancha', this.form.foto_cancha);
+      }
+
+      if (this.form.imagen_torneo) {
+        datosenviar.append('imagen_torneo', this.form.imagen_torneo);
       }
 
       try {
@@ -124,65 +197,42 @@ export default {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
 
-        console.log('Evento creado con éxito:', response.data);
         alert('Torneo creado con éxito!');
+        console.log(response.data);
 
+        // Reset del formulario
         this.form = {
           nombre: '',
-          fecha: '',
-          ubicacion: '',
-          numPartidos: '',
-          apuestaTorneo: '',
-          precioArbitrajeTorneo: '',
-          precioInscripcion: '',
-          reglasTorneo: '',
-          numeroparticipantes: '',
-          logoTeam: null,
+          tipo: '',
+          categoria: '',
+          formato: '',
+          fecha_inicio: '',
+          fecha_final: '',
+          fecha_limite_inscripcion: '',
+          descripcion_reglas: '',
+          cantidad_participantes: '',
+          requiere_uniforme: '',
+          duracion_partido: '',
+          direccion: '',
+          descripcion_llegada: '',
+          premio_principal: '',
+          premios_adicionales: '',
+          precio_arbitraje: '',
+          precio_inscripcion: '',
           correo_usuario: '',
+          foto_cancha: null,
+          imagen_torneo: null,
         };
       } catch (error) {
-        console.error('Error al crear el evento:', error);
+        console.error('Error al crear el torneo:', error);
         console.log('Detalles del error:', error.response?.data);
+        alert('Ocurrió un error al crear el torneo.');
       }
     },
-    obtenerUbicacionActual() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            this.obtenerNombreUbicacion(latitude, longitude);
-          },
-          () => {
-            alert('No se pudo obtener la ubicación');
-          }
-        );
-      } else {
-        alert('Geolocalización no es compatible con este navegador.');
-      }
-    },
-    obtenerNombreUbicacion(lat, lng) {
-      const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&lang=es`;
-      fetch(url)
-        .then((response) => response.json())
-        .then((data) => {
-          this.form.ubicacion = data.address.city || data.address.town || data.address.village || 'Ubicación desconocida';
-        })
-        .catch((error) => {
-          console.error('Error al obtener la ubicación:', error);
-          this.form.ubicacion = 'Error al obtener la ubicación';
-        });
-    },
-    initMap() {
-      const map = L.map('map').setView([4.5709, -74.2973], 6);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-      map.on('click', (e) => this.obtenerNombreUbicacion(e.latlng.lat, e.latlng.lng));
-    },
-  },
-  mounted() {
-    this.initMap();
   },
 };
 </script>
+
 
   <style scoped>
   .form-container {

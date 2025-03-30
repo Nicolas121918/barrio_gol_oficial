@@ -9,10 +9,7 @@
     <div class="match-container">
       <h1 class="match-title">{{ nombre }}</h1>
       <p class="match-subtitle">Eres el encargado, Matías: <span>¡Estamos bajo tus manos!</span></p>
-      <div v-if="!isMatchStarted" class="match-info">
-        <p>⏰ El partido se juega hoy a las <span>{{ matchTime }}</span></p>
-      </div>
-      <div v-else class="match-content">
+      <div class="match-content">
         <div class="team">
           <img :src="teamA.logo" alt="Logo Equipo A" class="team-logo" />
           <p class="team-name">{{ teamA.name }}</p>
@@ -24,7 +21,7 @@
           <p class="team-name">{{ teamB.name }}</p>
         </div>
       </div>
-      <div class="scoreboard" v-if="isMatchStarted && !isMatchEnded">
+      <div class="scoreboard">
         <div class="team-score">
           <p class="score-team-name">{{ teamA.name }}</p>
           <div class="score-buttons">
@@ -42,9 +39,10 @@
           </div>
         </div>
       </div>
-      <button v-if="isMatchStarted && !isMatchEnded" class="finish-button" @click="showEndConfirmation">
-        Finalizar
-      </button>
+      <button class="finish-button" @click="showEndConfirmation">
+  Finalizar
+</button>
+
 
       <!-- Modal de Confirmación -->
       <div v-if="showConfirmation" class="confirmation-modal">
@@ -55,45 +53,6 @@
             <button class="confirm-btn" @click="finalizeMatch">Aceptar</button>
             <button class="cancel-btn" @click="cancelMatch">Cancelar</button>
           </div>
-        </div>
-      </div>
-
-      <!-- Modal de Resultados Finales -->
-      <div v-if="isMatchEnded" class="modal">
-        <div class="modal-content">
-          <h2 class="result_fin">Resultados Finales</h2>
-          <div class="result-container">
-            <div v-if="isMatchTied" class="tie-result">
-              <p class="tie-message">¡Es un empate!</p>
-              <div class="resul">
-                <p>{{ teamA.name }} - {{ teamA.score }} goles</p>
-                <p>{{ teamB.name }} - {{ teamB.score }} goles</p>
-              </div>
-            </div>
-
-            <div class="contiene3" v-else>
-              <!-- Equipo Ganador -->
-              <div class="team-result" :class="{ winner: isTeamAWinner }">
-                <div class="team-logo-container">
-                  <p class="ganr2">Ganador</p>
-                  <img :src="isTeamAWinner ? teamA.logo : teamB.logo" alt="Logo Equipo Ganador" class="team-logo-modal1" />
-                </div>
-                <p class="ganr">{{ isTeamAWinner ? teamA.name : teamB.name }} - {{ isTeamAWinner ? teamA.score : teamB.score }} goles</p>
-                <img src="../assets/imagenes/balondeoro.png" alt="Ganador" class="gif" />
-              </div>
-
-              <!-- Equipo Perdedor -->
-              <div class="team-result" :class="{ winner: !isTeamAWinner }">
-                <div class="team-logo-container">
-                  <p class="ganr3">Perdedor</p>
-                  <img :src="!isTeamAWinner ? teamA.logo : teamB.logo" alt="Logo Equipo Perdedor" class="team-logo-modal" />
-                </div>
-                <p class="ganr">{{ !isTeamAWinner ? teamA.name : teamB.name }} - {{ !isTeamAWinner ? teamA.score : teamB.score }} goles</p>
-                <img src="https://i.pinimg.com/originals/a4/38/4c/a4384c5d86fa696a392ab216bc09a3d3.gif" alt="Perdedor" class="gif2" />
-              </div>
-            </div>
-          </div>
-          <button class="close-button" @click="resetMatch">Cerrar</button>
         </div>
       </div>
     </div>
@@ -142,9 +101,7 @@ import Headerapp from './Headerapp.vue';
   console.log("Fecha y hora actual:", now.toLocaleString());
   console.log("Hora del partido:", matchDateTime.toLocaleString());
 
-  if (now <= matchDateTime) {
-    this.isMatchStarted = true;
-  }
+  
 },
 
   methods: {
@@ -156,8 +113,12 @@ import Headerapp from './Headerapp.vue';
       }
     },
     showEndConfirmation() {
-      this.showConfirmation = true;
-    },
+    const confirmado = confirm("⚠️ ¿Estás seguro de finalizar el enfrentamiento? No hay vuelta atrás.");
+    if (confirmado) {
+      // Redirige a otro componente, por ejemplo, "/resultados"
+      this.$router.push('/ganador_partido');
+    }
+  },
     finalizeMatch() {
       this.isMatchEnded = true;
       this.showConfirmation = false;
@@ -166,14 +127,13 @@ import Headerapp from './Headerapp.vue';
       this.showConfirmation = false;
     },
     resetMatch() {
-      this.teamA.score = 0;
+      this.teamA.score = 0; 
       this.teamB.score = 0;
       this.isMatchEnded = false;
-      this.isMatchStarted = false;
+  
     },
   },
 };
-
   </script>
   
   <style scoped>
