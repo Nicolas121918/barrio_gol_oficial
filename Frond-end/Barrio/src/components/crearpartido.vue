@@ -1,6 +1,6 @@
 <template>
   <div class="crear-partido-container">
-    <Headerapp />
+
     <div class="volver-btn">
   <button @click="volver" class="btn-volver">
     Volver
@@ -44,9 +44,7 @@
 <option value="Fútbol 7" title="7 jugadores por equipo, cancha mediana">Fútbol 7</option>
 <option value="Fútbol Playa" title="5 jugadores por equipo, se juega en arena, cancha pequeña">Fútbol Playa</option>
 <option value="Fútbol Indoor" title="5 jugadores por equipo, cancha cubierta o sintética">Fútbol Indoor</option>
-
   </select>
-
   <!-- ✅ Texto explicativo según selección -->
   <p v-if="descripcionModalidad()" class="descripcion-modalidad">
   {{ descripcionModalidad() }}
@@ -211,7 +209,7 @@ export default {
         const data = await response.json();
         if (response.ok) {
           alert("¡Partido creado exitosamente!");
-          this.$router.push("/menu");
+          this.$router.push("/partidos_creados");
         } else {
           alert("Error al crear el partido: " + JSON.stringify(data.detail || "Desconocido"));
         }
@@ -227,7 +225,7 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
 .crear-partido-container {
-  margin-top: 30%;
+  margin-top: 10%;
   background-color: #000;
   color: #fff;
   min-height: 100vh;

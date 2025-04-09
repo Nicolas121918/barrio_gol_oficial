@@ -22,7 +22,7 @@
           </div>
           <div class="acciones">
             <button @click="verDetalle(partido)" class="btn-detalle">Ver Contenido</button>
-            <button class="btn-detalle2" @click="irAComponente">Ingresar</button>
+            <button class="btn-detalle2" @click="irAComponente(partido.id_Partido)">Ingresar</button>
           </div>
         </div>
       </div>
@@ -48,7 +48,8 @@
           </div>
           <div class="acciones">
             <button @click="verDetalle(partido)" class="btn-detalle">Ver Contenido</button>
-            <button class="btn-detalle2" @click="irAComponente2">Ver Resultado</button>
+            <button class="btn-detalle2" @click="irAComponente3(partido.id_Partido)">Ver Resultado</button>
+            
           </div>
         </div>
       </div>
@@ -106,9 +107,11 @@
 import { onMounted, ref } from 'vue';
 import axios from 'axios';
 import { useUsuarios } from '@/stores/usuario';
+import { useRouter } from 'vue-router';
 
 export default {
   setup() {
+    const router = useRouter();
     const usuariosStore = useUsuarios();
     const partidosEnEspera = ref([]);
     const partidosFinalizados = ref([]);
@@ -132,9 +135,12 @@ const logoSrc = ref('');
   logoAmpliado.value = true;
 };
 
-    const irAComponente = () => {
-      window.location.href = "/sala_partidos";
-    };
+const irAComponente = (idPartido) => {
+  router.push({ name: 'sala_partidos', params: { id: idPartido } });
+};
+const irAComponente3 = (idPartido) => {
+  router.push({ name: 'ganador_partido', params: { id: idPartido } });
+};
 
     const irAComponente2 = () => {
       window.location.href = "/ganador_partido";
@@ -188,6 +194,7 @@ const logoSrc = ref('');
       irAComponente,
       formatoPesos,
       irAComponente2,
+      irAComponente3,
       logoSrc,
     };
   },

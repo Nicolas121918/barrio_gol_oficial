@@ -184,8 +184,6 @@ const Insertar_team = async () => {
 };
 
 </script>
-
-
 <style scoped>
 @keyframes fadeIn {
   from {

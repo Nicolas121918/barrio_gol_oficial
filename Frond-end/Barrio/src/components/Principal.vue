@@ -27,7 +27,7 @@
 </template>
 
 
-<style>
+<style >
 /* Estilo para los botones */
 #boton {
   padding: 10px 20px;

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from fastapi import Form
+from fastapi import File, Form, UploadFile
 from typing import Optional
 from datetime import datetime
 
@@ -56,12 +56,22 @@ class DatosTeams(BaseModel):
     requisitos_join : str
     location : str
     logoTeam : Optional[str]=None
-    
-    class PublicacionGaleria(BaseModel):
-        id_team: int
-        descripcion: str
-        tipo_media: str  # 'imagen' o 'video'
-        archivo_url: Optional[str] = None
+
+class SolicitudIngresoOut(BaseModel):
+    id: int
+    documento_usuario: str
+    id_equipo: int
+    estado: str
+    fecha_solicitud: str
+
+    class Config:
+        orm_mode = True
+
+class PublicacionGaleria(BaseModel):
+    id_team: int
+    descripcion: str
+    tipo_media: str  # 'imagen' o 'video'
+    archivo_url: Optional[str] = None
 
 class videos(BaseModel):
     id: int
@@ -93,47 +103,42 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 class Torneo(BaseModel):
-    id_Torneo: int
-
-    # Información básica
+    id_torneo: int
     nombre: str
-    tipo: str  # Microfútbol, Penales, 1 vs 1, etc.
-    categoria: str  # Libre, Juvenil, Infantil, etc.
-    formato: str  # Libre, Eliminación directa, Torneo relámpago, etc.
+    documento_creador: str
 
-    # Fechas
+    tipo_torneo: str  # Eliminación directa, liga, grupos, etc.
+    tipo_futbol: str  # Futbol 5, Futbol 7, Futbol 11, mixto, etc.
+
     fecha_inicio: str
-    fecha_final: str
-    fecha_limite_inscripcion: str
-    dias_de_juego: Optional[List[str]] = None  # Lista de días o fechas si aplica
-
-    # Participación
-    cantidad_participantes: int
-    requiere_uniforme: str  # Texto libre, por ejemplo: "camiseta blanca", "sí", "no aplica"
+    ubicacion: str
+    como_llegar: str  # Indicaciones de llegada
+    lugar: str
     
-    # Reglas y descripción
-    descripcion_reglas: str
-    duracion_partido: str  # Ejemplo: "2 tiempos de 20 minutos", "1 solo tiempo", etc.
-    organizacion_partidos: str  # Ej: "aleatoria", "manual", "por grupos"
+    imagen_cancha: Optional[UploadFile] = File(None)
+    torneo_logo: Optional[UploadFile] = File(None)
+    numero_participantes: int
+    premiacion: str
+    reglas: str
 
-    # Ubicación
-    direccion: str
-    descripcion_llegada: str
-    foto_cancha: Optional[str] = None  # URL o nombre del archivo
-    ubicacion_mapa: Optional[str] = None  # URL de Google Maps (opcional)
+    categorias: str  # Ej: "juvenil, libre, femenina"
+    costo_inscripcion: float
 
-    # Recursos visuales
-    imagen_torneo: Optional[str] = None  # Imagen representativa
+    torneo_logo: Optional[str] = None  # Imagen representativa del torneo
+    estado: Optional[str] = "en espera"
+    id_ganador: Optional[int] = None
 
-    # Costos y premios
-    precio_inscripcion: float
-    precio_arbitraje: float
-    premio_principal: str
-    premios_adicionales: Optional[str] = None
 
-    # Creador del torneo
-    nombre_creador: str
+class SolicitudTorneo(BaseModel):
+    id_solicitud: int
+    id_torneo: int
+    documento_equipo: str
+    estado: Optional[str] = "pendiente"  # Estado por defecto es pendiente
 
+from pydantic import BaseModel
+from typing import Optional
+
+# Esquema para el partido
 class Partidos(BaseModel):
     id_Partido: int
     name: str
@@ -150,12 +155,36 @@ class Partidos(BaseModel):
     ganador: Optional[str] = None
     Documento_Creador_P: str
 
-    reglas: Optional[str] = None  # <-- NUEVO
-    como_llegar: Optional[str] = None  # <-- NUEVO
+    # Nuevos campos
+    reglas: Optional[str] = None
+    como_llegar: Optional[str] = None
+    goles_local: int = 0  # Nuevo campo
+    goles_visitantes: int = 0  # Nuevo campo
 
     class Config:
-        from_attributes = True
+        orm_mode = True  # Cambié 'from_attributes' por 'orm_mode'
 
+# Esquema base para la solicitud de unirse a un partido
+class SolicitudUnirseBase(BaseModel):
+    id_usuario: int
+    id_equipo: int
+    id_partido: int
+
+# Esquema para la creación de una solicitud de unirse a un partido
+class SolicitudUnirseCreate(SolicitudUnirseBase):
+    id_partido: int
+    
+
+# Esquema para una solicitud de unirse a un partido, con información adicional
+class SolicitudUnirse(SolicitudUnirseBase):
+    id_solicitud: int
+    estado: str
+
+    class Config:
+        orm_mode = True
+class GolesUpdate(BaseModel):
+    goles_local: int
+    goles_visitante: int
 
 class Message(BaseModel):
     team_id: int

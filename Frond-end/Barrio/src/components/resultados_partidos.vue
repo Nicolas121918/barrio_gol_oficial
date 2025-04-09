@@ -8,16 +8,15 @@
   <div class="negro">
     <div class="match-container">
       <h1 class="match-title">{{ nombre }}</h1>
-      <p class="match-subtitle">Eres el encargado, Matías: <span>¡Estamos bajo tus manos!</span></p>
       <div class="match-content">
         <div class="team">
-          <img :src="teamA.logo" alt="Logo Equipo A" class="team-logo" />
+          <img :src="urlLogoequipo()" alt="Logo Equipo A" class="team-logo" />
           <p class="team-name">{{ teamA.name }}</p>
       
         </div>
         <div class="vs">VS</div>
         <div class="team">
-          <img :src="teamB.logo" alt="Logo Equipo B" class="team-logo" />
+          <img :src="urlLogoequipo1()" alt="Logo Equipo B" class="team-logo" />
           <p class="team-name">{{ teamB.name }}</p>
         </div>
       </div>
@@ -58,53 +57,64 @@
     </div>
   </div>
 </template>
-
-  <script>
+<script>
 import Headerapp from './Headerapp.vue';
+import axios from 'axios';
 
-  export default {
-    components : {
-      Headerapp
-
-    },
+export default {
+  components: {
+    Headerapp,
+  },
   data() {
     return {
-      nombre: "partido de muerte",
-      matchTime: "5:00 AM",
+      nombre: "Cargando...",
       teamA: {
-        name: "Diego",
-        logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgcadZp6orYwW2SrUcyJhyTRredhg_sf_vzQ&s",
+        name: "Cargando...",
+        logo: "",
         score: 0,
       },
       teamB: {
-        name: "Santi",
-        logo: "https://marketplace.canva.com/EAFtzm5feNI/1/0/1600w/canva-logo-circular-escudo-club-de-f%C3%BAtbol-ilustrativo-negro-MwzhJEsdrNM.jpg",
+        name: "Cargando...",
+        logo: "",
         score: 0,
       },
-      isMatchStarted: false,
-      isMatchEnded: false,
       showConfirmation: false,
     };
   },
-  computed: {
-    isTeamAWinner() {
-      return this.teamA.score > this.teamB.score;
-    },
-    isMatchTied() {
-      return this.teamA.score === this.teamB.score;
-    },
+  async mounted() {
+    await this.fetchMatchData();
   },
-  mounted() {
-  const now = new Date();
-  const matchDateTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30, 0); // Fecha de hoy a las 8:30 PM
-
-  console.log("Fecha y hora actual:", now.toLocaleString());
-  console.log("Hora del partido:", matchDateTime.toLocaleString());
-
-  
-},
-
   methods: {
+    async fetchMatchData() {
+      try {
+        const partidoId = this.$route.params.id;
+        const response = await axios.get(`http://localhost:8000/partido/${partidoId}`);
+        const partido = response.data;
+        this.nombre = partido.name;
+
+        // Obtener datos de los equipos
+        await this.fetchTeamData(partido.equipo_local, 'A');
+        await this.fetchTeamData(partido.equipo_visitante, 'B');
+      } catch (error) {
+        console.error("Error al obtener datos del partido:", error);
+      }
+    },
+    async fetchTeamData(teamId, team) {
+      try {
+        const response = await axios.get(`http://localhost:8000/equipos_traer/${teamId}`);
+        const teamData = response.data;
+        
+        if (team === 'A') {
+          this.teamA.name = teamData.nombreteam;
+          this.teamA.logo = teamData.logoTeam;
+        } else {
+          this.teamB.name = teamData.nombreteam;
+          this.teamB.logo = teamData.logoTeam;
+        }
+      } catch (error) {
+        console.error(`Error al obtener datos del equipo ${teamId}:`, error);
+      }
+    },
     adjustScore(team, increment) {
       if (team === "A") {
         this.teamA.score = Math.max(0, this.teamA.score + increment);
@@ -112,29 +122,36 @@ import Headerapp from './Headerapp.vue';
         this.teamB.score = Math.max(0, this.teamB.score + increment);
       }
     },
+    urlLogoequipo() {
+      return this.teamA.logo ? `http://127.0.0.1:8000/${this.teamA.logo}` : '';
+    },
+    urlLogoequipo1() {
+      return this.teamB.logo ? `http://127.0.0.1:8000/${this.teamB.logo}` : '';
+    },
+    async finalizeMatch() {
+  const partidoId = this.$route.params.id;
+  try {
+    await axios.post(`http://localhost:8000/actualizar_goles/${partidoId}`, {
+      goles_local: this.teamA.score,
+      goles_visitante: this.teamB.score,
+    });
+    alert("Partido finalizado y goles actualizados.");
+    this.$router.push(`/ganador_partido/${partidoId}`);
+  } catch (error) {
+    console.error("Error al actualizar los goles:", error);
+    alert("Hubo un error al finalizar el partido.");
+  }
+},
     showEndConfirmation() {
-    const confirmado = confirm("⚠️ ¿Estás seguro de finalizar el enfrentamiento? No hay vuelta atrás.");
-    if (confirmado) {
-      // Redirige a otro componente, por ejemplo, "/resultados"
-      this.$router.push('/ganador_partido');
-    }
-  },
-    finalizeMatch() {
-      this.isMatchEnded = true;
-      this.showConfirmation = false;
-    },
-    cancelMatch() {
-      this.showConfirmation = false;
-    },
-    resetMatch() {
-      this.teamA.score = 0; 
-      this.teamB.score = 0;
-      this.isMatchEnded = false;
-  
+      const confirmado = confirm("⚠️ ¿Estás seguro de finalizar el enfrentamiento? No hay vuelta atrás.");
+      if (confirmado) {
+        this.finalizeMatch();
+      }
     },
   },
 };
-  </script>
+</script>
+
   
   <style scoped>
   .result_fin{

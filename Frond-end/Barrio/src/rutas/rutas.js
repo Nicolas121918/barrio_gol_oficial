@@ -38,6 +38,10 @@ import Partidos_creado from "@/components/partidos_creado.vue";
 import Sala_espera_partidos from "@/components/sala_espera_partidos.vue";
 import Ganador_partido from "@/components/ganador_partido.vue";
 import Resultados_partidos from "@/components/resultados_partidos.vue";
+import Partidos_finalizados from "@/components/partidos_finalizados.vue";
+import Inpeccion_equipo from "@/components/inpeccion_equipo.vue";
+import Torneos_finalizados from "@/components/torneos_finalizados.vue";
+import Torneo_sala_espera from "@/components/torneo_sala_espera.vue";
 
 
 
@@ -62,12 +66,12 @@ const routes=[
         component: Partidos_creado,
         
       },
-      {
-        path: '/sala_partidos',//sala de espera partidos
-        name: 'sala_partidos',
-        component: Sala_espera_partidos,
-        
-      },
+        {
+          path: '/sala_partidos/:id', // ← aquí está la diferencia
+          name: 'sala_partidos',
+          component: Sala_espera_partidos,
+          props: true // opcional: pasa el id como prop
+        },      
       {
         path: '/iniciosesion',//form inicio de sesion
         name: 'iniciosesion',
@@ -146,11 +150,11 @@ const routes=[
         
       },
       {
-        path: '/resultados_partidos',//interfaz para dar resultados de partido(ganador y goles)
+        path: '/resultados_partidos/:id', // ← Agregamos ":id" para recibir el ID del partido
         name: 'resultados_partidos',
         component: Resultados_partidos,
-        
-      },
+        props: true // Opcional: Pasa el id como una prop
+      },      
       {
         path: '/crearpartido',//formulario para crear partido
         name: 'crearpartido',
@@ -158,10 +162,16 @@ const routes=[
         
       },
       {
-        path: '/ganador_partido',//ganador de partido
+        path: '/partido_finalizados',//formulario para crear partido
+        name: 'partidos_finalizados',
+        component: Partidos_finalizados,
+        
+      },
+      {
+        path: '/ganador_partido/:id',//ganador de partido
         name: 'ganador_partido',
         component: Ganador_partido,
-        
+        props: true
       },
       {
         path: '/diegos',//torneos anterior creador
@@ -174,17 +184,30 @@ const routes=[
         path: '/torneo_guardado',//torneos de equipo
         name: 'torneo_guardado',
         component: Torneos_guardado,
-        
       },
+      {
+        path: '/torneo_sala_espera/:id_torneo', // Ruta dinámica con el id_torneo
+        name: 'torneo_sala_espera',
+        component: Torneo_sala_espera,
+        props: true, // Esto pasa el parámetro id_torneo como prop al componente
+      },      
       {
         path: '/torneo_creados',//torneos y partidos creados
         name: 'torneo_creados',
         component: Torneos_creados,
-        
+      },
+      {
+        path: '/torneos_finalizados',//torneos y partidos creados
+        name: 'torneos_finalizados',
+        component: Torneos_finalizados,
       },
       { path: '/perfiles/:documento',//perfil de usuarios inspeccionados
         name: 'perfiles',
         component: Perfiles,
+      },
+      { path: '/inspeccion_equipo/:id',//inspeccionar equipo
+        name: 'inspeccion_equipo',
+        component: Inpeccion_equipo,
       },
       {
         path: '/jugadores',//todos los jugadores

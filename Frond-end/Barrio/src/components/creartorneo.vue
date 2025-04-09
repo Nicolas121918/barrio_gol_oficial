@@ -1,369 +1,500 @@
-<template>
-  <header>
-    <Headerapp></Headerapp>
-  </header>
-  <div class="form-container">
-    <form @submit.prevent="crearEvento">
-      <h1>Crear Torneo</h1>
-
-      <div class="form-group">
-        <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" v-model="form.nombre" placeholder="Nombre del torneo" required />
-      </div>
-
-      <div class="form-group">
-        <label for="tipo">Tipo de Torneo:</label>
-        <input type="text" id="tipo" v-model="form.tipo" placeholder="Ej: Microfútbol, Penales, 1 vs 1" required />
-      </div>
-
-      <div class="form-group">
-        <label for="categoria">Categoría:</label>
-        <select id="categoria" v-model="form.categoria" required>
-          <option disabled value="">Selecciona una categoría</option>
-          <option>Libre</option>
-          <option>Juvenil</option>
-          <option>Infantil</option>
-          <option>Mixto</option>
-          <option>Femenino</option>
-          <option>Senior</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="formato">Formato:</label>
-        <select id="formato" v-model="form.formato" required>
-          <option disabled value="">Selecciona un formato</option>
-          <option>Eliminación directa</option>
-          <option>Todos contra todos</option>
-          <option>Grupos + Eliminación</option>
-          <option>Llave ida y vuelta</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="fecha_inicio">Fecha de Inicio:</label>
-        <input type="date" id="fecha_inicio" v-model="form.fecha_inicio" required />
-      </div>
-
-      <div class="form-group">
-        <label for="fecha_final">Fecha Final:</label>
-        <input type="date" id="fecha_final" v-model="form.fecha_final" required />
-      </div>
-
-      <div class="form-group">
-        <label for="fecha_limite_inscripcion">Fecha Límite de Inscripción:</label>
-        <input type="date" id="fecha_limite_inscripcion" v-model="form.fecha_limite_inscripcion" required />
-      </div>
-
-      <div class="form-group">
-        <label for="descripcion_reglas">Descripción de Reglas:</label>
-        <textarea id="descripcion_reglas" v-model="form.descripcion_reglas" rows="4" placeholder="Reglas generales del torneo" required></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="cantidad_participantes">Cantidad de Participantes:</label>
-        <input type="number" id="cantidad_participantes" v-model="form.cantidad_participantes" min="2" required />
-      </div>
-
-      <div class="form-group">
-        <label for="requiere_uniforme">¿Requiere uniforme? (Especifique):</label>
-        <input type="text" id="requiere_uniforme" v-model="form.requiere_uniforme" placeholder="Ej: Camiseta y pantaloneta del mismo color" />
-      </div>
-
-      <div class="form-group">
-        <label for="duracion_partido">Duración de Partido:</label>
-        <input type="text" id="duracion_partido" v-model="form.duracion_partido" placeholder="Ej: 2 tiempos de 20 min" required />
-      </div>
-
-      <div class="form-group">
-        <label for="direccion">Dirección del Torneo:</label>
-        <input type="text" id="direccion" v-model="form.direccion" placeholder="Dirección del evento" required />
-      </div>
-
-      <div class="form-group">
-        <label for="descripcion_llegada">Descripción para llegar:</label>
-        <textarea id="descripcion_llegada" v-model="form.descripcion_llegada" rows="3" placeholder="Punto de referencia o cómo llegar al sitio"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="foto_cancha">Foto de la Cancha:</label>
-        <input type="file" @change="onFileChangeCancha" accept="image/jpeg, image/png" />
-      </div>
-
-      <div class="form-group">
-        <label for="imagen_torneo">Imagen Representativa del Torneo:</label>
-        <input type="file" @change="onFileChangeTorneo" accept="image/jpeg, image/png" />
-      </div>
-
-      <div class="form-group">
-        <label for="premio_principal">Premio Principal:</label>
-        <input type="text" id="premio_principal" v-model="form.premio_principal" placeholder="Premio principal del torneo" required />
-      </div>
-
-      <div class="form-group">
-        <label for="premios_adicionales">Premios Adicionales (Opcional):</label>
-        <input type="text" id="premios_adicionales" v-model="form.premios_adicionales" placeholder="Ej: Trofeos, medallas, etc." />
-      </div>
-
-      <div class="form-group">
-        <label for="precio_arbitraje">Precio de Arbitraje ($):</label>
-        <input type="number" id="precio_arbitraje" v-model="form.precioArbitrajeTorneo" min="1" required />
-      </div>
-
-      <div class="form-group">
-        <label for="precio_inscripcion">Precio de Inscripción ($):</label>
-        <input type="number" id="precio_inscripcion" v-model="form.precioInscripcion" min="1" required />
-      </div>
-
-      <input type="hidden" v-model="form.correo_usuario" />
-
-      <div class="form-group">
-        <button type="submit" class="centered-button">Crear</button>
-      </div>
-    </form>
-  </div>
-</template>
-<script>
-import L from 'leaflet';
-import Headerapp from './Headerapp.vue';
-import axios from 'axios';
-import { useUsuarios } from '@/stores/usuario';
-
-export default {
-  components: {
-    Headerapp,
-  },
-  data() {
-    return {
-      datos: useUsuarios(),
-      form: {
-        nombre: '',
-        tipo: '',
-        categoria: '',
-        formato: '',
-        fecha_inicio: '',
-        fecha_final: '',
-        fecha_limite_inscripcion: '',
-        descripcion_reglas: '',
-        cantidad_participantes: '',
-        requiere_uniforme: '',
-        duracion_partido: '',
-        direccion: '',
-        descripcion_llegada: '',
-        premio_principal: '',
-        premios_adicionales: '',
-        precioArbitrajeTorneo: '',
-        precioInscripcion: '',
-        correo_usuario: '',
-        foto_cancha: null,
-        imagen_torneo: null,
-      },
-    };
-  },
-  methods: {
-    onFileChangeCancha(event) {
-      this.form.foto_cancha = event.target.files[0];
-    },
-    onFileChangeTorneo(event) {
-      this.form.imagen_torneo = event.target.files[0];
-    },
-    async crearEvento() {
-      const datosenviar = new FormData();
-      const campos = [
-        'nombre', 'tipo', 'categoria', 'formato',
-        'fecha_inicio', 'fecha_final', 'fecha_limite_inscripcion',
-        'descripcion_reglas', 'cantidad_participantes', 'requiere_uniforme',
-        'duracion_partido', 'direccion', 'descripcion_llegada',
-        'premio_principal', 'premios_adicionales',
-        'precioArbitrajeTorneo', 'precioInscripcion',
-      ];
-
-      campos.forEach(campo => {
-        datosenviar.append(campo, this.form[campo]);
-      });
-
-      datosenviar.append('correo_usuario', this.datos.usuario?.correo || '');
-
-      if (this.form.foto_cancha) {
-        datosenviar.append('foto_cancha', this.form.foto_cancha);
-      }
-
-      if (this.form.imagen_torneo) {
-        datosenviar.append('imagen_torneo', this.form.imagen_torneo);
-      }
-
-      try {
-        const response = await axios.post('http://localhost:8000/crearTorneo', datosenviar, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-
-        alert('Torneo creado con éxito!');
-        console.log(response.data);
-
-        // Reset del formulario
-        this.form = {
-          nombre: '',
-          tipo: '',
-          categoria: '',
-          formato: '',
-          fecha_inicio: '',
-          fecha_final: '',
-          fecha_limite_inscripcion: '',
-          descripcion_reglas: '',
-          cantidad_participantes: '',
-          requiere_uniforme: '',
-          duracion_partido: '',
-          direccion: '',
-          descripcion_llegada: '',
-          premio_principal: '',
-          premios_adicionales: '',
-          precioArbitrajeTorneo: '',
-          precioInscripcion: '',
-          correo_usuario: '',
-          foto_cancha: null,
-          imagen_torneo: null,
-        };
-      } catch (error) {
-        console.error('Error al crear el torneo:', error);
-        console.log('Detalles del error:', error.response?.data);
-        alert('Ocurrió un error al crear el torneo.');
-      }
-    },
-  },
-};
-</script>
-
-
-  <style scoped>
-  .form-container {
-    width: 500px;
-    max-width: 600px;
-    margin-top: 200px;
-    padding: 20px;
-    border-radius: 30px;
-    border: 4px solid rgb(4, 3, 2); /* Borde negro */
-    background: linear-gradient(to bottom, #514e4290, #8c8b8584); /* Fondo degradado */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 100px;
-}
-
-  h1{
-    font-weight: bold;
-    color: black;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
-    color: black;
-  }
-  
-  label {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  
-  input,
-  select,
-  textarea {
-    padding: 8px;
-    font-size: 16px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+  <template>
     
+    <form @submit.prevent="enviarFormulario" enctype="multipart/form-data" class="formulario">
+      <div class="volver">
+  <router-link to="/torneos" class="btn-volver">
+    Volver
+  </router-link>
+</div>
+
+      <h2 class="tiit">Crear Torneo</h2>
+
+      <label>Nombre del torneo:</label>
+      <input v-model="form.nombre" type="text" required />
+
+      <div>
+    <label>Tipo de torneo:</label>
+    <br>
+    <br>
+    <select v-model="form.tipo_torneo" required>
+      <option disabled value="">Seleccione una opción</option>
+      <option value="relampago">Relámpago</option>
+      <option value="todos">Todos contra todos</option>
+      <option value="personalizado">Personalizado</option>
+    </select>
+
+    <div v-if="form.tipo_torneo">
+      <p v-if="form.tipo_torneo === 'relampago'">
+        Torneo rápido donde los jugadores se eliminan en rondas directas.
+      </p>
+      <p v-else-if="form.tipo_torneo === 'todos'">
+        Cada jugador compite contra todos los demás. Gana quien tenga más victorias.
+      </p>
+      <p v-else-if="form.tipo_torneo === 'personalizado'">
+        Tú defines las reglas del torneo: rondas, puntos, enfrentamientos, etc.
+      </p>
+    </div>
+  </div>
+      <label>Tipo de fútbol:</label>
+<select v-model="form.tipo_futbol" required>
+  <option disabled value="">Seleccione una opción</option>
+  <option>Fútbol 11</option>
+  <option>Futbol sala(futsal)</option>
+  <option>Fútbol 7</option>
+  <option>Fútbol playa</option>
+  <option>Fútbol Indoor</option>
+</select>
+
+
+      <label>Fecha de inicio:</label>
+      <input v-model="form.fecha_inicio" type="date" required />
+
+      <label>Ubicación:</label>
+<div style="display: flex; gap: 8px;">
+  <input
+  v-model="form.ubicacion"
+  type="text"
+  required
+  style="flex: 1;"
+  readonly
+/>
+</div>
+<button type="button" @click="usarUbicacionActual">Obtener ubicación actual</button>
+
+      <label>¿Cómo llegar?:</label>
+      <input v-model="form.como_llegar" type="text" required />
+
+      <label>Lugar:</label>
+<input
+  v-model="form.lugar"
+  type="text"
+  list="ciudades"
+  required
+  @change="validarCiudad"
+/>
+
+<datalist id="ciudades">
+  <option v-for="ciudad in listaCiudades" :key="ciudad" :value="ciudad" />
+</datalist>
+
+<label>Número de participantes:</label>
+<input
+  v-model.number="form.numero_participantes"
+  type="number"
+  min="3"
+  required
+/>
+<p v-if="form.numero_participantes > 0 && form.numero_participantes < 3" style="color: red;">
+  El número mínimo de participantes es 3.
+</p>
+
+
+      <label>Premiación:</label>
+      <input v-model="form.premiacion" type="text" required />
+      <label for="reglas">Reglas:</label>
+<textarea
+  id="reglas"
+  v-model="form.reglas"
+  required
+  rows="6"
+  placeholder="Escribe aquí todas las reglas del torneo..."
+  style="
+    width: 100%;
+    resize: none;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+  "
+  @focus="(e) => e.target.style.borderColor = '#3b82f6'"
+  @blur="(e) => e.target.style.borderColor = '#ccc'"
+></textarea>
+
+
+      <label>Categorías:</label>
+<select v-model="form.categorias" required>
+  <option disabled value="">Seleccione una categoría</option>
+  <option value="Niños">Niños (menores de 13 años)</option>
+  <option value="Adolescentes">Adolescentes (14 a 18 años)</option>
+  <option value="Adultos">Adultos (mayores de 19 años)</option>
+  <option value="Mixto">Mixto (todas las edades)</option>
+</select>
+
+
+<label>Costo de inscripción:</label>
+<input
+  :value="formatearPesos(form.costo_inscripcion)"
+  @input="actualizarCosto($event)"
+  type="text"
+  inputmode="numeric"
+  required
+/><label>Imagen de la cancha:</label>
+<input type="file" @change="mostrarVistaPrevia1" />
+<img v-if="imagenPrevia1" :src="imagenPrevia1" style="width: 150px;height: 150px; margin-top: 10px;border: solid white 1px;" />
+
+<label>Logo del torneo:</label>
+<input type="file" @change="mostrarVistaPrevia2" />
+<img v-if="imagenPrevia2" :src="imagenPrevia2" style="width: 150px;height: 150px;border: solid white 1px; margin-top: 10px;" />
+
+<div  style="display: flex; align-items: center; gap: 12px; margin-top: 16px;">
+  <button type="submit">Crear Torneo</button>
+  <div class="vamiss" style="font-size: 0.9rem; margin-top: 10px;">
+  <strong class="verde">¡Accede gratis por tiempo limitado!</strong><br>
+  <span style="display: block; margin-top: 4px;">
+    Sé parte de los primeros creadores de torneos <strong class="num">${{ comisionEstimado.toLocaleString() }} COP</strong> <br>
+    <em style="font-size: 0.8rem;">(Precio estimado en el futuro)</em>
+  </span>
+</div>
+
+</div>
+
+
+      <transition name="fade">
+  <div v-if="mensaje === '¡Torneo creado exitosamente!'" class="modal">
+    <div class="modal-contenido">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icono-check" fill="none" viewBox="0 0 24 24" stroke="green" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+      <h3>{{ mensaje }}</h3>
+      <button class="btn-aceptar" @click="cerrarModal">Aceptar</button>
+    </div>
+  </div>
+</transition>
+    </form>
+  </template>
+  <script setup>
+  import { computed } from 'vue';
+
+  import 'leaflet/dist/leaflet.css';
+  import { ref } from 'vue';
+  import axios from 'axios';
+  import { useUsuarios } from '@/stores/usuario';
+  import { useRouter } from 'vue-router';
+  import Swal from 'sweetalert2';
+  const imagenPrevia1 = ref("");
+const imagenPrevia2 = ref("");
+
+  const mostrarVistaPrevia1 = (event) => {
+  const archivo = event.target.files[0];
+  if (archivo && archivo.type.startsWith('image/')) {
+    const lector = new FileReader();
+    lector.onload = () => {
+      imagenPrevia1.value = lector.result;
+      console.log("Imagenes : " , imagenPrevia1, "error")
+    };
+    lector.readAsDataURL(archivo);
+  } else {
+    imagenPrevia1.value = lector;
+  }
+};
+
+const mostrarVistaPrevia2 = (event) => {
+  const archivo = event.target.files[0];
+  if (archivo && archivo.type.startsWith('image/')) {
+    const lector = new FileReader();
+    lector.onload = () => {
+      imagenPrevia2.value = lector.result;
+      console.log(imagenPrevia2, "error")
+    };
+    lector.readAsDataURL(archivo);
+  } else {
+    imagenPrevia2.value = null;
+  }
+};
+
+  const router = useRouter();
+  const usuariosStore = useUsuarios();
+  const listaCiudades = ref([
+  'Bogotá, Cundinamarca',
+  'Medellín, Antioquia',
+  'Cali, Valle del Cauca',
+  // Puedes agregar más aquí
+])
+function validarCiudad() {
+  if (!listaCiudades.value.includes(form.value.lugar)) {
+    alert("Por favor selecciona una ciudad válida de la lista.");
+    form.value.lugar = '';
+  }
+}
+  const form = ref({
+    nombre: '',
+    tipo_torneo: '',
+    tipo_futbol: '',
+    fecha_inicio: '',
+    ubicacion: '',
+    como_llegar: '',
+    lugar: '',
+    numero_participantes: 0,
+    premiacion: '',
+    reglas: '',
+    categorias: '',
+    costo_inscripcion: 0.0,
+    imagen_cancha: null,
+    torneo_logo: null,
+  });
+
+  const mensaje = ref('');
+
+  const handleFileChange = (event, tipo) => {
+    const file = event.target.files[0];
+    form.value[tipo] = file;
+  };
+  const cerrarModal = () => {
+  mensaje.value = '';
+};
+function usarUbicacionActual() {
+  if (!navigator.geolocation) {
+    alert("La geolocalización no es compatible con este navegador.");
+    return;
   }
 
-  #tipo{
-    color: black;
-  }
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude.toFixed(6);
+      const lon = position.coords.longitude.toFixed(6);
+      form.value.ubicacion = `${lat}, ${lon}`; // <- Aquí está el cambio
+    },
+    (error) => {
+      console.error("Error obteniendo ubicación:", error);
+      alert("No se pudo obtener la ubicación. Asegúrate de permitir el acceso.");
+    }
+  );
+}
+const formatearPesos = (valor) => {
+  if (!valor) return '';
+  return new Intl.NumberFormat('es-CO').format(valor);
+};
+const comisionEstimado = computed(() => {
+  const total = form.value.costo_inscripcion * form.value.numero_participantes;
+  return Math.floor(total * 0.01); // 1% del total
+});
+
+// Convertir string con puntos a número real
+const actualizarCosto = (event) => {
+  const soloNumeros = event.target.value.replace(/\D/g, ''); // Quita todo menos dígitos
+  const numero = parseInt(soloNumeros, 10);
+  form.value.costo_inscripcion = isNaN(numero) ? 0 : numero;
+};
+  const enviarFormulario = async () => {
+    const formData = new FormData();
+    for (const key in form.value) {
+      if (form.value[key] !== null) {
+        formData.append(key, form.value[key]);
+      }
+    }
+    formData.append("documento_creador", usuariosStore.usuario.documento);
+
+    try {
+      await axios.post("http://127.0.0.1:8000/crearTorneo", formData);
+      mensaje.value = "¡Torneo creado exitosamente!";
+      setTimeout(() => {
+        router.push('/torneo_creados');
+      }, 2000);
+    } catch (error) {
+      mensaje.value = "Hubo un error al crear el torneo.";
+      console.error(error);
+    }
+
+    
+  };
   
-  button {
-    background: url('https://i.pinimg.com/736x/82/77/8d/82778d6d72c05cf2808e3bd2bcaeb823.jpg') no-repeat center center; /* Imagen de fondo */
-    background-size: cover; /* Ajusta la imagen para cubrir todo el botón */
-    color: rgb(0, 0, 0); /* Color del texto */
-    font-size: 17px;
-    padding: 10px 20px; /* Espaciado interno */
-    border: solid 2px black; /* Borde */
-    border-radius: 5px; /* Bordes redondeados */
-    width: 250px; /* Ancho del botón */
-    cursor: pointer; /* Cursor interactivo */
-    text-shadow: 1px 1px 2px black; /* Sombra para que el texto sea más legible */
+  
+  </script>
+
+<style scoped>
+select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  background-color: #000 ;
+  color: white;
+  margin-bottom: 15px;
+}
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: #121212;
+  color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 500px;
+  margin: auto;
+  box-shadow: 0 0 20px rgba(218, 165, 32, 0.3);
 }
 
+h2 {
+  color: gold;
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-shadow: 1px 1px #000;
+}
+
+label {
+  color: #ccc;
+  font-weight: 600;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"],
+input[type="file"] {
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background-color: #1f1f1f;
+  color: white;
+  transition: border 0.2s, background-color 0.2s;
+}
+
+input:focus {
+  border-color: gold;
+  outline: none;
+  background-color: #2a2a2a;
+}
+
+button {
+  background-color: gold;
+  color: black;
+  font-weight: bold;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
 
 button:hover {
-    background-color: gray; /* Fondo gris */
-
-    transform: scale(1.1); /* Aumenta el tamaño del botón un 10% */
+  background-color: #d4af37;
+  transform: scale(1.05);
 }
 
-  
-  .map {
-    height: 200px;
-    margin-top: 20px;
-    z-index: 0;
-  }
-  
-  h1 {
-    text-align: center;
-    font-size: 24px;
-  }
-  
-  textarea {
-    resize: vertical;
-  }
-
-  .centered-button{
-    display: block;
-  margin: 10px auto;
+.mensaje {
+  color: #00ff99;
+  font-weight: bold;
   text-align: center;
+}
+
+fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+.fade-enter-to, .fade-leave-from {
+  opacity: 1;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-contenido {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  max-width: 400px;
+  animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
   }
-
-  @media (max-width: 320px) {
-    .form-container {
-    width: 120px;
-    max-width: 150px;
-    margin-top: 200px;
-    padding: 20px;
-    border-radius: 30px;
-    border: 4px solid rgb(4, 3, 2); /* Borde negro */
-    background: linear-gradient(to bottom, #514e4290, #8c8b8584); /* Fondo degradado */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 100px;
-}
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-
-@media (max-width: 480px) {
-    .form-container {
-    width: 300px;
-    max-width: 400px;
-    margin-top: 200px;
-    padding: 20px;
-    border-radius: 30px;
-    border: 4px solid rgb(4, 3, 2); /* Borde negro */
-    background: linear-gradient(to bottom, #514e4290, #8c8b8584); /* Fondo degradado */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 100px;
-}
+.modal-contenido h3 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #333;
 }
 
-
-@media (min-width: 481px) and (max-width: 600px) {
-    .form-container {
-    width: 400px;
-    max-width: 600px;
-    margin-top: 200px;
-    padding: 20px;
-    border-radius: 30px;
-    border: 4px solid rgb(4, 3, 2); /* Borde negro */
-    background: linear-gradient(to bottom, #514e4290, #8c8b8584); /* Fondo degradado */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 100px;
-}
+.btn-aceptar {
+  padding: 10px 20px;
+  background-color: #4caf50;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
+.btn-aceptar:hover {
+  background-color: #45a049;
+}
 
-  </style>
-  
+.icono-check {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 15px;
+}
+.volver {
+  text-align: center;
+  margin-top: 20px;
+  display: flex;
+  align-items: end;
+}
+
+.btn-volver {
+  display: inline-block;
+  background-color: #000000; /* Negro */
+  color: #FFD700; /* Dorado */
+  font-size: 16px;
+  padding: 10px 20px;
+  border: 2px solid #FFD700; /* Borde dorado */
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none; /* Elimina el subrayado */
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s; /* Transiciones suaves */
+}
+
+.btn-volver:hover {
+  background-color: #FFD700; /* Fondo dorado al pasar el mouse */
+  color: #000000; /* Texto negro al pasar el mouse */
+  border-color: #000000; /* Borde negro al pasar el mouse */
+}
+
+.btn-volver:focus {
+  outline: none; /* Elimina el borde al hacer foco */
+}
+.verde {
+  color: #fffb00;
+  font-weight: bold;
+}
+
+.num {
+  text-decoration: line-through;
+  color: #ff7f50;
+  font-weight: bold;
+}
+
+.vamiss{
+  max-width: 300px;
+}
+.tiit{
+  color: #d4af37;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+}
+</style>

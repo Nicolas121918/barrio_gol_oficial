@@ -23,11 +23,10 @@ class Registro(Base):
     equipo = relationship("Equipos", back_populates="capitan", uselist=False)
     videos = relationship("UserVideos", back_populates="usuario")
     contacto = relationship("Contacto_usuarios", back_populates="usuario")
-    torneo = relationship("Torneos", back_populates="participantes")
     partido = relationship("partidos", back_populates="creador")
-    Torneos_create = relationship("Torneos", back_populates="creadormatch")
     # Un usuario puede dar muchos likes
     likes = relationship("Like", back_populates="usuario", cascade="all, delete-orphan")
+    solicitudes_equipo = relationship("SolicitudesIngreso", back_populates="usuario")
 
 
 # Tabla de Contacto de Usuario
@@ -117,6 +116,18 @@ class Equipos(Base):
      # Relación con el usuario que es el capitán del equipo
      capitan_documento = Column(String(50), ForeignKey('usuarios.documento'))
      capitan = relationship("Registro", back_populates="equipo")
+     solicitudes_recibidas = relationship("SolicitudesIngreso", back_populates="equipo")
+class SolicitudesIngreso(Base):
+    __tablename__ = "solicitudes_ingreso"
+
+    id = Column(Integer, primary_key=True, index=True)
+    documento_usuario = Column(String(50), ForeignKey("usuarios.documento"))
+    id_equipo = Column(Integer, ForeignKey("Equipos_de_barrio_gol.Id_team"))
+    estado = Column(String(20), default="pendiente")  # pendiente, aceptado, rechazado
+    fecha_solicitud = Column(String(50))  # puedes poner date también
+
+    usuario = relationship("Registro", back_populates="solicitudes_equipo")
+    equipo = relationship("Equipos", back_populates="solicitudes_recibidas")
 
 class GaleriaEquipo(Base):
     __tablename__ = 'galeria_equipo'
@@ -132,52 +143,42 @@ class GaleriaEquipo(Base):
 class Torneos(Base):
     __tablename__ = 'Torneos_Barrio_Gol'
 
-    id_Torneo = Column(Integer, primary_key=True, index=True)
-
-    # Información básica
+    id_torneo = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(100), nullable=False)
-    tipo = Column(String(50), nullable=False)
-    categoria = Column(String(50), nullable=False)
-    formato = Column(String(100), nullable=False)
+    documento_creador = Column(String(50), ForeignKey('usuarios.documento'))
 
-    # Fechas
+    tipo_torneo = Column(String(100), nullable=False)
+    tipo_futbol = Column(String(100), nullable=False)
+
     fecha_inicio = Column(String(50), nullable=False)
-    fecha_final = Column(String(50), nullable=False)
-    fecha_limite_inscripcion = Column(String(50), nullable=False)
-    dias_de_juego = Column(String(255), nullable=True)  # Por ejemplo: "Sábado, Domingo, Lunes"
+    ubicacion = Column(String(255), nullable=False)
+    como_llegar = Column(String(500), nullable=True)
+    lugar = Column(String(255), nullable=False)
 
-    # Participación y reglas
-    cantidad_participantes = Column(Integer, nullable=False)
-    requiere_uniforme = Column(String(100), nullable=True)
-    descripcion_reglas = Column(String(1000), nullable=False)
-    duracion_partido = Column(String(100), nullable=True)
-    organizacion_partidos = Column(String(100), nullable=True)
+    imagen_cancha = Column(String(255), nullable=True)
 
-    # Ubicación
-    direccion = Column(String(255), nullable=False)
-    descripcion_llegada = Column(String(500), nullable=True)
-    foto_cancha = Column(String(255), nullable=True)
-    ubicacion_mapa = Column(String(255), nullable=True)
+    numero_participantes = Column(Integer, nullable=False)
+    premiacion = Column(String(255), nullable=False)
+    reglas = Column(String(1000), nullable=False)
 
-    # Imágenes y logos
-    imagen_torneo = Column(String(255), nullable=True)
-    logoTeam = Column(String(255), nullable=True)
+    categorias = Column(String(255), nullable=False)
+    costo_inscripcion = Column(Float, nullable=False)
 
-    # Costos y premios
-    precioInscripcion = Column(Float, nullable=False)
-    precioArbitrajeTorneo = Column(Float, nullable=False)
-    apuestaTorneo = Column(Float, nullable=True)
-    premio_principal = Column(String(255), nullable=True)
-    premios_adicionales = Column(String(255), nullable=True)
-
-    # Relación con el creador del torneo
-    Documento_Creador_Torneo = Column(String(50), ForeignKey('usuarios.documento'))
-    Nombre_Creador_Torneo = Column(String(255), nullable=False)
-
+    torneo_logo = Column(String(255), nullable=True)
+    estado = Column(String(50), default="en espera", nullable=False)
+    id_ganador = Column(Integer,nullable=True)
+    solicitudes = relationship("SolicitudesTorneo", back_populates="torneo")
+    
     # Relaciones
-    participantes = relationship("Registro", back_populates="torneo")
-    creadormatch = relationship("Registro", back_populates="Torneos_create")
+class SolicitudesTorneo(Base):
+    __tablename__ = 'SolicitudesTorneo'
 
+    id_solicitud = Column(Integer, primary_key=True, index=True)
+    id_torneo = Column(Integer, ForeignKey('Torneos_Barrio_Gol.id_torneo'))
+    id_equipo = Column(String(50))
+    estado = Column(String(50), default="pendiente", nullable=False)  # Pendiente, aceptado, rechazado
+
+    torneo = relationship("Torneos", back_populates="solicitudes")
 class partidos(Base):
     __tablename__ = 'Partidos_Barrio_Gol'
 
@@ -196,11 +197,25 @@ class partidos(Base):
     ganador = Column(String(100), nullable=True)
     Documento_Creador_P = Column(String(50), ForeignKey('usuarios.documento'))
 
-    reglas = Column(Text, nullable=True)  # <-- NUEVO
-    como_llegar = Column(Text, nullable=True)  # <-- NUEVO
+    # Nuevos campos
+    reglas = Column(Text, nullable=True)
+    como_llegar = Column(Text, nullable=True)
+
+    goles_local = Column(Integer, default=0)  # Nuevos campos
+    goles_visitantes = Column(Integer, default=0)  # Nuevos campos
 
     creador = relationship("Registro", back_populates="partido")
+    solicitudes = relationship("SolicitudUnirse", back_populates="partido")
+class SolicitudUnirse(Base):
+    __tablename__ = 'solicitudes_unirse_partido'
 
+    id_solicitud = Column(Integer, primary_key=True, index=True)
+    id_usuario = Column(Integer, nullable=False)
+    id_equipo = Column(Integer, nullable=False)
+    id_partido = Column(Integer, ForeignKey('Partidos_Barrio_Gol.id_Partido'), nullable=False)
+    estado = Column(String(50), default='pendiente')  # Puede ser 'pendiente', 'aceptada', o 'rechazada'
+
+    partido = relationship("partidos", back_populates="solicitudes")
 
 class Messages(Base):
     __tablename__ = 'Chatmessages'
