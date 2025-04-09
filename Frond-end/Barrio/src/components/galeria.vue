@@ -6,7 +6,6 @@
     <div class="padre">
       <button class="botones_" @click="$router.go(-1)">Volver</button>
       <h1>GALERÍA DE EQUIPO</h1>
-      <p>Dat</p>
 
       <!-- Barra de búsqueda -->
       <div class="caja">
