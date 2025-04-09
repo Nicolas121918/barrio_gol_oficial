@@ -205,6 +205,10 @@
       transform: scale(1);
     }
   }
+  .no-videos{
+    font-size: 30px;
+    color: rgb(177, 177, 177);
+  }
   </style>
     <script>
     import { useUsuarios } from "@/stores/usuario";
@@ -297,4 +301,5 @@
         };
       },
     };
+    
     </script>

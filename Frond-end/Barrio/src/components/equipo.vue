@@ -89,7 +89,7 @@ export default {
   font-family: 'Audiowide', cursive;
   position: relative;
   overflow: hidden;
-  margin-top: 50%;
+  margin-top: 20%;
 }
 
 .boton-crear::before {

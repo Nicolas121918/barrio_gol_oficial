@@ -81,7 +81,7 @@
     <div v-if="showMemberMenu" class="modal">
       <div class="modal-content">
         <h3 class="edit">Opciones para {{ selectedMember.name }}</h3>
-        <button id="espacio" class="button_danger2" @click="verPerfil(selectedMember.documento)">ver perfil</button>
+        <button @click="verUsuario(solicitud.documento_usuario)" class="button_info-btn">ver perfil</button>
         <button id="espacio" class="button_danger"
   @click="confirmExpel(selectedMember.documento, selectedMember.name)"
   v-if="!selectedMember.isLeader"
@@ -110,10 +110,17 @@
         <h3>Buzón de Solicitudes</h3>
         <ul class="request-list">
           <li v-for="(solicitud, index) in team.requests" :key="index" class="request-item">
-            <span>{{ solicitud.name }} solicita unirse al equipo</span>
+            <div class="vertical">
+              <img :src="getImagenUrl(solicitud.picture)" alt="Foto de perfil" class="profile-pic" />
+            <span class="letra2p">{{ solicitud.name }} </span>
+          </div>
             <div class="request-actions">
-              <button  @click="acceptRequest(solicitud)" class="button_accept-btn">Aceptar</button>
+
+              <button @click="verUsuario(solicitud.documento)" class="button_info-btn">ver perfi</button>
+              <button  @click="acceptRequest(solicitud.id_solicitud)" class="button_accept-btn">Aceptar</button>
               <button @click="rejectRequest(solicitud)" class="button_reject-btn">Rechazar</button>
+              
+
             </div>
           </li>
         </ul>
@@ -187,7 +194,8 @@ export default {
         integrantes_actuales: 0,
         members: [],
         leader: {}, 
-        requests: [],
+        requests: [
+        ],
         tournaments: [],
       },
       selectedMember: null,
@@ -205,6 +213,7 @@ export default {
   await this.obtenerLiderEquipo();
   await this.obtenerCantidadIntegrantes();
   await this.viewMessages();
+  await this.requests();
   this.conectarSocket(); // Llamar a la conexión WebSocket
 
   const movistore = useUsuarios();
@@ -215,6 +224,7 @@ export default {
   // Unirse a la sala del equipo
   this.socket.emit("joinRoom", team_Id);
 
+  
   // Escuchar nuevos mensajes y agregarlos en tiempo real
   this.socket.on("nuevoMensaje", (message) => {
     console.log("📩 Nuevo mensaje recibido en tiempo real:", message);
@@ -335,9 +345,7 @@ conectarSocket() {
       } catch (error) {
         console.error("Error al obtener datos:", error);
       }
-    },  
-    
-    
+    },      
     openMemberMenu(member) {
       this.selectedMember = member;
       this.showMemberMenu = true;
@@ -399,6 +407,9 @@ verPerfil(documento) {
       this.showConfig = true;
       this.showBuzon = false; // Cerrar buzón si está abierto
     },
+    verUsuario(documento) {
+  this.$router.push({ name: 'perfiles', params: { documento } });
+},
     updateLogo(event) {
   const file = event.target.files[0];
   if (file) {
@@ -411,16 +422,7 @@ verPerfil(documento) {
     closeConfig() {
       this.showConfig = false;
     },
-      acceptRequest(solicitud) {
-        this.team.members.push({
-          name: solicitud.name,
-          role: "Nuevo Miembro",
-          birthDate: solicitud.birthDate,
-          isLeader: false,
-          profilePicture: "https://via.placeholder.com/50",
-        });
-        this.team.requests = this.team.requests.filter((req) => req !== solicitud);
-      },
+  
       rejectRequest(solicitud) {
         this.team.requests = this.team.requests.filter((req) => req !== solicitud);
       },
@@ -513,9 +515,67 @@ async obtenerCantidadIntegrantes() {
     this.team.integrantes_actuales = 0;
   }
 },
+async requests() {
+  const usuarioStore = useUsuarios(); // Usamos el store de usuario
+  try {
+    const idEquipo = usuarioStore.usuario.equipo_tiene;
+    console.log("ID del equipo:", idEquipo);
 
+    const res = await axios.get(
+      `http://127.0.0.1:8000/solicitudes_pendientes/${idEquipo}`,
+      {
+        headers: {
+          Accept: 'application/json',
+        },
+      }
+    );
 
+    console.log("Respuesta del backend:", res.data);
 
+    this.team.requests = res.data.map(solicitud => ({
+      id_solicitud: solicitud.id_solicitud,
+      documento: solicitud.documento_usuario,
+      name: solicitud.nombre_usuario,
+      picture: solicitud.logo_usuario || 'default.png',
+      fecha: solicitud.fecha_solicitud,
+    }));
+
+    console.log("Solicitudes procesadas:", this.team.requests);
+  } catch (error) {
+    console.error("Error al obtener solicitudes-------------------:", error);
+  }
+},
+async acceptRequest(solicitud) {
+  try {
+    const response = await fetch(`http://localhost:8000/solicitudes_ingreso/${solicitud.id_solicitud}/aceptar`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const responseData = await response.json(); // 📦 Solo se hace una vez
+
+    if (!response.ok) {
+      throw new Error(responseData.detail || 'Error al aceptar la solicitud');
+    }
+
+    alert(`✅ ${responseData.mensaje}: ${responseData.usuario} ahora está en el equipo ${responseData.nuevo_equipo_id}`);
+
+    // Eliminar la solicitud aceptada de la lista
+    this.team.requests = this.team.requests.filter(req => req.id_solicitud !== solicitud.id_solicitud);
+
+  } catch (error) {
+    console.error(error);
+
+    // Mostrar error más claro
+    const mensaje = typeof error.message === 'object'
+      ? JSON.stringify(error.message)
+      : error.message;
+
+    alert(`❌ No se pudo aceptar la solicitud: ${mensaje}`);
+  }
+},
     updateLogo(event) {
       const file = event.target.files[0];
       if (file) {
@@ -736,12 +796,54 @@ border: solid white;
 
 
 
-.button_accept-btn {
-  background-color: green;
-  padding: 2%;
+
+.button_info-btn {
+  background-color: #6a6a6a;
+  color: #ffffff;
+  padding: 5px;
+  border: none;
+
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.button_info-btn:hover {
+  background-color: #a3a3a3;
   color: white;
-  border-radius: 5px;
-  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px white;
+}
+.button_accept-btn {
+  background-color: #ffd814; /* verde más moderno */
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  padding: 5px;
+  color: #000000;
+  border: none;
+  
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 128, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  border-radius: 8px;
+}
+
+.button_accept-btn:hover {
+  background-color: #d0ae29;
+  color: #e5ffe5;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 128, 0, 0.4);
+  box-shadow: 0 0 10px white;
+}
+
+.vertical{
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 }
 .button2{
   background-color: #005bb5;
@@ -755,10 +857,7 @@ border: solid white;
   color: grey;
 }
 
-.button_accept-btn:hover{
-  color: rgb(89, 90, 89);
-  background: rgb(1, 63, 1);
-}
+
 .button_reject-btn:hover,.button_danger:hover{
   color: rgb(89, 90, 89);
   background: rgb(112, 1, 1);
@@ -776,11 +875,23 @@ border: solid white;
 
 }
 .button_reject-btn {
-  background-color: red;
-  padding: 2%;
+  padding: 5px;
+  background-color: #fb0820; /* rojo más moderno */
   color: white;
-  border-radius: 5px;
+  border: none;
+  border-radius: 8px;
   font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.button_reject-btn:hover {
+  background-color: #a71d2a; /* rojo más oscuro para el hover */
+  color: #ffeaea;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(220, 53, 69, 0.4);
 }
 
 .button_danger{
@@ -860,17 +971,42 @@ textarea {
 .request-list {
   list-style: none;
   margin-top: 5%;
+  max-height: 300px; /* Altura máxima visible */
+  overflow-y: auto;  /* Agrega scroll vertical solo si es necesario */
+  padding-right: 10px; 
   
 }
-
-.request-item {
-  background-color: rgb(204, 202, 202);
-  border: solid black;
-  box-shadow: 0 0 10px white;
-  padding: 5px;
-  text-align: center;
-  margin-bottom: 10px;
+.request-list::-webkit-scrollbar {
+  width: 8px;
 }
+.request-list::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+.request-list::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+.request-item {
+  gap: 10px;
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 12px;
+  margin-top: 10px;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.05);
+  padding: 10px 15px;
+  margin-bottom: 12px;
+  color: white;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.request-item:hover {
+  transform: scale(1.05);
+  background-color: #fdd70074;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 10px orange;
+  color: black;
+}
+
 
 .request-actions {
   display: flex;
@@ -1029,5 +1165,14 @@ textarea {
   border-radius: 10px;
   border: 2px solid #ccc;
 }
-
+.profile-pic{
+  width: 60px;
+  height: 60px;
+  border-radius: 50px;
+  border: solid rgb(0, 0, 0);
+}
+.letra2p{
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  margin-left: 10px;
+}
 </style>

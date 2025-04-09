@@ -1,12 +1,15 @@
 <template>
 
 <header class="header1">
+  <!-- perfil del usuario -->
       <router-link class="link perfil" to="/Perfil">
         <img class="api1" src="../assets/iconos header/perfil-del-usuario.png" alt="Perfil">
       </router-link>
+        <!-- casa-->
       <router-link class="link home" to="/home">
         <img class="api2" src="../assets/iconos header/hogar.png" alt="Home">
       </router-link>
+        <!-- Encabezado principal con enlaces a distintas rutas -->
       <router-link class="link torneos" to="/torneos">
         <img class="api3" src="../assets/iconos header/torneo.png" alt="Torneo">
       </router-link>
@@ -41,29 +44,19 @@
     <div class="notification">  No tienes Notificaciones Hoy: {{fecha }}</div>
   </div>
   </router-link>
-
-  <router-link class="link torneos" to="/pay">
-        <img class="api11" src="../assets/imagenes/money.png" alt="Torneo">
-      </router-link>
-
-
-      <router-link class="link torneos" to="/store">
+      <router-link class="link torneos" to="/stores">
         <img class="api4" src="../assets/imagenes/futbol.png" alt="Tienda">
       </router-link>
-      
-
-
-      
-  
       <router-link class="link api8" to="/home">
         <img class="api8" src="../assets/imagenes/logo.png" alt="Logo">
       </router-link>
     </header>
-
-
-
 </template>
 
+<script setup>
+
+
+</script>
 
 <style scoped>
 .loader {
@@ -375,8 +368,3 @@ display: block;
 
 </style>
 
-
-<script setup>
-
-
-</script>

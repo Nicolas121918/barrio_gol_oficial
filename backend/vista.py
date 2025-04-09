@@ -410,7 +410,55 @@ async def obtener_equipo_detalle(id_equipo: int, db: Session = Depends(get_db)):
             },
             "miembros": [{"nombre": miembro.nombre, "documento": miembro.documento, "imagen":miembro.imagen , "fecha_nacimiento" : miembro.fecha_nacimiento} for miembro in miembros]
         }
+@app.post("/equipos/salir")
+async def salir_equipo(
+    documento_user: str = Form(...),  # Cambié int -> str porque en el modelo es String(50)
+    db: Session = Depends(get_db)
+):
+    # Verificar si el usuario existe
+    usuario = db.query(Registro).filter(Registro.documento == documento_user).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
+    # Verificar si el usuario está en un equipo
+    if usuario.equipo_tiene == 0:
+        raise HTTPException(status_code=400, detail="El usuario no pertenece a ningún equipo")
+
+    # Eliminar la relación con el equipo
+    usuario.equipo_tiene = 0  # Cambiar a 0 en lugar de None
+    db.commit()
+
+    return {"mensaje": f"{usuario.nombre} ha salido del equipo"}
+
+@app.post("/equipos/expulsar")
+async def expulsar_miembro(
+    id_team: int = Form(...),
+    documento_miembro: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    # Buscar el equipo
+    equipo = db.query(Equipos).filter(Equipos.Id_team == id_team).first()
+    if not equipo:
+        raise HTTPException(status_code=404, detail="Equipo no encontrado")
+
+    # Buscar al miembro dentro del equipo
+    miembro = db.query(Registro).filter(
+        Registro.documento == documento_miembro,
+        Registro.equipo_tiene == id_team
+    ).first()
+
+    if not miembro:
+        raise HTTPException(status_code=404, detail="Miembro no encontrado en el equipo")
+
+    # Evitar que el capitán sea expulsado
+    if miembro.documento == equipo.capitan_documento:
+        raise HTTPException(status_code=403, detail="No puedes expulsar al capitán del equipo")
+
+    # Expulsar (quitar del equipo)
+    miembro.equipo_tiene = 0
+    db.commit()
+
+    return {"mensaje": f"{miembro.nombre} ha sido expulsado del equipo"}
 @app.post("/equipos/{id_equipo}/solicitar_union")
 async def solicitar_union_equipo(id_equipo: int, documento_usuario: str, db: Session = Depends(get_db)):
     # Buscar si ya existe una solicitud del usuario al equipo
@@ -434,6 +482,55 @@ async def solicitar_union_equipo(id_equipo: int, documento_usuario: str, db: Ses
     db.refresh(nueva_solicitud)
 
     return {"mensaje": "Solicitud enviada correctamente."}
+
+@app.get("/solicitudes_pendientes/{id_equipo}")
+def solicitudes_pendientes_equipo(id_equipo: int, db: Session = Depends(get_db)):
+    solicitudes = (
+        db.query(SolicitudesIngreso, Registro)
+        .join(Registro, SolicitudesIngreso.documento_usuario == Registro.documento)
+        .filter(SolicitudesIngreso.id_equipo == id_equipo)
+        .filter(SolicitudesIngreso.estado == "pendiente")
+        .all()
+    )
+
+    resultados = []
+    for solicitud, usuario in solicitudes:
+        resultados.append({
+            "id_solicitud": solicitud.id,  # Aquí lo agregamos
+            "documento_usuario": solicitud.documento_usuario,
+            "nombre_usuario": usuario.nombre,
+            "logo_usuario": usuario.imagen,
+            "fecha_solicitud": solicitud.fecha_solicitud,
+        })
+
+    return resultados
+@app.post("/solicitudes_ingreso/{id_solicitud}/aceptar")
+async def aceptar_solicitud_ingreso(id_solicitud: int, db: Session = Depends(get_db)):
+    # Buscar la solicitud por ID
+    solicitud = db.query(SolicitudesIngreso).filter(SolicitudesIngreso.id == id_solicitud).first()
+    if not solicitud:
+        raise HTTPException(status_code=404, detail="Solicitud no encontrada")
+    
+    # Buscar al usuario por su documento
+    usuario = db.query(Registro).filter(Registro.documento == solicitud.documento_usuario).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    # Verificar si ya pertenece a un equipo
+    if usuario.equipo_tiene != 0:
+        raise HTTPException(status_code=400, detail="El usuario ya pertenece a un equipo")
+
+    # Cambiar el estado de la solicitud a "aceptada"
+    solicitud.estado = "aceptada"
+
+    # Asignar el ID del equipo al usuario
+    usuario.equipo_tiene = solicitud.id_equipo
+
+    # Guardar los cambios en la base de datos
+    db.commit()
+
+    return {"mensaje": "Solicitud aceptada con éxito", "usuario": usuario.nombre, "nuevo_equipo_id": usuario.equipo_tiene}
+
 ## Endpoint para listar los equipos
 @app.get("/listarteams", response_model=list[DatosTeams])
 async def listar_equipos(db: Session = Depends(get_db)):

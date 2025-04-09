@@ -116,6 +116,7 @@ export default {
   border-radius: 20px;
   box-shadow: 0 0 20px rgba(246, 246, 246, 0.4);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-top: 10%;
 }
 
 .contenedor-equipo:hover {

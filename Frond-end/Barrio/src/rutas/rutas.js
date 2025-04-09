@@ -9,7 +9,6 @@ import equipo from "@/components/equipo.vue";
 import Eventos from "@/components/Eventos.vue";
 import subir_video from "@/components/subir_video.vue";
 import Notificaciones from "@/components/Notificaciones.vue";
-
 import crearequipo from "@/components/crearequipo_form.vue";
 import Diego from "@/components/resultados_partidos.vue";
 import crearpartido from "@/components/crearpartido.vue";

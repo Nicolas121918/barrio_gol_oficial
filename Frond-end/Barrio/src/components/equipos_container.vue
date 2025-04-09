@@ -29,6 +29,7 @@
                 <h3 class="nombre-equipo">{{ i.nombreteam }}</h3>
                 <p class="texto-secundario">
                   <strong>Capitán:</strong> {{ i.capitanteam }}
+                  
                 </p>
                 <p class="texto-secundario">
                   <strong>Ubicación:</strong> {{ i.location }}
@@ -38,12 +39,11 @@
                 </p>
                 <p class="texto-secundario">
                   <strong>Integrantes:</strong> {{ i.numeropeople }}
-                  <strong>id:</strong> {{ i.Id_team }}
                 </p>
                 <button @click="enviarSolicitud(i.Id_team)" class="boton-solicitud">
   Unirse al equipo
 </button>
-                <button >ver equipo</button>
+<button @click="verEquipo(i.Id_team)">ver equipo</button>
               </div>
             </div>
           </li>
@@ -63,6 +63,7 @@ import axios from 'axios';
 import { useUsuarios } from '@/stores/usuario';
 import Headerapp from './Headerapp.vue';
 import Componente from './equipo_lider.vue';
+import { useRouter } from 'vue-router';
 
 export default {
   components: {
@@ -70,11 +71,14 @@ export default {
     Componente,
   },
   setup() {
+    const router = useRouter(); 
     const teams = ref([]);
     const buscadorteams = ref('');
     const usuarios = useUsuarios(); // Usa el store de Pinia
     const movistore = useUsuarios();
-
+    const verEquipo = (id) => {
+    router.push({ name: 'inspeccion_equipo', params: { id } });
+  };
     const getImagenUrl = (path) => `http://127.0.0.1:8000/${path}`;
     const enviarSolicitud = async (id_equipo) => {
   try {
@@ -131,7 +135,7 @@ try {
     documento_user: usuarios.usuario.documento,
     id_equipo: idEquipo,
   });
-
+  
   const response = await axios.post("http://localhost:8000/equipos/unirse", formData);
 
   Swal.fire("¡Éxito!", response.data.mensaje, "success");
@@ -167,6 +171,7 @@ try {
       filtradordeequipos,
       unirseEquipo,
       enviarSolicitud, 
+      verEquipo,
     };
   },
 };
