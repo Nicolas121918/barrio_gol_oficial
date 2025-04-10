@@ -223,7 +223,7 @@ class Messages(Base):
     team_id = Column(Integer,nullable=False)
     sender = Column(String(255), nullable=False)
     content = Column(Text, nullable=False)
-    timestamp = Column(TIMESTAMP, server_default=func.current_timestamp())
+    timestamp = Column(DateTime, default=datetime.now) 
 
 # Tabla de Reportes de Usuario
 class ReporteUsuario(Base):

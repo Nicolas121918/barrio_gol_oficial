@@ -157,16 +157,46 @@ export default {
   },
   mounted() {
     this.getGaleria();
+    
   },
   methods: {
+    
     getGaleria() {
-      const usuariosStore = useUsuarios();
-      const idTeam = usuariosStore.usuario.equipo_tiene;
+  const usuariosStore = useUsuarios();
+  const idTeam = usuariosStore.usuario.equipo_tiene;
 
-      if (!idTeam) return;
-      
 
-    },
+  if (!idTeam) {
+    console.error("No se encontró un equipo asignado.");
+    return;
+  }
+
+  axios
+    .get(`http://localhost:8000/galeria/${idTeam}`)
+    .then((response) => {
+
+      // Mapea los datos del backend al formato esperado por el frontend
+      this.posts = response.data.map((post) => {
+  const mediaUrl = `http://localhost:8000${post.archivo_url}`;
+  console.log("URL generada para media:", mediaUrl);
+  return {
+    mediaType: post.tipo_media === "imagen" ? "image" : post.tipo_media, // Ajusta "imagen" a "image"
+    media: mediaUrl,
+    description: post.descripcion,
+    id: post.id,
+    idTeam: post.id_team,
+  };
+});
+
+      console.log("Posts después de mapear:", this.posts); // Verifica los datos mapeados
+      this.applyFilters(); // Aplica los filtros iniciales
+    })
+    .catch((err) => {
+      console.error("Error al obtener las publicaciones:", err);
+      alert("Error al cargar las publicaciones");
+    });
+},
+    
     startUpload() {
       this.isUploading = true;
     },

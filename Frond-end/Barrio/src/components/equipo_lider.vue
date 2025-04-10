@@ -158,7 +158,12 @@
       <h2 class="vamoss2">Chat del Equipo</h2>
       <div class="chat-box">
         <div v-for="(message, index) in chats" :key="index" class="chat-message">
-          <strong class="vamoss1">{{ message.sender }}:</strong> <span>{{ message.content }}</span>
+          <div class="message-header">
+            <img :src="message.sender.profilePicture" alt="Foto de perfil" class="profile-pic" />
+            <strong class="sender-name">{{ message.sender.nombre }}</strong>
+            <span class="timestamp">{{ message.timestamp }}</span>
+          </div>
+          <p class="message-content">{{ message.content }}</p>
         </div>
       </div>
       <input
@@ -227,73 +232,101 @@ export default {
   
   // Escuchar nuevos mensajes y agregarlos en tiempo real
   this.socket.on("nuevoMensaje", (message) => {
-    console.log("📩 Nuevo mensaje recibido en tiempo real:", message);
-    this.chats.push(message); // Agregar el mensaje a la lista sin recargar
+  console.log("📩 Nuevo mensaje recibido:", message);
+  this.chats.push({
+    sender: {
+      nombre: message.sender.nombre,
+      profilePicture: this.getImagenUrl(message.sender.imagen),
+    },
+    content: message.content,
+    timestamp: message.timestamp,
   });
+});
+
 
 
 },
 
-  methods: {
-    
-    async sendMessage() {
-  const movistore = useUsuarios();
-  const team_Id = movistore.usuario.equipo_tiene;
+methods: {
+  async sendMessage() {
+    const movistore = useUsuarios();
+    const team_Id = movistore.usuario.equipo_tiene;
 
-  if (this.newMessage.trim() !== "") {
-  
     if (this.newMessage.trim() !== "") {
-    const messageData = {
-      team_id: team_Id,
-      sender: movistore.usuario.nombreUsuario,
-      content: this.newMessage,
-    };
+      const messageData = {
+        team_id: team_Id,
+        sender: movistore.usuario.documento,
+        content: this.newMessage,
+      };
+
+      try {
+        // Enviar el mensaje a la base de datos
+        await axios.post("http://localhost:8000/chat/send", messageData);
+
+        // Emitir el mensaje por WebSocket
+        this.socket.emit("sendMessage", messageData);
+
+        this.newMessage = "";
+      } catch (error) {
+        console.error("❌ Error al enviar el mensaje:", error);
+      }
+    }
+  },
+
+  async viewMessages() {
+    const movistore = useUsuarios();
+    const team_Id = movistore.usuario.equipo_tiene;
 
     try {
-      await axios.post("http://localhost:8000/chat/send", messageData);
-
-      // Enviar el mensaje por WebSocket a todos los clientes conectados en la sala
-      this.socket.emit("sendMessage", messageData);
-
-      this.newMessage = "";
+      // Obtener mensajes desde la base de datos
+      const response = await axios.get(`http://localhost:8000/chat/${team_Id}`);
+      this.chats = response.data.messages.map((message) => ({
+        sender: {
+          nombre: message.sender.nombre,
+          profilePicture: this.getImagenUrl(message.sender.imagen),
+        },
+        content: message.content,
+        timestamp: message.timestamp,
+      }));
     } catch (error) {
-      console.error("❌ Error al enviar el mensaje:", error);
+      console.error("❌ Error al obtener los mensajes:", error);
     }
-  }
-  }
-},
-/* ver mensajes actualizados */
-async viewMessages() { 
-  const movistore = useUsuarios();
-  const team_Id = movistore.usuario.equipo_tiene;
+  },
 
-  try {
-    const response = await axios.get(`http://localhost:8000/chat/${team_Id}`);
-    this.chats = response.data.messages;
-  } catch (error) {
-    console.error("❌ Error al obtener los mensajes:", error);
-  }
-},
+  conectarSocket() {
+    this.socket = io("http://localhost:8000", {
+      path: "/socket.io/",
+      transports: ["websocket", "polling"],
+    });
 
-conectarSocket() {
-  this.socket = io("http://localhost:8000", {
-    path: "/socket.io/",
-    transports: ["websocket", "polling"],
-  });
+    this.socket.on("connect", () => {
+      console.log("🔗 Conectado al WebSocket con ID:", this.socket.id);
+    });
 
-  this.socket.on("connect", () => {
-    console.log("🔗 Conectado al WebSocket con ID:", this.socket.id);
-  });
+    this.socket.on("nuevoMensaje", (message) => {
+      console.log("📩 Nuevo mensaje recibido:", message);
 
-  this.socket.on("nuevoMensaje", (mensaje) => {
-    console.log("📩 Nuevo mensaje recibido:", mensaje);
-    this.chats.push(mensaje);
-  });
+      // Verificar si el mensaje ya existe para evitar duplicados
+      const exists = this.chats.some(
+        (chat) => chat.timestamp === message.timestamp && chat.content === message.content
+      );
 
-  this.socket.on("connect_error", (err) => {
-    console.error("❌ Error de conexión:", err.message);
-  });
-},
+      if (!exists) {
+        this.chats.push({
+          sender: {
+            nombre: message.sender.nombre,
+            profilePicture: this.getImagenUrl(message.sender.imagen),
+          },
+          content: message.content,
+          timestamp: message.timestamp,
+        });
+      }
+    });
+
+    this.socket.on("connect_error", (err) => {
+      console.error("❌ Error de conexión:", err.message);
+    });
+  },
     getImagenUrl(path) {
     return path ? `http://127.0.0.1:8000/${path}` : '';
   },
@@ -940,11 +973,25 @@ border: solid white;
 }
 
 .chat-message {
-  padding: 5px;
-  background-color: #8a888886;
-  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background-color: #f1f1f1;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
   margin-bottom: 5px;
-  color: white;
+}
+
+.profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
 }
 
 .chat-input {
@@ -954,6 +1001,21 @@ border: solid white;
   margin-top: 10px;
   border: 1px solid #ccc;
   background-color: rgba(255, 255, 255, 0.74)
+}
+
+.sender-name {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.timestamp {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.message-content {
+  font-size: 1rem;
+  color: #333;
 }
 
 textarea {

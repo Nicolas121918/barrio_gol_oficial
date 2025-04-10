@@ -1600,13 +1600,19 @@ def actualizar_equipo(
 # Configurar el manejador de Socket.IO
 socket_manager = SocketManager(app=app, mount_location="/socket.io")
 
-""" Guardar y enviar mensajes en tiempo real """
 @app.post("/chat/send")
 async def send_message(message: Message, db: Session = Depends(get_db)):
+    # Obtener información del remitente
+    sender = db.query(Registro).filter(Registro.documento == message.sender).first()
+    if not sender:
+        raise HTTPException(status_code=404, detail="Remitente no encontrado")
+
+    # Crear el nuevo mensaje
     new_message = Mensajes(
         team_id=message.team_id,
-        sender=message.sender,
-        content=message.content
+        sender=message.sender,  # Aquí se guarda solo el documento del remitente
+        content=message.content,
+        timestamp=datetime.now()  # Agregar la hora actual
     )
     db.add(new_message)
     db.commit()
@@ -1615,8 +1621,13 @@ async def send_message(message: Message, db: Session = Depends(get_db)):
     # Emitir el mensaje en tiempo real a los clientes conectados
     await socket_manager.emit("nuevoMensaje", {
         "team_id": message.team_id,
-        "sender": message.sender,
-        "content": message.content
+        "sender": {
+            "documento": sender.documento,
+            "nombre": sender.nombre,
+            "imagen": sender.imagen  # Cambia "imagen" a "profilePicture" si es necesario
+        },
+        "content": message.content,
+        "timestamp": new_message.timestamp.strftime("%Y-%m-%d %H:%M:%S")  # Formatear la hora
     })
 
     return {"message": "Mensaje enviado correctamente"}
@@ -1636,31 +1647,75 @@ def reportar_usuario(reporte: ReporteUsuarioSchema, db: Session = Depends(get_db
     db.refresh(nuevo_reporte)
     return {"mensaje": "Reporte enviado correctamente", "reporte_id": nuevo_reporte.id}
 
-""" Obtener los mensajes de un equipo """
 @app.get("/chat/{team_id}")
-def get_messages(team_id: int, db: Session = Depends(get_db)):
+def get_messages(team_id: str, db: Session = Depends(get_db)):
+    # Obtener los mensajes del equipo
     messages = db.query(Mensajes).filter(Mensajes.team_id == team_id).all()
-    return {"messages": messages}
 
+    # Construir la respuesta con los datos del remitente
+    response = []
+    for message in messages:
+        sender = db.query(Registro).filter(Registro.documento == message.sender).first()
+        if not sender:
+            # Si el remitente no existe, omitir el mensaje o manejarlo de otra forma
+            print(f"⚠️ Remitente no encontrado para el mensaje con ID: {message.id}")
+            continue
 
+        response.append({
+            "content": message.content,
+            "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+            "sender": {
+                "documento": sender.documento,
+                "nombre": sender.nombre,
+                "imagen": sender.imagen
+            }
+        })
 
+    return {"messages": response}
 
-""" WebSocket para recibir mensajes en tiempo real """
+    
 @app.websocket("/ws/{team_id}")
-async def websocket_endpoint(websocket: WebSocket, team_id: int):
+async def websocket_endpoint(websocket: WebSocket, team_id: int, db: Session = Depends(get_db)):
     await websocket.accept()
-    await socket_manager.connect(websocket)
+    await socket_manager.connect(websocket, team_id)
 
     try:
         while True:
-            data = await websocket.receive_text()
-            message = {"team_id": team_id, "content": data}
+            data = await websocket.receive_json()  # Se espera JSON del cliente
+            documento = data.get("documento")  # ID del usuario que envía el mensaje
+            contenido = data.get("content")
 
-            """ emit funcion para emitir los mensajes a todos los usuarios conectados a el equipo En tiempo real
-            sin recargar pagina """
-            await socket_manager.emit("nuevoMensaje", message)
-    except:
-        await socket_manager.disconnect(websocket)
+            if not documento or not contenido:
+                await websocket.send_json({"error": "Datos incompletos"})
+                continue
+
+            sender = db.query(Registro).filter(Registro.documento == documento).first()
+            if not sender:
+                await websocket.send_json({"error": "Usuario no encontrado"})
+                continue
+
+            timestamp = datetime.now()
+
+            # Guardar el mensaje en la base de datos (opcional)
+            # new_message = Message(team_id=team_id, sender_id=documento, content=contenido, timestamp=timestamp)
+            # db.add(new_message)
+            # db.commit()
+
+            # Emitir el mensaje a todos los clientes conectados al equipo
+            await socket_manager.emit_to_team(team_id, "nuevoMensaje", {
+                "team_id": team_id,
+                "sender": {
+                    "documento": sender.documento,
+                    "nombre": sender.nombre,
+                    "imagen": sender.imagen
+                },
+                "content": contenido,
+                "timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S")
+            })
+
+    except WebSocketDisconnect:
+        await socket_manager.disconnect(websocket, team_id)
+        print(f"WebSocket desconectado para el equipo {team_id}")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
@@ -1690,11 +1745,11 @@ async def subir_publicacion(
     with open(ruta_archivo, "wb") as buffer:
         shutil.copyfileobj(archivo.file, buffer)
 
-    url_final = f"/{UPLOAD_DIR}/{nombre_archivo}"  # esto depende si sirves archivos estáticos
+    url_final = f"/media/publicaciones/{nombre_archivo}"
 
     nueva_publicacion = GaleriaEquipo(
         id_team=id_team,
-        descripcion=descripcion,
+        descripcion=descripcion, 
         tipo_media=tipo_media,
         archivo_url=url_final
     )
