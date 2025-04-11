@@ -27,7 +27,7 @@ import jugadorestorneo from "@/components/jugadorestorneo.vue";
 import targetas from "@/components/targetas.vue";
 import Galeria from "@/components/galeria.vue";
 import tienda from "@/components/test.vue";
-import Calendario from "@/components/calendario.vue";
+
 import Vender from "@/components/vender.vue";
 import Creartorneo from "@/components/creartorneo.vue";
 import One_video from "@/components/one_video.vue";
@@ -252,11 +252,6 @@ const routes=[
         path: '/stores',
         name: 'stores',
         component: Stores
-      },
-      {
-        path: '/calendario',//calendario de equipo
-        name: 'calendario',
-        component: Calendario
       },
       {
         path: '/vendedor',//interfaz de vendedor

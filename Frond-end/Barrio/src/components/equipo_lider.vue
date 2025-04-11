@@ -1,5 +1,4 @@
 <template>
-
 <div class="padre">
   <div v-if="mostrarImagen" class="modal-overlay" @click.self="mostrarImagen = false">
   <img :src="team.logo" alt="Logo ampliado" class="logo-modal" />
@@ -19,11 +18,6 @@
   <h1 class="epic-name">{{ team.name }}</h1>
           <p class="description">{{ team.description }}</p>
       </div> <!-- Descripción debajo del nombre -->
-
-      <router-link class="linktorneos" to="/calendario">
-        <img class="api5" src="../assets/imagenes/calendario.png" alt="calendario">
-      </router-link>
-
       <div class="caja_hijo">
       
       <p class="miembros_style">
@@ -197,25 +191,33 @@
     </section>
   </div>
 </div>
-
-<div v-if="mostrarModalReporte" class="modal">
+<div v-if="mostrarModalReporte" class="modal-overlay">
   <div class="modal-content">
-    <h3>Reportar Mensaje</h3>
-    <p><strong>Mensaje:</strong> {{ mensajeSeleccionado.content }}</p>
-    <label for="motivo">Motivo:</label>
-    <select v-model="motivoReporte" id="motivo">
+    <h3 class="modal-title">Reportar Mensaje</h3>
+    
+    <p class="modal-text">
+      <strong>Mensaje:</strong> {{ mensajeSeleccionado.content }}
+    </p>
+
+    <label for="motivo" class="modal-label">Motivo:</label>
+    <select v-model="motivoReporte" id="motivo" class="modal-select">
       <option disabled value="">Selecciona un motivo</option>
       <option>Contenido ofensivo</option>
       <option>Spam</option>
       <option>Comportamiento inapropiado</option>
       <option>Otro</option>
     </select>
-    <label for="comentario">Comentario:</label>
-    <textarea v-model="comentarioReporte" id="comentario" rows="4" placeholder="Escribe un comentario..."></textarea>
-    <button @click="enviarReporte" class="button">Enviar Reporte</button>
-    <button @click="cerrarModalReporte" class="button button-close">Cancelar</button>
+
+    <label for="comentario" class="modal-label">Comentario:</label>
+    <textarea v-model="comentarioReporte" id="comentario" rows="4" class="modal-textarea" placeholder="Escribe un comentario..."></textarea>
+
+    <div class="modal-buttons">
+      <button @click="enviarReporte" class="modal-button modal-button-send">Enviar Reporte</button>
+      <button @click="cerrarModalReporte" class="modal-button modal-button-cancel">Cancelar</button>
+    </div>
   </div>
 </div>
+
 </template>
 
 <script>
@@ -830,7 +832,9 @@ border: solid white;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px;
+  padding-top: 50px;
+  padding-right: 50px;
+  
 }
 
 .logo {
@@ -842,6 +846,7 @@ border: solid white;
   background-color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   box-shadow: 0 0 12px #ffe100;
+
 }
 
 
@@ -1084,6 +1089,7 @@ border: solid white;
   max-height: 200px;
   overflow-y: auto;
   margin-bottom: 10px;
+  padding: 20px;
   
 }
 .edit{
@@ -1092,12 +1098,25 @@ border: solid white;
 }
 
 .chat-message {
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  background-color: #f1f1f1;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  background-color: #1a1a1a; /* negro suave */
+  border: 1px solid #333;
+  border-left: 4px solid transparent;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+  color: #fff;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  width: 600px;
+
+}
+.chat-message:hover {
+  border-color: #d4af37; /* dorado */
+  border-left: 4px solid #d4af37;
+  background-color: #222;
+  transform: scale(1.015);
 }
 
 .message-header {
@@ -1105,13 +1124,19 @@ border: solid white;
   align-items: center;
   margin-bottom: 5px;
 }
-
 .profile-pic {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  margin-right: 10px;
+  object-fit: cover;
+  margin-right: 12px;
+  border: 2px solid #d4af37;
+  transition: transform 0.3s ease;
 }
+.chat-message:hover .profile-pic {
+  transform: rotate(5deg);
+}
+
 
 .chat-input {
   width: 100%;
@@ -1123,33 +1148,36 @@ border: solid white;
 }
 
 .sender-name {
+  color: #d4af37; /* dorado */
   font-weight: bold;
-  margin-right: 10px;
+  margin-right: auto;
 }
 
 .timestamp {
-  font-size: 0.8rem;
-  color: #888;
+  font-size: 0.75rem;
+  color: #ccc; /* gris claro */
 }
-
 .message-content {
   font-size: 1rem;
-  color: #333;
+  color: #eee;
+  padding-left: 52px;
+  position: relative;
+  margin-left: 20px;
 }
-
 .report-icon-button {
-  background-color: transparent;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
   border: none;
-  color: #ff4d4d;
-  font-size: 1rem;
+  color: #d4af37; /* dorado */
+  font-size: 1.2rem;
   cursor: pointer;
-  margin-left: auto;
-  padding: 5px;
-  transition: color 0.3s ease;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
-
 .report-icon-button:hover {
-  color: #ff1a1a;
+  color: #fff;
+  transform: scale(1.2);
 }
 
 .report-icon-button i {
@@ -1405,8 +1433,8 @@ textarea {
 
 .nivel-container {
   max-width: 420px;
-  margin: 30px auto;
-  padding: 30px;
+  margin: 1px auto;
+  padding: 5px;
   border-radius: 20px;
   font-family: 'Rajdhani', sans-serif;
   color: #fff;
@@ -1467,4 +1495,115 @@ textarea {
   z-index: 1;
   letter-spacing: 1px;
 }
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.modal-content {
+  background-color: #1a1a1a;
+  padding: 24px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  color: #fff;
+  border: 2px solid #d4af37;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+  animation: fadeInUp 0.4s ease;
+}
+
+.modal-title {
+  color: #d4af37;
+  font-size: 1.4rem;
+  margin-bottom: 16px;
+}
+
+.modal-text {
+  color: #eaeaea;
+  margin-bottom: 12px;
+}
+
+.modal-label {
+  display: block;
+  margin: 12px 0 4px;
+  color: #ccc;
+  font-weight: bold;
+}
+
+.modal-select,
+.modal-textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background-color: #2a2a2a;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: border 0.3s;
+}
+
+.modal-select:focus,
+.modal-textarea:focus {
+  border: 1px solid #d4af37;
+  outline: none;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.modal-button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.95rem;
+  border: none;
+}
+
+.modal-button-send {
+  background-color: #d4af37;
+  color: #1a1a1a;
+}
+
+.modal-button-send:hover {
+  background-color: #f5d76e;
+}
+
+.modal-button-cancel {
+  background-color: transparent;
+  color: #ccc;
+  border: 1px solid #555;
+}
+
+.modal-button-cancel:hover {
+  background-color: #333;
+  color: #fff;
+  border-color: #777;
+}
+
+/* Animación al mostrar el modal */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 </style>

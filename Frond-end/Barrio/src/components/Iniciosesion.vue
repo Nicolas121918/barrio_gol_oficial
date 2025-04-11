@@ -8,7 +8,7 @@
         <br>
 
         <div class="frminput">
-          <label for="correo">Correo electrónico:</label>
+          <label class="pa" for="correo">Correo electrónico:</label>
           <br>
           <input class="inicio_sesion_cont" placeholder="correo electronico" type="email" id="correo" v-model="correo" required />
           <br>
@@ -37,9 +37,10 @@
 </div>
 
         <button class="inicio_sesion_boton" type="submit">Iniciar sesión</button>
-        <p class="inicio_sesion_letra">¿No tienes cuenta? <a @click="toggleForm">Regístrate</a></p>
-
-        <div v-if="menError" class="error-message">{{ menError }}</div>
+        <p class="inicio_sesion_letra">
+  ¿No tienes cuenta?
+  <a href="#" @click.prevent="toggleForm" class="registro-link">Regístrate</a>
+</p>
       </form>
 
     </div>   
@@ -99,14 +100,16 @@
 <label for="fecha_nacimiento">Fecha de nacimiento</label>
 <br />
 <input
-type="date"
-id="fecha_nacimiento"
-v-model="fechaNacimiento"
-@change="calcularedad"
-required
-min="1925-01-01"
-:max="fecha"
-title="La fecha de nacimiento no puede ser mayor que hoy"/>
+    type="date"
+    id="fecha_nacimiento"
+    v-model="fechaNacimiento"
+    @change="calcularedad"
+    required
+    min="1925-01-01"
+    :max="fecha"
+    title="La fecha de nacimiento no puede ser mayor que hoy"
+    class="input-fecha"
+  />
 </div>
 
 <div class="frminput">
@@ -139,7 +142,7 @@ title="La fecha de nacimiento no puede ser mayor que hoy"/>
 
 
         <div class="frminput">
-  <select v-model="posicion" required>
+  <select v-model="posicion" required class="select-posicion">
     <option disabled value="">Seleccione una posición de juego</option>
     <option value="Delantero">Delantero</option>
     <option value="Defensa">Defensa</option>
@@ -155,18 +158,28 @@ title="La fecha de nacimiento no puede ser mayor que hoy"/>
 
 
 
-<div class="frminputimg">
-    <label>Imagen</label>
-    <input type="file" @change="onFileChange" accept="image/jpeg, image/png" />
-    <div v-if="imageUrl" class="logo-preview">
-      <img :src="imageUrl" alt="Vista previa de la imagen" />
-    </div>
+<div class="form-imagen">
+  <label for="imagen">Imagen</label>
+  <input
+    type="file"
+    id="imagen"
+    @change="onFileChange"
+    accept="image/jpeg, image/png"
+    class="input-imagen"
+  />
+
+  <div v-if="imageUrl" class="logo-preview">
+    <img :src="imageUrl" alt="Vista previa de la imagen" />
   </div>
+</div>
   <br>
   <br>  
   <br> 
         <button class="inicio_sesion_boton" type="submit">Registrar</button>
-        <p>¿Ya tienes cuenta? <a @click="toggleForm" >Inicia sesión</a></p>
+        <p class="inicio_sesion_letra">
+  ¿Ya tienes cuenta?
+  <a href="#" @click.prevent="toggleForm" class="inicia-sesion-link">Inicia sesión</a>
+</p>
 
         <div v-if="menError" class="error-message">{{ menError }}</div>
       </form>
@@ -467,6 +480,8 @@ border-color: antiquewhite;
   cursor: pointer;
 }
 .registro_form{
+  overflow: hidden;   
+  color: white;
 background-color: rgb(0, 0, 0);
 border: 5px solid rgb(255, 255, 255);
 padding: 20px;
@@ -936,20 +951,29 @@ border: solid;
 border: 50px;
 border-color: antiquewhite;
 }
-.inicio_sesion_boton{
-background-image: url('https://static.vecteezy.com/system/resources/thumbnails/000/549/015/small/vector-apr-2018-19.jpg');
-      background-size: cover;
-      border: none;
-      padding: 10px 20px;
-      cursor: pointer;
-      border-radius: 20px;
-      text-align: center;
-      font-size: 90%;
-      margin-top: 30px;
-      width: 100%;
-      position: relative;
-      font-family:'Times New Roman', Times, serif;
+.inicio_sesion_boton {
+  background-image: url('https://static.vecteezy.com/system/resources/thumbnails/000/549/015/small/vector-apr-2018-19.jpg');
+  background-size: cover;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 20px;
+  text-align: center;
+  font-size: 90%;
+  margin-top: 30px;
+  width: 100%;
+  position: relative;
+  font-family: 'Times New Roman', Times, serif;
+  color: white;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
 }
+
+.inicio_sesion_boton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  opacity: 0.9;
+}
+
 .registro_contenedor{
 position: absolute;
 background-color: rgb(0, 0, 0);
@@ -1005,4 +1029,120 @@ margin-top: -5%;
   animation: fadeInScale 0.5s ease-out;
 }
 
+.inicio_sesion_letra {
+  font-size: 16px;
+  color: #ffffff;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.registro-link {
+  color: #fbff00;
+  text-decoration: none;
+  font-weight: bold;
+  margin-left: 5px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.registro-link:hover {
+    color: #fff205;
+    text-shadow: 0 0 4px white;
+    text-decoration: underline;
+    transform: scale(5.1);
+  }
+
+  .inicia-sesion-link {
+  color: #ffff00;
+  text-decoration: none;
+  font-weight: bold;
+  margin-left: 5px;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.inicia-sesion-link:hover {
+
+  text-shadow: 0 0 4px #ffffff;
+  text-decoration: underline;
+  transform: scale(1.3);
+}
+.input-fecha {
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 2px solid #aaa;
+  border-radius: 8px;
+  background-color: #000000;
+  color: #ffffff;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-fecha:hover {
+  border-color: #e2b307;
+  color: #d4af37;
+
+  box-shadow: 0 0 6px rgba(255, 247, 2, 0.5);
+
+}
+.select-posicion {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 16px;
+  color: #ffffff;
+  background-color: #000000;
+  border: 2px solid #aaa;
+  border-radius: 8px;
+  appearance: none; /* Oculta flechita por defecto */
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.select-posicion:focus {
+  border-color: #fbff16;
+  box-shadow: 0 0 6px rgba(208, 212, 0, 0.5);
+  outline: none;
+}
+.form-imagen {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-imagen label {
+  font-weight: bold;
+  color: #444;
+}
+label{
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 15px;
+}
+
+.input-imagen {
+  padding: 10px;
+  background-color: #000000;
+  border: 2px solid #aaa;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-imagen:hover {
+  border-color: #d4b100;
+  box-shadow: 0 0 6px rgba(212, 184, 0, 0.4);
+}
+
+.logo-preview img {
+  width: 150px;
+  height: 150;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+.pa{
+  font-size: 20px;
+}
 </style>
