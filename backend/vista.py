@@ -1129,13 +1129,16 @@ class GolesUpdate(BaseModel):
 
 @app.post("/actualizar_goles/{id_partido}")
 async def actualizar_goles(id_partido: int, goles: GolesUpdate, db: Session = Depends(get_db)):
+    # Buscar el partido en la base de datos
     partido = db.query(partidos).filter(partidos.id_Partido == id_partido).first()
     if not partido:
         raise HTTPException(status_code=404, detail="Partido no encontrado")
 
+    # Actualizar los goles
     partido.goles_local = goles.goles_local
     partido.goles_visitantes = goles.goles_visitante
 
+    # Determinar el ganador
     if goles.goles_local > goles.goles_visitante:
         partido.ganador = partido.equipo_local
     elif goles.goles_local < goles.goles_visitante:
@@ -1143,14 +1146,19 @@ async def actualizar_goles(id_partido: int, goles: GolesUpdate, db: Session = De
     else:
         partido.ganador = "Empate"
 
+    # Marcar el partido como finalizado
     partido.estado_partido = "finalizado"
 
+    # Guardar los cambios en la base de datos
     db.commit()
     db.refresh(partido)
 
     return {"mensaje": "Goles actualizados y partido finalizado", "id_partido": id_partido}
+
+
 @app.get("/resultado_detallado/{id_partido}")
 async def resultado_detallado(id_partido: int, db: Session = Depends(get_db)):
+    # Buscar el partido en la base de datos
     partido = db.query(partidos).filter(partidos.id_Partido == id_partido).first()
     if not partido:
         raise HTTPException(status_code=404, detail="Partido no encontrado")
@@ -1220,24 +1228,74 @@ async def resultado_detallado(id_partido: int, db: Session = Depends(get_db)):
         "perdedor": datos_perdedor
     }
 
-    # Devolver la info de ganador y perdedor
+
+@app.post("/actualizar_puntos/{id_partido}")
+async def actualizar_puntos(id_partido: int, db: Session = Depends(get_db)):
+    # Buscar el partido en la base de datos
+    partido = db.query(partidos).filter(partidos.id_Partido == id_partido).first()
+    if not partido:
+        raise HTTPException(status_code=404, detail="Partido no encontrado")
+
+    if partido.estado_partido != "finalizado":
+        raise HTTPException(status_code=400, detail="El partido aún no ha finalizado")
+
+    # Obtener los equipos
+    equipo_local = db.query(Equipos).filter(Equipos.Id_team == partido.equipo_local).first()
+    equipo_visitante = db.query(Equipos).filter(Equipos.Id_team == partido.equipo_visitante).first()
+
+    if not equipo_local or not equipo_visitante:
+        raise HTTPException(status_code=404, detail="Uno o ambos equipos no encontrados")
+
+    # Actualizar puntos según el resultado
+    if partido.ganador == partido.equipo_local:
+        equipo_local.puntos += 200
+        equipo_visitante.puntos -= 100
+        if equipo_visitante.puntos < 0:
+            equipo_visitante.puntos = 0
+    elif partido.ganador == partido.equipo_visitante:
+        equipo_visitante.puntos += 200
+        equipo_local.puntos -= 100
+        if equipo_local.puntos < 0:
+            equipo_local.puntos = 0
+    else:  # Empate
+        equipo_local.puntos += 50
+        equipo_visitante.puntos += 50
+
+    # Actualizar niveles según los puntos
+    def actualizar_nivel(equipo):
+        if equipo.puntos >= 5000:
+            equipo.nivel = 4
+        elif equipo.puntos >= 2000:
+            equipo.nivel = 3
+        elif equipo.puntos >= 500:
+            equipo.nivel = 2
+        else:
+            equipo.nivel = 1
+
+    actualizar_nivel(equipo_local)
+    actualizar_nivel(equipo_visitante)
+
+    # Guardar los cambios en la base de datos
+    db.commit()
+    db.refresh(equipo_local)
+    db.refresh(equipo_visitante)
+
     return {
-        "id_partido": partido.id_Partido,
-        "nombre_partido": partido.name,
-        "ganador": {
-            "id": ganador.Id_team,
-            "nombre": ganador.nombreteam,
-            "logo": ganador.logoTeam,
-            "goles": goles_ganador
-        },
-        "perdedor": {
-            "id": perdedor.Id_team,
-            "nombre": perdedor.nombreteam,
-            "logo": perdedor.logoTeam,
-            "goles": goles_perdedor
+        "mensaje": "Puntos y niveles actualizados correctamente",
+        "id_partido": id_partido,
+        "equipos": {
+            "local": {
+                "nombre": equipo_local.nombreteam,
+                "puntos": equipo_local.puntos,
+                "nivel": equipo_local.nivel
+            },
+            "visitante": {
+                "nombre": equipo_visitante.nombreteam,
+                "puntos": equipo_visitante.puntos,
+                "nivel": equipo_visitante.nivel
+            }
         }
     }
-
 
 #-------------------------------------TORNEO-----------------------------------------------------------------
 
@@ -1634,13 +1692,19 @@ async def send_message(message: Message, db: Session = Depends(get_db)):
 
 
 @app.post("/reportar_usuario/")
-def reportar_usuario(reporte: ReporteUsuarioSchema, db: Session = Depends(get_db)):
+def reportar_usuario(
+    documento_reportante: str = Form(...),
+    documento_reportado: str = Form(...),
+    motivo: str = Form(...),
+    comentario: str = Form(...),
+    db: Session = Depends(get_db)
+):
     nuevo_reporte = ReporteUsuario(
-        documento_reportado=reporte.documento_reportado,
-        documento_reportante=reporte.documento_reportante,
-        motivo=reporte.motivo,
-        comentario=reporte.descripcion,
-        fecha_reporte=reporte.fecha_reporte
+        documento_reportante=documento_reportante,
+        documento_reportado=documento_reportado,
+        motivo=motivo,
+        comentario=comentario,
+        fecha_reporte=datetime.now()
     )
     db.add(nuevo_reporte)
     db.commit()

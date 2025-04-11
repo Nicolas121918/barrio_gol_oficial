@@ -107,6 +107,8 @@ class Equipos(Base):
      __tablename__ = 'Equipos_de_barrio_gol'
      Id_team = Column(Integer, primary_key=True, index=True)
      nombreteam = Column(String(50), nullable=False)
+     puntos = Column(Integer, default=0)
+     nivel = Column(Integer, default=1)
      Descripcion = Column(String(100), nullable=False)
      numeropeople = Column(Integer, nullable=False)
      capitanteam = Column(String(100), nullable=False, unique=True)
