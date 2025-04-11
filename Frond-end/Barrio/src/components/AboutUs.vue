@@ -44,7 +44,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;600&display=swap');
 
@@ -142,4 +141,55 @@ export default {
     align-items: center;
   }
 }
+
+
+
+
+
+@media (max-width: 320px) {
+  /* Estilos para pantallas con un ancho máximo de 320px */
+  .sobre-nosotros {
+  border: solid white;
+  position: relative;
+  background-image: url('https://www.elagora.net/wp-content/uploads/2021/04/Crack-del-barrio.jpg');
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 5px;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  margin-top: 10%;
+}
+
+
+
+
+}
+
+@media (max-width: 480px) {
+  /* Estilos para pantallas con un ancho máximo de 480px */
+  .sobre-nosotros {
+  border: solid white;
+  position: relative;
+  background-image: url('https://www.elagora.net/wp-content/uploads/2021/04/Crack-del-barrio.jpg');
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 5px;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  margin-top: 15%;
+}
+
+}
 </style>
+
+

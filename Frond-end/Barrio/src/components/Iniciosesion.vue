@@ -634,7 +634,7 @@ font-size: 25px;
 text-align: center;
 font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 position: relative;
-left: 0%;
+left: -8%;
 margin-top: 40%;
 
 }

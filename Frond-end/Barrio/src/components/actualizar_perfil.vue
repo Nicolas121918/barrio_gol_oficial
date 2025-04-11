@@ -8,9 +8,9 @@
   <div class="actualizar_caja">
 
   <section v-if="mostrar" class="Actualizar_contenedor">
-    <h1>{{ movistore.usuario.documento }}</h1>
+    <!-- <h1>{{ movistore.usuario.documento }}</h1>
     <h1>{{ movistore.usuario.equipo_tiene }}</h1>
-    <h1>{{ movistore.usuario.Edad }}</h1>
+    <h1>{{ movistore.usuario.Edad }}</h1> -->
     <router-link class="volver_actualizar" to="/Perfil">volver</router-link>
     <h1 class="actualizar_h1">¿Qué desea actualizar?</h1>
     <button @click="cambiar_foto" class="Actualizar_button">Cambiar Foto de Perfil</button>

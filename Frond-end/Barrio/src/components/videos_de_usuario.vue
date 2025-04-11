@@ -209,6 +209,56 @@
     font-size: 30px;
     color: rgb(177, 177, 177);
   }
+
+
+
+  @media (max-width: 320px) {
+    .no-videos{
+    font-size: 100%;
+    color: rgb(177, 177, 177);
+  }
+}
+
+@media (max-width: 480px) {
+  .no-videos{
+    font-size: 100%;
+    color: rgb(251, 255, 0);
+  }
+}
+
+@media (min-width: 481px) and (max-width: 600px) {
+  .no-videos{
+    font-size: 100%;
+    color: rgb(177, 177, 177);
+  }
+}
+
+@media (min-width: 601px) and (max-width: 768px) {
+}
+
+@media (min-width: 820px) and (max-width: 1280px) {
+}
+
+@media (min-width: 1281px) and (max-width: 1440px) {
+}
+
+@media (min-width: 1441px) and (max-width: 1920px) {
+}
+
+@media (min-width: 1921px) and (max-width: 2560px) {
+}
+
+@media (min-width: 2561px) and (max-width: 3840px) {
+}
+
+@media (min-width: 3841px) and (max-width: 5120px) {
+}
+
+
+
+
+
+
   </style>
     <script>
     import { useUsuarios } from "@/stores/usuario";

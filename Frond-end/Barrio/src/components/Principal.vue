@@ -273,8 +273,11 @@ gap: 10%;
   
 
 
-@media (min-width: 1025px) and (max-width: 1280px) {
+@media (min-width: 820px) and (max-width: 1280px) {
   /* Estilos para pantallas entre 1025px y 1280px */
+  .menu-desplegable.activo{
+    display: none;
+  }
   
 }
 
@@ -286,6 +289,9 @@ gap: 10%;
 
 @media (min-width: 1441px) and (max-width: 1920px) {
   /* Estilos para pantallas entre 1441px y 1920px */
+  .menu-desplegable.activo{
+    display: none;
+  }
   
 }
 

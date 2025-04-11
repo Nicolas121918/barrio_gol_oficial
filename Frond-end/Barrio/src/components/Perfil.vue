@@ -456,7 +456,7 @@ height: 800px;
 }
 
 
-@media (max-width: 320px) {
+@media (max-width: 320px ) {
   /* Estilos para pantallas muy pequeñas */
 .card_profile {
 width: 50%;
@@ -518,16 +518,51 @@ font-weight: bold;
 cursor: pointer;
 transition: all 0.5s ease; 
 }
+
+.videooo {
+  margin-top: 50%;
+  width: 100%;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 2rem;
+  font-weight: bold;
+  position: relative;
+  color: #fff;
+  overflow: hidden;
+  text-shadow: 2px 2px 4px #000000, -2px -2px 4px #000000, 2px -2px 4px #000000, -2px 2px 4px #000000; /* Borde negro */
+}
+.videooo:before,
+.videooo:after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #ffdd00; /* Color dorado */
+  z-index: -1;
+  animation: glitch 1s infinite;
+  clip-path: inset(0 0 0 0);
+}
+
+.videooo:before {
+  left: 2px;
+  text-shadow: 2px 0px #ffd700, -2px 0px #000000; /* Dorado y negro */
+}
+
+.videooo:after {
+  left: -1px;
+  text-shadow: -1px 0px #ffcc00, 2px 0px #000000; /* Dorado más claro y negro */
+  animation-delay: 0.3s;
+}
 }
 @media (max-width: 480px) {
    /* Estilos para pantallas muy pequeñas */
 .card_profile {
-width: 50%;
+width: 40%;
 height: auto;
 border-radius: 2rem;
 transition: transform 1500ms;
 transform-style: preserve-3d;
-margin-left: 40%;
+margin-left: 30%;
 }
   .caja_perfil{
   display: flex;
@@ -549,7 +584,7 @@ justify-content: center;
 }
 #datos {
 color: rgb(255, 255, 255);
-font-size: 160%;
+font-size: 50%;
 margin-top:20%;
 margin-left: 30%;
 font-family: Arial, Helvetica, sans-serif;
@@ -559,19 +594,31 @@ text-align: center;
   margin-top: 2%;
 position: absolute;
 left: 5%;
-width: 40%;
+width: 50%;
 background: linear-gradient(45deg, #bdbebe, #575757); 
 color: rgb(255, 255, 255);
 border: none;
 padding: 2% 2%;
 border-radius: 5%;
 font-family: 'Arial', sans-serif;
-font-size:15px;
+font-size:50%;
 font-weight: bold;
 cursor: pointer;
 transition: all 0.5s ease; 
 }
 
+.videooo {
+  margin-top: 50%;
+  width: 100%;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 2rem;
+  font-weight: bold;
+  position: relative;
+  color: #fff;
+  overflow: hidden;
+  text-shadow: 2px 2px 4px #000000, -2px -2px 4px #000000, 2px -2px 4px #000000, -2px 2px 4px #000000; /* Borde negro */
+}
 }
 
 
@@ -584,7 +631,7 @@ height: auto;
 border-radius: 2rem;
 transition: transform 1500ms;
 transform-style: preserve-3d;
-margin-left: 35%;
+margin-left: 25%;
 }
   .caja_perfil{
   display: flex;
@@ -627,6 +674,19 @@ font-size:10px;
 font-weight: bold;
 cursor: pointer;
 transition: all 0.5s ease; 
+}
+
+.videooo {
+  margin-top: 50%;
+  width: 100%;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 3rem;
+  font-weight: bold;
+  position: relative;
+  color: #fff;
+  overflow: hidden;
+  text-shadow: 2px 2px 4px #000000, -2px -2px 4px #000000, 2px -2px 4px #000000, -2px 2px 4px #000000; /* Borde negro */
 }
 }
 
