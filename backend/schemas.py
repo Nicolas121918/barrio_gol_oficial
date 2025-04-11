@@ -65,7 +65,7 @@ class SolicitudIngresoOut(BaseModel):
     fecha_solicitud: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class PublicacionGaleria(BaseModel):
     id_team: int
@@ -162,7 +162,7 @@ class Partidos(BaseModel):
     goles_visitantes: int = 0  # Nuevo campo
 
     class Config:
-        orm_mode = True  # Cambié 'from_attributes' por 'orm_mode'
+        from_attributes = True  # Cambié 'orm_mode' por 'from_attributes porque 'orm_mode' no es un atributo válido en Pydantic v2.0
 
 # Esquema base para la solicitud de unirse a un partido
 class SolicitudUnirseBase(BaseModel):
@@ -181,7 +181,7 @@ class SolicitudUnirse(SolicitudUnirseBase):
     estado: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 class GolesUpdate(BaseModel):
     goles_local: int
     goles_visitante: int
