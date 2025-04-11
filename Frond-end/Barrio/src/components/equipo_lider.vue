@@ -108,7 +108,7 @@
       <button class="button" @click="openBuzon">Buzón</button>
       <button class="button" @click="openConfig">Configuración</button>
       <router-link class="padre" to="torneo_guardado">
-        <button class="button2" @click="">incritos</button>
+        <button class="button2" @click="">Inscritos</button>
       </router-link>
       
     </section>
@@ -117,28 +117,27 @@
     
     <!-- Modal de Buzón -->
     <div v-if="showBuzon" class="modal buzón-modal">
-      <div id="caja" class="modal-content buzón-content">
-        <h3>Buzón de Solicitudes</h3>
-        <ul class="request-list">
-          <li v-for="(solicitud, index) in team.requests" :key="index" class="request-item">
-            <div class="vertical">
-              <img :src="getImagenUrl(solicitud.picture)" alt="Foto de perfil" class="profile-pic" />
-            <span class="letra2p">{{ solicitud.name }} </span>
-          </div>
-            <div class="request-actions">
-              <button @click="verUsuario(solicitud.documento)" class="button_info-btn">ver perfi</button>
-              <button  @click="acceptRequest(solicitud)" class="button_accept-btn">Aceptar</button>
-              <button @click="rejectRequest(solicitud)" class="button_reject-btn">Rechazar</button>
-            </div>
-          </li>
-        </ul>
-        <button class="button_close" @click="closeBuzon">Cerrar</button>
-        <router-link class="link home" to="/invitar">
-          <button class="button_accept-btn" @click="closeBuzon">invitar</button>
-      </router-link>
-        
-      </div>
-    </div>
+  <div id="caja" class="modal-content buzón-content">
+    <h3>Buzón de Solicitudes</h3>
+    <ul class="request-list">
+      <li v-for="(solicitud, index) in team.requests" :key="index" class="request-item">
+        <div class="vertical">
+          <img :src="getImagenUrl(solicitud.picture)" alt="Foto de perfil" class="profile-pic" />
+          <span class="letra2p">{{ solicitud.name }}</span>
+        </div>
+        <div class="request-actions">
+          <button @click="verUsuario(solicitud.documento)" class="button_info-btn">Ver perfil</button>
+          <button @click="acceptRequest(solicitud)" class="button_accept-btn">Aceptar</button>
+          <button @click="rejectRequest(solicitud)" class="button_reject-btn">Rechazar</button>
+        </div>
+      </li>
+    </ul>
+    <button class="button_close" @click="closeBuzon">Cerrar</button>
+    <router-link class="link home" to="/invitar">
+      <button class="button_accept-btn" @click="closeBuzon">Invitar</button>
+    </router-link>
+  </div>
+</div>
 
     <!-- Modal de Configuración -->
     <div v-if="showConfig" class="modal config-modal">
@@ -462,6 +461,7 @@ methods: {
       this.showMemberMenu = false;
       this.selectedMember = null;
     },
+
     async confirmExpel(documento, nombre) {
   const movistore = useUsuarios();
 
@@ -504,6 +504,7 @@ methods: {
   }
 },
 
+// Modal reporte
 abrirModalReporte(mensaje) {
   console.log("Mensaje seleccionado:", mensaje); // Verifica el contenido del mensaje
   this.mensajeSeleccionado = mensaje;
@@ -1512,24 +1513,36 @@ textarea {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.7); /* Fondo semitransparente */
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(3px);
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px); /* Efecto de desenfoque */
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Fondo semitransparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Asegúrate de que esté por encima de otros elementos */
 }
 
 .modal-content {
-  background-color: #1a1a1a;
-  padding: 24px;
-  border-radius: 16px;
+  background-color: #ffffff; /* Fondo del contenido */
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
   width: 90%;
-  max-width: 400px;
-  color: #fff;
-  border: 2px solid #d4af37;
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
-  animation: fadeInUp 0.4s ease;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); /* Sombra para destacar */
+  z-index: 10000; /* Asegúrate de que el contenido esté por encima del fondo */
+  text-align: center;
 }
 
 .modal-title {

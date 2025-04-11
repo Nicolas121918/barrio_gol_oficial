@@ -41,7 +41,7 @@ import Partidos_finalizados from "@/components/partidos_finalizados.vue";
 import Inpeccion_equipo from "@/components/inpeccion_equipo.vue";
 import Torneos_finalizados from "@/components/torneos_finalizados.vue";
 import Torneo_sala_espera from "@/components/torneo_sala_espera.vue";
-import Galeria_insepccion from "../../galeria_insepccion.vue";
+import Galeria_insepccion from "../components/galeria_insepccion.vue";
 
 
 

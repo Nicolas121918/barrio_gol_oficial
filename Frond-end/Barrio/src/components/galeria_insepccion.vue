@@ -112,7 +112,7 @@
   </template>
   
   <script>
-  import Headerapp from "@/components/Headerapp.vue";
+  import Headerapp from "./Headerapp.vue";
   import axios from "axios";
   import { useUsuarios } from "@/stores/usuario";
   
@@ -146,7 +146,7 @@
       
       getGaleria() {
     const usuariosStore = useUsuarios();
-    const idTeam = this.$route.params.id;
+    const idTeam = usuariosStore.usuario.equipo_tiene;
   
   
     if (!idTeam) {
@@ -237,6 +237,21 @@
       closeModal() {
         this.showModal = false;
         this.modalIndex = null;
+      },
+      deletePost(index) {
+        const post = this.filteredPosts[index];
+  
+        axios
+          .delete(`http://localhost:8000/galeria/${post.id}`)
+          .then(() => {
+            alert("Publicación eliminada");
+            this.getGaleria();
+            this.closeModal();
+          })
+          .catch((err) => {
+            console.error(err);
+            alert("Error al eliminar");
+          });
       },
       enlargeMedia(post) {
         this.currentMedia = post;
