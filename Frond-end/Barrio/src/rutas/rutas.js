@@ -41,6 +41,7 @@ import Partidos_finalizados from "@/components/partidos_finalizados.vue";
 import Inpeccion_equipo from "@/components/inpeccion_equipo.vue";
 import Torneos_finalizados from "@/components/torneos_finalizados.vue";
 import Torneo_sala_espera from "@/components/torneo_sala_espera.vue";
+import Galeria_insepccion from "../../galeria_insepccion.vue";
 
 
 
@@ -63,8 +64,9 @@ const routes=[
         path: '/partidos_creados',//partidos ver los creados
         name: 'partidos_creados',
         component: Partidos_creado,
-        
+  
       },
+
         {
           path: '/sala_partidos/:id', // ← aquí está la diferencia
           name: 'sala_partidos',
@@ -248,6 +250,11 @@ const routes=[
         name: 'galeria',
         component: Galeria
       },
+      {
+        path: '/galeria-inspeccionar/:id', // nota el ":id"
+        name: 'galeria-inspeccionar',
+        component: Galeria_insepccion
+      },      
       {
         path: '/stores',
         name: 'stores',

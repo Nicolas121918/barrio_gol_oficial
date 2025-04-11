@@ -9,9 +9,12 @@
         <div class="logo-container" @click="mostrarImagen = true">
     <img :src="team.logo" alt="Logo del equipo" class="logo" v-if="team.logo" />
   </div>
-        <router-link class="linktorneos" to="/galeria">
-          <img class="api5" src="../assets/imagenes/galeria.png" alt="galeria">
-        </router-link>
+  <router-link
+  class="linktorneos"
+  :to="`/galeria-inspeccionar/${team.Id_equipo}`"
+>
+  <img class="api5" src="../assets/imagenes/galeria.png" alt="galeria">
+</router-link>
   
           <div class="epic-banner">
     <h1 class="epic-name">{{ team.name }}</h1>
@@ -152,6 +155,7 @@
         nuevoMensaje: "",
         team: {
           logo: "",
+          Id_equipo:0,
           name: "",
           description: "",
           numero_integrantes: 0,
@@ -277,6 +281,7 @@ conectarSocket() {
           
           this.team.leader = {
             name: response.data.lider.nombre,
+
             document: response.data.lider.documento,
             email: response.data.lider.correo,
             phone: response.data.lider.telefono,
@@ -296,6 +301,7 @@ conectarSocket() {
           console.log("logo: ",response.data.equipo.logo)
           this.team = {
             logo: `http://127.0.0.1:8000/${response.data.equipo.logo}`,
+            Id_equipo:response.data.equipo.id,
             name: response.data.equipo.nombre,
             description: response.data.equipo.descripcion,
             numero_integrantes: response.data.equipo.numero_integrantes,

@@ -14,7 +14,7 @@
         <h1 class="titulo-equipo">{{ equipo.nombreteam }}</h1>
         <p class="descripcion-equipo">{{ equipo.Descripcion }}</p>
         <p class="descripcion-equipo">Miembros: {{ cantidadIntegrantes }}</p>
-        <button class="boton-galeria">Ver Galería</button>
+        <button class="boton-galeria" @click="verGaleria(equipo.Id_team)">Ver Galería</button>
       </div>
     </div>
 
@@ -77,6 +77,9 @@ export default {
         console.error("Error obteniendo equipo:", error);
       }
     },
+    verGaleria(id) {
+    this.$router.push({ name: 'galeria-inspeccionar', params: { id } });
+  },
     getImagenUrl(path) {
       return path ? `http://127.0.0.1:8000/${path}` : "https://via.placeholder.com/150";
     },

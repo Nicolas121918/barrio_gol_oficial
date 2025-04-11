@@ -127,8 +127,8 @@
       class="buzon-equipo"
     >
       <div class="equipo-info">
-        <img :src="equipo.logo" alt="Logo del equipo" />
-        <p class="equipo-nombre">{{ equipo.nombre }}</p>
+        <img :src="urlLogoxx(equipo.logo)" alt="Logo del equipo" />
+        
         <button @click="irAInspeccion(equipo.id_equipooo)" class="boton-ver-detalles">
   Ver detalles del equipo
 </button>
@@ -328,7 +328,7 @@ irPerfilCreador() {
   const idPartido = this.$route.params.id;
 
   // Obtener las solicitudes pendientes del partido
-  axios.get(`http://localhost:8000/solicitudes_pendientes/${idPartido}`)
+  axios.get(`http://localhost:8000/solicitudes_pendientesPartidos/${idPartido}`)
     .then(response => {
       console.log(response.data);  // Verifica la respuesta aquí
       if (response.data && response.data.solicitudes_pendientes) {
@@ -399,6 +399,9 @@ irPerfilCreador() {
     },
     urlLogoequipo() {
       return this.partido.logo ? `http://127.0.0.1:8000/${this.equipo1.logo}` : '';
+    },
+    urlLogoxx(rutaLogo) {
+      return rutaLogo ? `http://127.0.0.1:8000/${rutaLogo}` : '';
     },
     urlLogobuzon() {
       return this.partido.logo ? `http://127.0.0.1:8000/${equipo.logo}` : '';

@@ -90,7 +90,7 @@
     <div v-if="showMemberMenu" class="modal">
       <div class="modal-content">
         <h3 class="edit">Opciones para {{ selectedMember.name }}</h3>
-        <button @click="verUsuario(solicitud.documento_usuario)" class="button_info-btn">ver perfil</button>
+        <button @click="verUsuario(solicitud.documento_usuario)" class="button_info-btn2">ver perfil</button>
         <button id="espacio" class="button_danger"
   @click="confirmExpel(selectedMember.documento, selectedMember.name)"
   v-if="!selectedMember.isLeader"
@@ -126,12 +126,9 @@
             <span class="letra2p">{{ solicitud.name }} </span>
           </div>
             <div class="request-actions">
-
               <button @click="verUsuario(solicitud.documento)" class="button_info-btn">ver perfi</button>
-              <button  @click="acceptRequest(solicitud.id_solicitud)" class="button_accept-btn">Aceptar</button>
+              <button  @click="acceptRequest(solicitud)" class="button_accept-btn">Aceptar</button>
               <button @click="rejectRequest(solicitud)" class="button_reject-btn">Rechazar</button>
-              
-
             </div>
           </li>
         </ul>
@@ -700,36 +697,30 @@ async requests() {
   }
 },
 async acceptRequest(solicitud) {
-  try {
-    const response = await fetch(`http://localhost:8000/solicitudes_ingreso/${solicitud.id_solicitud}/aceptar`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
+    try {
+      const response = await fetch(`http://localhost:8000/solicitudes_ingreso/${solicitud.id_solicitud}/aceptar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error en la solicitud:", errorData.detail);
+        alert(`Error: ${errorData.detail}`);
+        return;
       }
-    });
 
-    const responseData = await response.json(); // 📦 Solo se hace una vez
-
-    if (!response.ok) {
-      throw new Error(responseData.detail || 'Error al aceptar la solicitud');
+      const data = await response.json();
+      console.log("Respuesta del servidor:", data);
+      alert("Solicitud aceptada con éxito");
+    } catch (error) {
+      console.error("Error en fetch:", error);
+      alert("Ocurrió un error al aceptar la solicitud");
     }
-
-    alert(`✅ ${responseData.mensaje}: ${responseData.usuario} ahora está en el equipo ${responseData.nuevo_equipo_id}`);
-
-    // Eliminar la solicitud aceptada de la lista
-    this.team.requests = this.team.requests.filter(req => req.id_solicitud !== solicitud.id_solicitud);
-
-  } catch (error) {
-    console.error(error);
-
-    // Mostrar error más claro
-    const mensaje = typeof error.message === 'object'
-      ? JSON.stringify(error.message)
-      : error.message;
-
-    alert(`❌ No se pudo aceptar la solicitud: ${mensaje}`);
-  }
-},
+  },
     updateLogo(event) {
       const file = event.target.files[0];
       if (file) {
@@ -969,6 +960,26 @@ border: solid white;
 }
 
 .button_info-btn:hover {
+  background-color: #a3a3a3;
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px white;
+}
+.button_info-btn2 {
+  background-color: #6a6a6a;
+  color: #ffffff;
+  padding: 5px;
+  border: none;
+  font-family:Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  font-weight: bold;
+  margin-right: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.button_info-btn2:hover {
   background-color: #a3a3a3;
   color: white;
   transform: scale(1.05);

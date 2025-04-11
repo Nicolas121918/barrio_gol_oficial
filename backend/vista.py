@@ -400,7 +400,7 @@ async def obtener_equipo_detalle(id_equipo: int, db: Session = Depends(get_db)):
     return {
             "equipo": {
                 "id": equipo.Id_team,
-                "nombre": equipo.nombreteam,
+                    "nombre": equipo.nombreteam,
                 "descripcion": equipo.Descripcion,
                 "numero_integrantes": equipo.numeropeople,
                 "capitan": equipo.capitanteam,  # Mantiene el nombre del capitán en los detalles
@@ -554,6 +554,49 @@ async def contar_integrantes(id_equipo: int, db: Session = Depends(get_db)):
     ).count()
 
     return conteo
+
+@app.get("/actualizar_puntos_nivel/{id_equipo}")
+def actualizar_puntos_y_nivel(id_equipo: int, db: Session = Depends(get_db)):
+    equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
+    if not equipo:
+        raise HTTPException(status_code=404, detail="Equipo no encontrado")
+
+    # Obtener todos los partidos donde el equipo fue local o visitante
+    partidos_equipo = db.query(partidos).filter(
+        (partidos.equipo_local == id_equipo) |
+        (partidos.equipo_visitante == id_equipo)
+    ).all()
+
+    puntos = 0
+    for partido in partidos_equipo:
+        if partido.ganador == id_equipo:
+            puntos += 200
+        else:
+            puntos -= 100
+
+    # Actualizar puntos y nivel
+    equipo.puntos = puntos if puntos > 0 else 0  # No permitir puntos negativos
+
+    if equipo.puntos >= 5000:
+        equipo.nivel = 4
+    elif equipo.puntos >= 2500:
+        equipo.nivel = 3
+    elif equipo.puntos >= 900:
+        equipo.nivel = 2
+    else:
+        equipo.nivel = 1
+
+    db.commit()
+    db.refresh(equipo)
+
+    return {
+        "id_equipo": equipo.Id_team,
+        "nombre": equipo.nombreteam,
+        "puntos_actualizados": equipo.puntos,
+        "nivel_actualizado": equipo.nivel,
+        "partidos_totales": len(partidos_equipo)
+    }
+
 
 #equipo actualizar------
 
@@ -1110,9 +1153,9 @@ async def rechazar_solicitud(id_solicitud: int, db: Session = Depends(get_db)):
 
     db.commit()
 
-    return {"mensaje": "Solicitud rechazada correctamente"}
+    return {"mensaje": "Solicitud rechazada correctamente"} 
 
-@app.get("/solicitudes_pendientes/{id_partido}")
+@app.get("/solicitudes_pendientesPartidos/{id_partido}")
 async def solicitudes_pendientes(id_partido: int, db: Session = Depends(get_db)):
     # Buscar las solicitudes pendientes para un partido específico
     solicitudes = db.query(SolicitudUnirse).filter(SolicitudUnirse.id_partido == id_partido, SolicitudUnirse.estado == 'pendiente').all()
