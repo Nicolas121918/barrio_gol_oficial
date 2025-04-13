@@ -1,0 +1,28 @@
+# Ignorar archivos de video
+*.mp4
+*.mov
+*.avi
+
+# Ignorar imágenes
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+
+# Ignorar carpetas específicas y sus contenidos al subirlo a GitHub
+backend/archivos_torneos/
+backend/imagenes/
+backend/imagenes_cancha_torneo/
+backend/imagenes_torneo/    
+backend/imagenes_cancha_torneos/
+backend/imagenescancha/
+backend/logos/
+backend/logos_torneos/
+backend/logospartidos/
+backend/logosteams/
+backend/logostorneos/
+backend/media/
+backend/micarpeta/
+backend/videos/
