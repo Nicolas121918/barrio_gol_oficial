@@ -11,18 +11,34 @@
 *.bmp
 *.tiff
 
-# Ignorar carpetas específicas y sus contenidos al subirlo a GitHub
-backend/archivos_torneos/
-backend/imagenes/
-backend/imagenes_cancha_torneo/
-backend/imagenes_torneo/    
-backend/imagenes_cancha_torneos/
-backend/imagenescancha/
-backend/logos/
-backend/logos_torneos/
-backend/logospartidos/
-backend/logosteams/
-backend/logostorneos/
-backend/media/
-backend/micarpeta/
-backend/videos/
+# Ignorar todo dentro de las carpetas, pero no las carpetas mismas
+backend/archivos_torneos/*
+backend/imagenes/*
+backend/imagenes_cancha_torneo/*
+backend/imagenes_torneo/*
+backend/imagenes_cancha_torneos/*
+backend/imagenescancha/*
+backend/logos/*
+backend/logos_torneos/*
+backend/logospartidos/*
+backend/logosteams/*
+backend/logostorneos/*
+backend/media/*
+backend/micarpeta/*
+backend/videos/*
+
+# Excluir archivos .gitkeep para que las carpetas vacías se rastreen y no se eliminen y se puedan subir a GitHub
+!backend/archivos_torneos/.gitkeep
+!backend/imagenes/.gitkeep
+!backend/imagenes_cancha_torneo/.gitkeep
+!backend/imagenes_torneo/.gitkeep
+!backend/imagenes_cancha_torneos/.gitkeep
+!backend/imagenescancha/.gitkeep
+!backend/logos/.gitkeep
+!backend/logos_torneos/.gitkeep
+!backend/logospartidos/.gitkeep
+!backend/logosteams/.gitkeep
+!backend/logostorneos/.gitkeep
+!backend/media/.gitkeep
+!backend/micarpeta/.gitkeep
+!backend/videos/.gitkeep
