@@ -1,7 +1,15 @@
 <template>
 
   <header>
-    <headerapp></headerapp>
+    <!-- Header de escritorio -->
+    <div class="d-none d-md-block">
+      <Headerapp></Headerapp>
+    </div>
+
+    <!-- Header para móviles -->
+    <div class="d-block d-md-none">
+      <headermobile></headermobile>
+    </div>
   </header>
       
       <table id="update">
@@ -39,6 +47,7 @@
 <script setup> 
 import { onMounted, ref, onBeforeUnmount } from 'vue';
 import Headerapp from './Headerapp.vue';
+import headermobile from './headermobile.vue';
 const verificar = ref(false);
 const nombre = ref('');
 const queja_reclamo_quest = ref('');

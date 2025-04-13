@@ -1,7 +1,20 @@
 <template>
   <header>
-    <headerapp></headerapp>
+
+    
+     <!-- Header de escritorio -->
+  <div class="d-none d-md-block">
+    <Headerapp></Headerapp>
+  </div>
+
+  <!-- Header para móviles -->
+  <div class="d-block d-md-none">
+    <headermobile></headermobile>
+  </div>
+
+
   </header>
+
   <h1 class="titulo_torneo">Lista de Torneos y Partidos</h1>
   <div class="main-container">
     <div class="buscador_torneo">
@@ -163,8 +176,8 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';  
 import { useUsuarios } from '@/stores/usuario';
 import { useRouter } from 'vue-router';
-import Headerapp from './Headerapp.vue';
-
+import Headerapp from '@/components/headerapp.vue';
+import headermobile from '@/components/headermobile.vue';
 const documento_equipo = ref("");
 const router = useRouter();
 const mostrarMenu2 = ref(false);

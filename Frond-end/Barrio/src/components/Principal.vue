@@ -242,13 +242,19 @@ gap: 150px;
 
   /* Barra navegacion*/
 .botones-prin{
-width: 150%;
+width: 120%;
 display: flex;
 justify-content: space-around;
 flex-wrap: wrap;
 margin: 0; 
 align-self: flex-start;
-gap: 10%;
+gap: 1%;
+margin-left: -10%;
+}
+
+
+.menu-desplegable.activo {
+  display: none;
 }
 }
 
@@ -269,6 +275,9 @@ margin: 0;
 align-self: flex-start;
 gap: 10%;
 }
+.menu-desplegable.activo {
+  display: none;
+}
 }
   
 
@@ -283,6 +292,9 @@ gap: 10%;
 
 @media (min-width: 1281px) and (max-width: 1440px) {
   /* Estilos para pantallas entre 1281px y 1440px */
+  .menu-desplegable.activo{
+    display: none;
+  }
 }
 
 

@@ -1,12 +1,18 @@
 <template>
  
   <header>
-    <headerapp></headerapp>
+    <!-- Header de escritorio -->
+    <div class="d-none d-md-block">
+      <Headerapp></Headerapp>
+    </div>
 
+    <!-- Header para móviles -->
+    <div class="d-block d-md-none">
+      <headermobile></headermobile>
+    </div>  
   </header>
 
   <div class="actualizar_caja">
-
   <section v-if="mostrar" class="Actualizar_contenedor">
     <!-- <h1>{{ movistore.usuario.documento }}</h1>
     <h1>{{ movistore.usuario.equipo_tiene }}</h1>
@@ -29,7 +35,7 @@
     <button @click="volver"><img class="salir" src="../assets/iconos header/emblemunreadable_93487 (1).png" alt="Salir" /></button>
     <form @submit.prevent="actualizarFoto">
       <label>Seleccione foto de perfil:</label>
-      <input type="file" @change="onFileChange" accept="image/*" />
+      <input class="custom-file"  type="file" @change="onFileChange" accept="image/*" />
       <button class="boton_actu1" type="submit">Actualizar Foto</button>
     </form>
   </section>
@@ -73,7 +79,8 @@
 import { ref } from "vue";
 import axios from "axios";
 import Swal from 'sweetalert2';
-import Headerapp from "./Headerapp.vue";
+import headerapp from "@/components/headerapp.vue";
+import headermobile from "@/components/headermobile.vue"; 
 import { useUsuarios } from "@/stores/usuario";
 
 const movistore = useUsuarios();
@@ -422,6 +429,12 @@ const actualizarDescripcion = async () => {
   
 
 <style scoped>
+.custom-file {
+  border: none;
+  padding: 10px 0;
+  font-size: 14px;
+}
+
 .lineal{
   font-size: 50%;
   background-color: rgb(255, 255, 255);
@@ -565,30 +578,60 @@ const actualizarDescripcion = async () => {
 }
 
 
-@media (max-width: 480px) {
+/* Estilos para pantallas con un ancho mínimo de 320px y un ancho máximo de 480px */
+/* Responsive Design */
+@media (min-width: 320px) and (max-width: 480px) {
+  .nombre{
+    color:darkgrey;
+  background-color: rgb(0, 0, 0);
+  font-size: 250%;
+  text-align: center;
+  font-family: 'Times New Roman', Times, serif;
+  border: 5%;
+  border-style: solid;
+  text-decoration:underline;
+  box-shadow: 0 0 10% rgb(251, 255, 255);
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  margin-left: -0%;
+}
   /* Estilos para pantallas con un ancho máximo de 480px */
   .actualizar_caja{
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top:100%;
-  margin-left: 0%;
-  width: 120%
-  
+  margin-top:50%;
+  margin-left:5%;
+  width: 95%
+
 }
 
 .Actualizar_contenedor{
   background-color: rgb(0, 0, 0);
   height: auto;
   left: 0%;
-  width: 100%;
+  width: 135%;
   text-align: center;
   border: 2%;
-  margin-left: 0%;
+  margin-left: -15%;
   font-size: 8px;
   border-style: solid;
   border-color: aliceblue;
+}
+
+
+.salir{
+  height: 20%;
+  width: 10%;
+  margin-left: 90%;
+  
+
+}
+.salir:hover{
+  transform: scale(1.1);
+  color: red;
 }
 }
 

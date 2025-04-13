@@ -1,5 +1,4 @@
 import 'leaflet/dist/leaflet.css'; // ✅ Esto es lo que hace falta para que se vea el mapa
-import './assets/main.css';
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from '../src/rutas/rutas';

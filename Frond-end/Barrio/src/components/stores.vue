@@ -1,6 +1,14 @@
 <template>
   <header>
-    <headerapp></headerapp>
+    <!-- Header de escritorio -->
+    <div class="d-none d-md-block">
+      <Headerapp></Headerapp>
+    </div>
+
+    <!-- Header para móviles -->
+    <div class="d-block d-md-none">
+      <headermobile></headermobile>
+    </div>
 
   </header>
   <div class="pantalla bg-black flex items-center justify-center">
@@ -65,9 +73,11 @@
 
 <script>
 import Headerapp from './Headerapp.vue';
+import headermobile from './headermobile.vue';
 export default {
   components: {
     Headerapp,
+    headermobile,
   },
   data() {
     return {
@@ -99,6 +109,7 @@ export default {
 <style scoped>
 /* Fondo principal */
 .pantalla {
+  all: unset; /* Esto borra casi todo el estilo heredado de Boostrap */
   min-height: 100vh;
 }
 

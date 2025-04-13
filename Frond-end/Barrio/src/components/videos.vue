@@ -1,7 +1,17 @@
 
 <template>
    <header>
-    <Headerapp/>
+
+    <!-- Header de escritorio -->
+    <div class="d-none d-md-block">
+      <Headerapp></Headerapp>
+    </div>
+
+    <!-- Header para móviles -->
+    <div class="d-block d-md-none">
+      <headermobile></headermobile>
+    </div>
+
   </header>
   <div class="app-container">
     <div class="video-feed" @wheel="handleScroll">
@@ -70,10 +80,12 @@
 <script>
 import axios from "axios";
 import Headerapp from "./Headerapp.vue";
+import headermobile from "./headermobile.vue";
 import { useUsuarios } from "@/stores/usuario";
 export default {
   components: {
     Headerapp,
+    headermobile,
   },
   data() {
     return {

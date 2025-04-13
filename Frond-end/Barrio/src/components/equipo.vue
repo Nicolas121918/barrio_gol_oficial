@@ -1,6 +1,18 @@
 <template>
   <header>
-    <headerapp></headerapp>
+
+
+       <!-- Header de escritorio -->
+  <div class="d-none d-md-block">
+    <Headerapp></Headerapp>
+  </div>
+
+  <!-- Header para móviles -->
+  <div class="d-block d-md-none">
+    <headermobile></headermobile>
+    
+  </div>
+  
   </header>
  
   <!-- Fase 1: No tiene equipo -->
@@ -28,6 +40,7 @@
 
 import { useUsuarios } from '@/stores/usuario';
 import Headerapp from './Headerapp.vue';
+import headermobile from './headermobile.vue';
 import Equipo_lider from './equipo_lider.vue';
 import Equipo_miembro from './equipo_miembro.vue';
 import axios from 'axios';
@@ -36,6 +49,7 @@ import Equipos_container from './equipos_container.vue';
 export default {
   components: {
     Headerapp,
+    headermobile,
     Equipo_lider,
     Equipo_miembro,
     Equipos_container,

@@ -219,7 +219,7 @@ display: block;
 
 
 
-@media (max-width: 480px) {
+@media  (min-width: 320px ) and (max-width: 480px) {
   /* Estilos para pantallas con un ancho máximo de 480px */
   .header1 {
     background: linear-gradient(rgb(56, 118, 103), rgb(255, 255, 255));

@@ -1,6 +1,19 @@
 <template>
   <header>
+
+
+     <!-- Header de escritorio -->
+  <div class="d-none d-md-block">
     <headerapp></headerapp>
+  </div>
+
+  <!-- Header para móviles -->
+  <div class="d-block d-md-none">
+    <headermobile></headermobile>
+    
+  </div>
+    
+    
   </header>
 <article>
   <div class="caja_perfil">
@@ -53,7 +66,8 @@
 </template>
 
 <script setup>
-import Headerapp from './Headerapp.vue';
+import headerapp from './headerapp.vue';
+import headermobile from './headermobile.vue';
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import videos_de_usuario from './videos_de_usuario.vue';
   import { useUsuarios } from '@/stores/usuario';
@@ -129,12 +143,7 @@ a.router-link-active, a.router-link-exact-active {
     margin-bottom: 20px;
     background: linear-gradient(90deg, rgba(212, 212, 212, 0.2), rgba(255, 215, 0, 0));
   }
-  
 
-
-
-
-  
 
   .link {
     display: inline-block;
@@ -149,6 +158,7 @@ a.router-link-active, a.router-link-exact-active {
 
 
 .caja_perfil{
+  all: unset;
   display: flex;
   flex-direction: column;
   justify-content:center;
@@ -355,25 +365,13 @@ transform: scale(1.05);
 }
 
 
-.actualizar_perfil {
-background: linear-gradient(45deg, #bdbebe, #575757); 
-color: rgb(255, 255, 255);
-border: none;
-padding: 2% 2%;
-border-radius: 5%;
-margin-right: 70%;
-font-family: 'Arial', sans-serif;
-font-size: 100%;
-font-weight: bold;
-cursor: pointer;
-transition: all 0.5s ease; 
-}
 
 .actualizar_perfil {
+  all: unset;
   position: absolute;
   left: 5%;
-  width: 180px;
-  height: 50px;
+  width: 100px;
+  height: 10px;
   background: linear-gradient(45deg, #3a3a3a, #6e6e6e);
   border: none;
   border-radius: 10px;
@@ -402,20 +400,6 @@ transition: all 0.5s ease;
 }
 
 
-#datos {
-  font-family: 'Anton', sans-serif; /* Fuente gruesa y de impacto */
-  color: #00ffea; /* Azul neón estilo sci-fi */
-  text-align: center;
-  text-transform: uppercase;
-  display: inline-block;
-  background: black;
-  border: 5px solid #00ffea;
-  border-radius: 15px;
-  box-shadow: 0px 0px 15px #00ffea, 0px 0px 30px #0077ff;
-  text-shadow: 4px 4px 10px #0077ff, 8px 8px 20px #00ffea;
-  animation: pulseGlow 1.5s infinite alternate, shake 0.3s infinite alternate;
-}
-
 @keyframes pulseGlow {
   0% { text-shadow: 4px 4px 10px #0077ff, 8px 8px 20px #00ffea; }
   100% { text-shadow: 6px 6px 15px #00ffea, 12px 12px 30px #00ffff; }
@@ -425,7 +409,7 @@ transition: all 0.5s ease;
   0% { transform: translateX(0px) rotate(-0deg); }
   100% { transform: translateX(-1px) rotate(1deg); }
 }
-.texto-2:hover, #datos:hover {
+.texto-2:hover {
 color: rgb(255, 251, 0);
 text-shadow: 0 0 4px rgb(0, 0, 0);
 
@@ -456,7 +440,7 @@ height: 800px;
 }
 
 
-@media (max-width: 320px ) {
+@media (min-width: 320px ) and (max-width: 480px) {
   /* Estilos para pantallas muy pequeñas */
 .card_profile {
 width: 50%;
@@ -464,7 +448,7 @@ height: auto;
 border-radius: 2rem;
 transition: transform 1500ms;
 transform-style: preserve-3d;
-margin-left: 40%;
+margin-left: 26%;
 }
   .caja_perfil{
   display: flex;
@@ -485,14 +469,6 @@ align-items: center;
 justify-content: center;
 
 }
-#datos {
-color: rgb(255, 255, 255);
-font-size: 160%;
-margin-top:15%;
-margin-left: 30%;
-font-family: Arial, Helvetica, sans-serif;
-text-align: center;
-}
 @keyframes pulseGlow {
   0% { text-shadow: 4px 4px 10px #0077ff, 8px 8px 20px #00ffea; }
   100% { text-shadow: 6px 6px 15px #00ffea, 12px 12px 30px #00ffff; }
@@ -503,17 +479,17 @@ text-align: center;
   100% { transform: translateX(-1px) rotate(1deg); }
 }
 .actualizar_perfil {
-  margin-top: 5%;
+  margin-top: -30%;
 position: absolute;
 left: 5%;
-width: 60%;
+width: 45%;
 background: linear-gradient(45deg, #bdbebe, #575757); 
 color: rgb(255, 255, 255);
 border: none;
-padding: 2% 2%;
-border-radius: 5%;
+padding: 5% 1%;
+border-radius: 100px;
 font-family: 'Arial', sans-serif;
-font-size:20px;
+font-size:10px;
 font-weight: bold;
 cursor: pointer;
 transition: all 0.5s ease; 
@@ -553,78 +529,15 @@ transition: all 0.5s ease;
   text-shadow: -1px 0px #ffcc00, 2px 0px #000000; /* Dorado más claro y negro */
   animation-delay: 0.3s;
 }
-}
-@media (max-width: 480px) {
-   /* Estilos para pantallas muy pequeñas */
-.card_profile {
-width: 40%;
-height: auto;
-border-radius: 2rem;
-transition: transform 1500ms;
-transform-style: preserve-3d;
-margin-left: 30%;
-}
-  .caja_perfil{
-  display: flex;
-  flex-direction: column;
-  justify-content:center;
-  text-align: center;
-  margin-top: 0%;
-}
-.front,
-.back {
 
-border-radius: 2rem;
-backface-visibility: hidden;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-
-}
-#datos {
-color: rgb(255, 255, 255);
-font-size: 50%;
-margin-top:20%;
-margin-left: 30%;
-font-family: Arial, Helvetica, sans-serif;
-text-align: center;
-}
-.actualizar_perfil {
-  margin-top: 2%;
-position: absolute;
-left: 5%;
-width: 50%;
-background: linear-gradient(45deg, #bdbebe, #575757); 
-color: rgb(255, 255, 255);
-border: none;
-padding: 2% 2%;
-border-radius: 5%;
-font-family: 'Arial', sans-serif;
-font-size:50%;
-font-weight: bold;
-cursor: pointer;
-transition: all 0.5s ease; 
-}
-
-.videooo {
-  margin-top: 50%;
-  width: 100%;
-  text-align: center;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 2rem;
-  font-weight: bold;
-  position: relative;
-  color: #fff;
-  overflow: hidden;
-  text-shadow: 2px 2px 4px #000000, -2px -2px 4px #000000, 2px -2px 4px #000000, -2px 2px 4px #000000; /* Borde negro */
+.link{
+  display: none;
 }
 }
 
 
 @media (min-width: 481px) and (max-width: 600px) {
   /* Estilos para pantallas entre 481px y 600px */
-   /* Estilos para pantallas muy pequeñas */
 .card_profile {
 width: 50%;
 height: auto;

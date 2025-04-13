@@ -1,7 +1,15 @@
 <template>
 
   <header>
+         <!-- Header de escritorio -->
+  <div class="d-none d-md-block">
     <headerapp></headerapp>
+  </div>
+
+  <!-- Header para móviles -->
+  <div class="d-block d-md-none">
+    <headermobile></headermobile>
+  </div>
   </header>
 <div class="caja_salir">
 
@@ -50,7 +58,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import Headerapp from './Headerapp.vue';
+import headerapp from './headerapp.vue'
+import headermobile from './headermobile.vue' 
 const fecha = ref(new Date().getUTCDate());
 const fecha2 = ref (new Date().getMonth() + 1)
 
@@ -69,6 +78,7 @@ const fecha3 = ref(new Date().getUTCFullYear());
   align-items: center ;
 }
 #input {
+  all: unset;
   width: 100%;
   height: 115%;
   border-radius: 5px;
@@ -82,6 +92,7 @@ const fecha3 = ref(new Date().getUTCFullYear());
 }
 
 #ayuda_link {
+  all: unset;
   top: 35%;
   left: 0;
   width: 100%;
@@ -92,6 +103,7 @@ const fecha3 = ref(new Date().getUTCFullYear());
 }
 
 #mi_perfil_link{
+  all: unset;
 
   top: 35%;
   left: 0;
@@ -104,6 +116,7 @@ const fecha3 = ref(new Date().getUTCFullYear());
 }
 
 #cerrar_sesion_link{
+  all: unset;
   top: 40%;
   left: 0;
   width: 100%;

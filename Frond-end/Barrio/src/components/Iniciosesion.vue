@@ -572,27 +572,27 @@ height: 50px;
 width: 150px;
 margin-left: 28%;
 }
-@media (max-width: 320px) {
+@media (min-width: 320px) and (max-width: 480px) {
 /* Estilos para pantallas con un ancho máximo de 320px */
 .inicio_sesion_contenedor{
-font-size: 25px;
+font-size: auto;
 text-align: center;
 font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 position: relative;
 left: -10%;
-margin-top: 67%;
+margin-top:30%;
 
 }
 .inicio_sesion_boton{
 background-image: url('https://static.vecteezy.com/system/resources/thumbnails/000/549/015/small/vector-apr-2018-19.jpg');
       background-size: cover;
       border: none;
-      padding: 10px 20px;
+      padding: 3% 5%;
       cursor: pointer;
       border-radius: 20px;
       text-align: center;
-      font-size: 90%;
-      margin-top: 30px;
+      font-size:10px;
+      margin-top: -5%;
       width: 100%;
       position: relative;
       font-family:'Times New Roman', Times, serif;
@@ -600,94 +600,54 @@ background-image: url('https://static.vecteezy.com/system/resources/thumbnails/0
 .registro_contenedor{
 position: absolute;
 background-color: rgb(0, 0, 0);
-width: 35%;
-top: -5%;
-left:16%;
+width: 65%;
+top: -4%;
 box-shadow: 0 0 6px rgb(255, 255, 255);
 border: solid;
 border: 50px;
 border-color: antiquewhite;
-
+margin-left: -5%;
 }
-.registro_form{
-background-color: rgb(0, 0, 0);
-border: 5px solid rgb(255, 255, 255);
-padding: 15px;
-border-radius: 10px;
-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-display: flex;
-flex-direction: column;
-gap: 5px; 
-width: 100%; 
-max-width: 400px; 
-font-size: 50%;
-margin-left: 5%;
-margin-top: -5%;
-}
-}
-
-
-@media (max-width: 480px) {
-/* Estilos para pantallas con un ancho máximo de 480px */
-.inicio_sesion_contenedor{
-font-size: 25px;
-text-align: center;
-font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+.registro_titulo{
+margin-left: 10%;
+margin-right: 10%;
 position: relative;
-left: -8%;
-margin-top: 40%;
-
-}
-.inicio_sesion_boton{
+font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+font-size: 15px;
 background-image: url('https://static.vecteezy.com/system/resources/thumbnails/000/549/015/small/vector-apr-2018-19.jpg');
-      background-size: cover;
-      border: none;
-      padding: 10px 20px;
-      cursor: pointer;
-      border-radius: 20px;
-      text-align: center;
-      font-size: 90%;
-      margin-top: 30px;
-      width: 100%;
-      position: relative;
-      font-family:'Times New Roman', Times, serif;
-}
-.registro_contenedor{
-position: absolute;
-background-color: rgb(0, 0, 0);
-width: 80%;
-top: -5%;
-left:16%;
-box-shadow: 0 0 6px rgb(255, 255, 255);
-border: solid;
-border: 50px;
-border-color: antiquewhite;
-
+background-size: cover;
+color: transparent;
+background-clip: text;
+text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.158);
+width: auto;
 }
 .registro_form{
 background-color: rgb(0, 0, 0);
-border: 5px solid rgb(255, 255, 255);
-padding: 15px;
-border-radius: 10px;
+border: 5% solid rgb(255, 255, 255);
+padding: 1%;
+border-radius: 1%;
 box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
 display: flex;
 flex-direction: column;
-gap: 5px; 
-width: 100%; 
+gap: 5%; 
+width: 90%; 
 max-width: 400px; 
-font-size: 50%;
-margin-left: 5%;
-margin-top: -5%;
+font-size: 10%;
+margin-left: 15%;
+margin-top: -20%;
 }
 }
+
+
+
 @media (min-width: 481px) and (max-width: 600px) {
 /* Estilos para pantallas entre 481px y 600px */
 .inicio_sesion_contenedor{
-font-size: 35px;
+font-size: 180%;
 text-align: center;
 font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 position: relative;
-left: 7%;
+left: -6%;
 margin-top: 20%;
 
 }
@@ -732,6 +692,12 @@ font-size: 50%;
 margin-left: 5%;
 margin-top: -5%;
 }
+}
+
+
+@media (max-width: 480px) {
+/* Estilos para pantallas con un ancho máximo de 480px */
+
 
 }
 

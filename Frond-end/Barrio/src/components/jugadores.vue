@@ -1,6 +1,14 @@
 <template>
   <header>
-    <Headerapp />
+    <!-- Header de escritorio -->
+    <div class="d-none d-md-block">
+      <Headerapp></Headerapp>
+    </div>
+
+    <!-- Header para móviles -->
+    <div class="d-block d-md-none">
+      <headermobile></headermobile>
+    </div>
   </header>
   <div class="profile-viewer">
     <div class="search-bar" :class="{ 'searching': searchQuery }">
@@ -59,6 +67,7 @@ Inspeccionar
 
 <script>
 import Headerapp from "./Headerapp.vue";
+import headermobile from "./headermobile.vue";
 import axios from "axios";
 import Perfiles from "./perfiles.vue";
 import { useUsuarios } from "@/stores/usuario";
@@ -66,6 +75,7 @@ export default {
   name: "ProfileViewer",
   components: {
     Headerapp,
+    headermobile,
   },
   data() {
     return {

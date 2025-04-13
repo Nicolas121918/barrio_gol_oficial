@@ -275,18 +275,18 @@ export default {
     margin-top: 5%;
   }
   .glitch {
-  font-size: 25px;
+  font-size: 120%;
   font-weight: 800;
   color: #ffffff;
   letter-spacing: 5px;
   z-index: 1;
   animation: shift 10s ease-in-out infinite alternate;
   position: relative;
-  left: 15%;
+  left: 2%;
 }
 .container_play_stop {
   --color: #ddff00b7;
-  --size: 50px;
+  --size: 180%;
   cursor: pointer;
   font-size: var(--size);
   user-select: none;
@@ -294,7 +294,7 @@ export default {
   position:absolute ;
   z-index:  99999;
   top: 50%;
-  left: 65%;
+  left: 50%;
 }
 
 }

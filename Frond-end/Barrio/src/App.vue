@@ -9,6 +9,7 @@
 <routerView></routerView>
 </template>
 <script setup>
+
 import Principal from './components/Principal.vue';
 import 'leaflet/dist/leaflet.css';
 import { useUsuarios } from './stores/usuario';
@@ -19,6 +20,7 @@ const movieStore=useUsuarios();
 <style>
 /* Estilo para el body */
 body {
+  
 background: 
   linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), 
   url('../src/assets/imagenes/fondo.jpeg');
