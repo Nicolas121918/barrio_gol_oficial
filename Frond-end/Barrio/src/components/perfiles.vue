@@ -1,6 +1,15 @@
 <template>
   <header>
-    <Headerapp></Headerapp>
+
+    <!-- Header de escritorio -->
+    <div class="d-none d-md-block">
+      <headerapp></headerapp>
+    </div>
+
+    <!-- Header para móviles -->
+    <div class="d-block d-md-none">
+      <headermobile></headermobile>
+    </div>
   </header>
 
   <div class="profile-container">
@@ -81,11 +90,13 @@
 <script>
 import axios from 'axios';
 import Headerapp from './Headerapp.vue';
+import headermobile from './headermobile.vue';
 import ReportarUsuario from './ReportarUsuario.vue';
 
 export default {
   components: {
     Headerapp,
+    headermobile,
     ReportarUsuario
   },
   data() {
@@ -203,56 +214,159 @@ export default {
 </script>
 
 
-
 <style scoped>
 .profile-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px;
-  background-color: rgb(0, 0, 0);
-  width: 155%;
-  margin-left: -24%;
-  border: solid white;
+  padding: 2rem;
+  background: linear-gradient(145deg, #000000, #1a1a1a);
+  width: 100%;
+  margin: 0 auto;
+  max-width: 1100px;
+  border: 2px solid white;
   box-shadow: 0 0 30px rgb(0, 0, 0);
-  margin-top: 17%;
   color: white;
-  font-family:serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border-radius: 16px;
+  margin-top: 20vb;
 }
 
 .back-button {
   padding: 10px 20px;
   background-image: url("https://static.vecteezy.com/system/resources/thumbnails/000/549/015/small/vector-apr-2018-19.jpg");
-  color: rgb(0, 0, 0);  
-  border: 3px solid white;
-  text-shadow: rgb(223, 0, 0) 0 0 40px;
-  border-radius: 4px;
+  color: black;  
+  border: 2px solid white;
+  border-radius: 8px;
+  font-weight: bold;
   cursor: pointer;
   font-size: 1rem;
-  z-index: 10;
-  margin-right: 100%;
+  margin-bottom: 1rem;
+  align-self: flex-start;
+  transition: 0.3s;
 }
 
 .back-button:hover {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: white;
-  transform: scale(1);
-  box-shadow: 0 0 40px white;
+  box-shadow: 0 0 20px white;
 }
+
+.profile-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  text-align: center;
+  justify-content: center;
+}
+
+
+.profile-picture {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #ffd700;
+  box-shadow: 0 0 10px white;
+  transition: 0.3s;
+}
+
+.profile-picture:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px #ffd700;
+}
+
+.user-details h2 {
+  font-size: 1.8rem;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  transition: transform 0.3s;
+}
+
+.user-details h2:hover {
+  transform: scale(1.1);
+  text-shadow: 0 0 15px white;
+}
+
+.user-details p {
+  font-size: 1rem;
+  margin: 5px 0;
+}
+
+.boton_ver {
+  background: linear-gradient(45deg, #333, #999);
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: solid 1px white;
+  position: relative;
+  overflow: hidden;
+}
+
+.boton_ver:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+}
+
+.boton_ver::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: skewX(-45deg);
+  transition: left 0.5s;
+}
+
+.boton_ver:hover::before {
+  left: 100%;
+}
+
+.team-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+  position: relative;
+  cursor: pointer;
+}
+
+.team-logo {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  box-shadow: 0 0 15px #fff;
+  transition: 0.3s;
+}
+
+.team-logo:hover {
+  transform: scale(1.1);
+}
+
 .team-hover-info {
   position: absolute;
-  color: #201f1f;
-  text-align: left;
   top: 0;
-  right: 70px;
+  right: 0;
   background-color: white;
-  padding: 15px;
-  border: 1px solid #ddd;
+  padding: 1rem;
   border-radius: 10px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
   width: 230px;
-  font-size: 1rem;
-  transition: all 0.4s ease-in-out;
+  font-size: 0.95rem;
   animation: fadeIn 0.6s ease-in-out;
 }
 
@@ -267,379 +381,135 @@ export default {
   }
 }
 
-.team-hover-info p {
-  margin: 10px 0;
-  line-height: 1.6;
-}
-
 .team-hover-info .label {
   font-weight: bold;
   color: black;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .team-hover-info .value {
-  color: rgb(70, 70, 70);
-  font-weight: normal;
-  
+  color: #464646;
 }
 
 .team-hover-info .join-button {
-  display: block;
   margin-top: 15px;
   background-color: gold;
   color: black;
-  border: none;
-  padding: 12px 18px;
+  padding: 10px 15px;
   font-size: 1rem;
   border-radius: 8px;
+  border: none;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: 0.3s ease;
 }
 
 .team-hover-info .join-button:hover {
   background-color: #d4af37;
   transform: scale(1.05);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
-.team-hover-info:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
-
-.profile-info {
+.videos-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
   width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 30px;
-}
-
-.profile-header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 20px;
-}
-
-.profile-picture {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: solid rgb(255, 166, 2);
-  box-shadow: 0 0 10px white;
-}
-.profile-picture:hover{
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgb(255, 230, 9);
-    
-}
-
-.user-details h2 {
-  margin: 0;
-  color: white;
-  font-size: 220%;
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  background: linear-gradient(90deg, rgba(212, 212, 212, 0.2), rgba(255, 215, 0, 0));
+  border: 2px solid #7e7e7e;
+  border-radius: 10px;
+  color: #ffd700;
   text-align: center;
-  border-bottom: 0.5px solid white;
-  text-shadow: 0 0 10px rgb(255, 174, 0);
+}
 
-  font-size: 160%;
-  font-weight: bold;
-  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-  color: #ffd700; /* Dorado */
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
-  padding: 10px 15px;
+.video{
+  width: 50%;
+  height: auto;
   border-radius: 8px;
-  margin-bottom: 20px;
-  
-
-}
-.boton_ver {
-  background: linear-gradient(45deg, #151515, #9f9f9f); /* Dorado degradado */
-  color: rgb(245, 245, 245);
-  font-size: 16px;
-  font-weight: bold;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s;
-  position: relative;
-  border: solid white 1px;
-  overflow: hidden;
+  box-shadow: 0 0 10px #949494;
 }
 
-.boton_ver::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: skewX(-45deg);
-  transition: left 0.5s;
-}
-.likes {
-  display: flex;
-  align-items: center;
-  gap: 5px; /* Espacio entre la imagen y el texto */
-}
-
-.likeee {
+.likeee{
   width: 20px;
   height: 20px;
-}
-
-.boton_ver:hover::before {
-  left: 100%;
-}
-
-.boton_ver:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
-}
-
-.user-details h2:hover {
-    transform: scale(1.2);
-    text-shadow: 0 0 20px rgb(255, 255, 255);
-}
-
-.user-details p {
-  margin: 5px 0;
-  font-size: 1.1rem;
-
-  
-}
-
-.team-info {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  position: relative;
-  margin-bottom: 30px;
-  cursor: pointer;
-  width: 20%;
-  margin-left: 100%
-}
-
-.team-logo {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: solid black;
-  box-shadow: 0 0 20px white;
-}
-.team-logo:hover{
-    transform: scale(1.1);
-}
-
-.descr{
-  color: aliceblue;
-  font-size: 120%;
-}
-.no-team-info {
-  font-size: 1.5rem;
-  color: #949494;
-  margin-left: 70%;
-}
-
-  .videos-section {
-    width: 90%;
-    margin-top: 2%;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;  
-    font-weight: bold;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    color: #ffd700; /* Dorado */
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
-    border: 2px solid #7e7e7e; /* Borde dorado */
-    padding: 10px 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    background: linear-gradient(90deg, rgba(212, 212, 212, 0.2), rgba(255, 215, 0, 0));
-  }
-  
-  .videos-section h3 {
-  font-size: 2.2rem;
-  font-weight: bold;
-  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-  color: #ffd700; /* Dorado */
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
-  border: 2px solid #ffd700; /* Borde dorado */
-  padding: 10px 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  background: linear-gradient(90deg, rgba(224, 197, 108, 0.2), rgba(255, 215, 0, 0));
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  margin-right: 5px;
 }
 
 .videos-section h3 {
-    font-size: 2.2rem;
-    margin-bottom: 20px;
-    
-    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    color: white;
-    text-shadow: 0 0 10px white;
-    border: 2px solid white;
-    margin-bottom: 3%;
-    padding: 1%;
-    box-shadow: 0 0 4px #ddd;
-  }
-
-  .videos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    width: 100%;
-  }
-  .video-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 5px;
-    background-color: #030303;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s;
-    border: solid white;
-    box-shadow: 0 0 10px#949494;
-  }
-
-  .video-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px#ffc400;
-  }
-
-  .video-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    
-    
-  }
-.usuarios{
-    display: flex;
-    flex-direction: row;
-}
-.image-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.image-modal .large-image {
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  animation: fadeIn 0.3s ease-in-out;
-}
-.like-icon {
-   width: 20px;
-   height: 20px;
-   margin-right: 5px;
- }
-/* Animación para que el modal aparezca suavemente */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-.video-content {
-  width: 80%;
-  overflow: hidden; /* Evita que el video se desborde */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.video {
-  max-width: 100%; /* Evita que el video sea más grande que su contenedor */
-  width: 100%;
-  height: 200px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  object-fit: cover;
-  border: 1px solid white;
-  box-shadow: 0 0 5px #949494;
-}
-
-
-#letra {
-  font-size: 1rem;
-  color: #ffffff;
-}
-#letra:hover{
-    color: #ffffff; /* Cambia el color del enlace al pasar el ratón */
-    background-color: transparent; 
-}
-
-
-#letra-link:focus {
-  outline: none; /* Asegura que no aparezca el borde en el foco */
-}
-.video-search {
-  width: 100%;
-  max-width: 300px;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 2px solid rgb(255, 255, 255);
-  border-radius: 25px;
-  outline: none;
-  font-size: 16px;
-  color: rgb(255, 255, 255);
-  background-color: #222;
-  transition: all 0.3s ease-in-out;
-  box-shadow: 2px 2px 10px rgba(255, 215, 0, 0.4);
-}
-
-
-
-.video-search:focus {
-  border-color: gold;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
-  background-color: #111;
-  color: rgba(255, 215, 0, 0.7);
-}
-  
-.juador_sin {
-  color: #000000; /* Rojo suave para destacar */
-  font-weight: bold;
-  font-size: 15px;
-  background-color: #a3a3a3; /* Fondo rosado claro */
-  padding: 5px 10px;
-  border-radius: 5px;
-  display: inline-block;
-  text-align: center;
-  min-width: 200px;
-}
-.equipp{
-  text-align: center;
-  color: #000000;
-  font-size: 17px;
-}
-H12{
+  font-size: 2rem;
+  margin-bottom: 1rem;
   color: white;
+  text-shadow: 0 0 10px white;
+  border: 2px solid white;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(224, 197, 108, 0.2), rgba(255, 215, 0, 0));
+}
+
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.video-card {
+  width: 50%;  
+  background-color: #030303;
+  border: 2px solid white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 0 10px #949494;
+  transition: 0.3s;
+}
+
+.video-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #ffc400;
+}
+
+.usuarios {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+
+
+/* --------- Media Queries ----------- */
+
+@media (max-width: 768px) {
+  .profile-header {
+    flex-direction: column;
+  }
+
+  .team-info {
+    justify-content: center;
+  }
+
+  .videos-section h3 {
+    font-size: 1.5rem;
+  }
+
+  .profile-container {
+    margin-top: 10%;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-picture {
+    width: 100px;
+    height: 100px;
+  }
+
+  .user-details h2 {
+    font-size: 1.3rem;
+  }
+
+  .boton_ver {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
 }
 </style>
+

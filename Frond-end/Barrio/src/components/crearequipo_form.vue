@@ -1,6 +1,11 @@
 <template>
   <header>
+ <div class = "d-none d-md-block">
     <headerapp></headerapp>
+  </div>
+  <div class = "d-block d-md-none">
+    <headermobile></headermobile>
+  </div>
   </header>
   
   <form @submit.prevent="Insertar_team" class="crear_equipo_form">
@@ -22,7 +27,7 @@
 
     <div class="crear_equipo_input-container">
       <p class="arrina">Cantidad De Integrantes:</p>
-      <input v-model="numeropeople" class="crear_equipo_input" type="number" required placeholder="Cantidad de Integrantes" />
+      <input v-model="numeropeople" class="crear_equipo_input" type="number" required placeholder="Cantidad de Integrantes" min="15" max="23" />
     </div>
 
     <div class="crear_equipo_input-container">
@@ -60,7 +65,8 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import Headerapp from './Headerapp.vue';
+import headerapp from '@/components/headerapp.vue';
+import headermobile from '@/components/headermobile.vue';
 import router from '@/rutas/rutas';
 import { useUsuarios } from '@/stores/usuario';
 
@@ -368,6 +374,121 @@ const Insertar_team = async () => {
     transform: translate(100%, 100%) rotate(25deg);
     opacity: 0;
   }
+}
+
+
+@media (min-width: 320px) and (max-width: 480px) {
+  .crear_equipo_form {
+  font-family: 'Trebuchet MS', Arial, sans-serif;
+  padding: 4.2rem;
+  max-width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  color: #fff;
+  backdrop-filter: blur(6px);
+  margin: 10% auto;
+  position: relative;
+  animation: fadeIn 0.8s ease-out;
+}
+}
+@media (min-width: 481px) and (max-width: 600px) {
+  .crear_equipo_form {
+  font-family: 'Trebuchet MS', Arial, sans-serif;
+  padding: 2rem;
+  max-width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  color: #fff;
+  backdrop-filter: blur(6px);
+  margin: 10% auto;
+  position: relative;
+  animation: fadeIn 0.8s ease-out;
+}
+
+
+}
+@media (min-width: 601px) and (max-width: 768px) {
+  .crear_equipo_form {
+  font-family: 'Trebuchet MS', Arial, sans-serif;
+  padding: 2rem;
+  max-width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  color: #fff;
+  backdrop-filter: blur(6px);
+  margin: 20% auto;
+  position: relative;
+  animation: fadeIn 0.8s ease-out;
+}
+
+
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  .crear_equipo_form {
+  font-family: 'Trebuchet MS', Arial, sans-serif;
+  padding: 2rem;
+  max-width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  color: #fff;
+  backdrop-filter: blur(6px);
+  margin: 30% auto;
+  position: relative;
+  animation: fadeIn 0.8s ease-out;
+}
+
+
+}
+@media (min-width: 1025px) and (max-width: 1440px) {
+
+  .crear_equipo_form {
+  font-family: 'Trebuchet MS', Arial, sans-serif;
+  padding: 2rem;
+  max-width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  color: #fff;
+  backdrop-filter: blur(6px);
+  margin: 35% auto;
+  position: relative;
+  animation: fadeIn 0.8s ease-out;
+}
+
+
+}
+@media (min-width: 1441px) and (max-width: 1920px) {
+  .crear_equipo_form {
+  font-family: 'Trebuchet MS', Arial, sans-serif;
+  padding: 2rem;
+  max-width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  color: #fff;
+  backdrop-filter: blur(6px);
+  margin: 35% auto;
+  position: relative;
+  animation: fadeIn 0.8s ease-out;
+}
+
+
+}
+@media (min-width: 1921px) and (max-width: 2560px) {
+
+
+}
+@media (min-width: 2561px) and (max-width: 3840px) {
+
+
+}
+@media (min-width: 3841px) and (max-width: 5120px) {
+
+
 }
 
 </style>

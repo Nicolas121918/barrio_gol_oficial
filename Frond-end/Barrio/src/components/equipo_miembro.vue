@@ -9,21 +9,15 @@
         <div class="logo-container" @click="mostrarImagen = true">
     <img :src="team.logo" alt="Logo del equipo" class="logo" v-if="team.logo" />
   </div>
-  <router-link
-  class="linktorneos"
-  :to="`/galeria-inspeccionar/${team.Id_equipo}`"
->
-  <img class="api5" src="../assets/imagenes/galeria.png" alt="galeria">
-</router-link>
+
+
+
   
           <div class="epic-banner">
     <h1 class="epic-name">{{ team.name }}</h1>
             <p class="description">{{ team.description }}</p>
         </div> <!-- Descripción debajo del nombre -->
-  
-        <router-link class="linktorneos" to="/calendario">
-          <img class="api5" src="../assets/imagenes/calendario.png" alt="calendario">
-        </router-link>
+
   
         <div class="caja_hijo">
         
@@ -180,6 +174,7 @@ import { useUsuarios } from '@/stores/usuario';
 import axios from 'axios';
 import { io } from "socket.io-client";
 
+
 export default {
   components: {
     useUsuarios,
@@ -216,8 +211,6 @@ export default {
 
     };
   },
-
-  
   computed: {
   nivel() {
     if (!this.team.puntos || this.team.puntos < 500) return 1; // Si no tiene puntos o tiene menos de 500, está en nivel 1
@@ -254,11 +247,11 @@ export default {
   const movistore = useUsuarios();
   const team_Id = movistore.usuario.equipo_tiene;
   
+  
   this.socket = io("http://localhost:8000");
   
   // Unirse a la sala del equipo
   this.socket.emit("joinRoom", team_Id);
-
   
   // Escuchar nuevos mensajes y agregarlos en tiempo real
   this.socket.on("nuevoMensaje", (message) => {
@@ -273,14 +266,14 @@ export default {
   });
 });
 
-
-
 },
 
 methods: {
+  
   async sendMessage() {
     const movistore = useUsuarios();
     const team_Id = movistore.usuario.equipo_tiene;
+    
 
     if (this.newMessage.trim() !== "") {
       const messageData = {
@@ -306,6 +299,7 @@ methods: {
   async viewMessages() {
     const movistore = useUsuarios();
     const team_Id = movistore.usuario.equipo_tiene;
+
 
     try {
       // Obtener mensajes desde la base de datos
@@ -384,6 +378,8 @@ methods: {
     },
 
 
+ 
+  
     
 
     async obtenerDatosEquipo() {
@@ -411,7 +407,13 @@ methods: {
   } catch (error) {
     console.error("Error al obtener datos del equipo:", error);
   }
-},      
+},     
+
+
+   
+
+
+
     openMemberMenu(member) {
       this.selectedMember = member;
       this.showMemberMenu = true;
@@ -423,6 +425,8 @@ methods: {
 
     async confirmExpel(documento, nombre) {
   const movistore = useUsuarios();
+     // **Actualizar el estado en Pinia**
+   
 
   if (!movistore.usuario.equipo_tiene) {
     console.error("Error: No hay equipo seleccionado.");
@@ -452,7 +456,7 @@ methods: {
 
       // ✅ Actualizar la lista de miembros
       this.team.members = this.team.members.filter(m => m.documento !== documento);
-
+      
       this.closeMemberMenu();
       alert(`${nombre} ha sido expulsado del equipo.`);
 
@@ -482,6 +486,7 @@ abrirModalReporte(mensaje) {
   }
 
   const movistore = useUsuarios(); // Obtén el estado del usuario actual
+ 
 
   const reporte = {
     documento_reportante: movistore.usuario.documento, // Documento del usuario actual
@@ -505,6 +510,9 @@ abrirModalReporte(mensaje) {
     alert("Hubo un error al enviar el reporte.");
   }
 },
+
+
+
 
 verPerfil(documento) {
   this.$router.push(`/perfiles/${documento}`); // Redirige usando el documento
@@ -533,6 +541,32 @@ verPerfil(documento) {
     closeConfig() {
       this.showConfig = false;
     },
+
+
+    salir_equipo() {
+  const movistore = useUsuarios();
+  const formData = new FormData();
+  formData.append('documento_user', movistore.usuario.documento); // Usa el documento del usuario logueado
+
+  axios.post('http://localhost:8000/equipos/salir', formData)
+    .then(response => {
+      console.log(response.data.mensaje);
+      // ✅ Actualizar estado local
+      movistore.usuario.equipo_tiene = 0;
+      // ✅ Mostrar notificación si quieres
+      alert('Has salido del equipo exitosamente.');
+    })
+    .catch(error => {
+      console.error('Error al salir del equipo:', error);
+      alert(error.response?.data?.detail || 'No se pudo salir del equipo.');
+    });
+},
+
+
+
+
+
+
   
       rejectRequest(solicitud) {
         this.team.requests = this.team.requests.filter((req) => req !== solicitud);
@@ -576,7 +610,6 @@ verPerfil(documento) {
 
     // Refrescar los datos del equipo (opcional)
     await this.obtenerDatosEquipo();
-    await this.obtenerDatosEquipo(); // Llamar al cargar el componente
     await this.obtenerLiderEquipo();
     await this.obtenerCantidadIntegrantes();
   } catch (error) {
@@ -656,6 +689,8 @@ async requests() {
     console.error("Error al obtener solicitudes-------------------:", error);
   }
 },
+
+
 async acceptRequest(solicitud) {
     try {
       const response = await fetch(`http://localhost:8000/solicitudes_ingreso/${solicitud.id_solicitud}/aceptar`, {
@@ -687,6 +722,8 @@ async acceptRequest(solicitud) {
         this.team.logo = URL.createObjectURL(file);
       }
     },
+
+    
   },
 };
   </script>
@@ -1069,19 +1106,22 @@ border: solid white;
 }
 
 .chat-message {
-  background-color: #1a1a1a; /* negro suave */
-  border: 1px solid #333;
-  border-left: 4px solid transparent;
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 18px;
-  color: #fff;
-  position: relative;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  width: 600px;
-
+background-color: #1a1a1a;
+border: 1px solid #333;
+border-left: 4px solid transparent;
+border-radius: 12px;
+padding: 14px;
+margin-bottom: 18px;
+color: #fff;
+position: relative;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+transition: all 0.3s ease;
+cursor: pointer;
+width: 100%;
+/* 🛠 Estas líneas son clave para textos largos */
+word-wrap: break-word;
+white-space: pre-wrap;
+overflow-wrap: break-word;
 }
 .chat-message:hover {
   border-color: #d4af37; /* dorado */
@@ -1501,6 +1541,9 @@ textarea {
 .modal-text {
   color: #eaeaea;
   margin-bottom: 12px;
+  word-wrap: break-word;
+white-space: pre-wrap;
+overflow-wrap: break-word;
 }
 
 .modal-label {
@@ -1576,6 +1619,837 @@ textarea {
     transform: translateY(0);
   }
 }
+
+
+
+
+
+@media (min-width: 320px) and (max-width: 480px) {
+
+.team-leader {
+max-width: 50vw;
+min-width: 100vw;
+font-family: 'Arial', sans-serif;
+padding: 1rem;
+background-image: url("../assets/imagenes/cancha.jpg"); 
+background-repeat: no-repeat;
+background-size: cover; /* Esto asegura que la imagen cubra todo el contenedor */
+color: #fff;
+border-radius: 10px;
+color: black;
+z-index:-6; /* Desenfoque de la imagen */
+border: solid white;
+}
+
+
+.header {
+text-align: center;
+background-color: rgba(3, 0, 0, 0.822);
+padding: 0rem;
+border-radius: 10px;
+color: white;
+}
+
+
+
+.logo-container {
+display: flex;
+justify-content: center;
+align-items: center;
+padding-top: 1rem;
+padding-right: 0rem
+
+}
+
+.logo {
+width: 40%;
+height: 20%;
+object-fit: cover; /* rellena el espacio sin deformarse */
+border-radius: 50%; /* círculo perfecto */
+border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+background-color: #fff;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+box-shadow: 0 0 12px #ffe100;
+
+}
+
+.epic-banner {
+text-align: center;
+padding: 1rem 2.1rem;
+background-color: transparent;
+max-width: 5%;
+min-width: 10%;
+}
+
+.epic-name {
+font-family:initial;
+color: #ffffff; /* Dorado */
+text-shadow:
+  1px 1px 0 #000000,
+  2px 2px 0 #ffcc00,
+  3px 3px 4px #000;
+letter-spacing: 0rem;
+text-transform: uppercase;
+padding-left: 1%;
+padding-right: 10%;
+font-size: 1.3rem;
+}
+
+.description {
+font-size: 1rem;
+color: #bcbcbc; /* más notorio que #ccc pero aún sutil */
+font-style: italic;
+margin-top: 0%;
+border: solid transparent;
+padding: 0rem 0rem;
+font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+
+.miembros_style {
+font-weight: bold;
+font-size: 1rem;
+color: #fff7f7;
+border-top: solid white;
+border-bottom: solid white;
+padding: 0rem;
+margin-top: 150%;
+margin-right: 1rem;
+}
+
+
+.caja_hijo{
+margin-left: 0rem; 
+}
+
+
+.chat-section {
+margin-top: 0%;
+padding: 2rem;
+background-color: #000000;
+border-radius: 10px;
+}
+
+.chat-box {
+max-height: 80%;
+max-width: 200%;
+overflow-y: auto;
+margin-bottom: 0%;
+padding: 1rem;
+
+}
+
+.chat-message {
+background-color: #1a1a1a;
+border: 1px solid #333;
+border-left: 4px solid transparent;
+border-radius: 12px;
+padding: 14px;
+margin-bottom: 18px;
+color: #fff;
+position: relative;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+transition: all 0.3s ease;
+cursor: pointer;
+width: 100%;
+/* 🛠 Estas líneas son clave para textos largos */
+word-wrap: break-word;
+white-space: pre-wrap;
+overflow-wrap: break-word;
+}
+
+.chat-message:hover {
+border-color: #d4af37; /* dorado */
+border-left: 4px solid #d4af37;
+background-color: #222;
+transform: scale(1.015);
+}
+
+.message-header {
+display: flex;
+align-items: center;
+margin-bottom: 5px;
+}
+
+
+.sender-name {
+color: #ffffff; /* dorado */
+font-weight: bold;
+margin-right: 0%;
+font-size: 15px;
+}
+
+.timestamp {
+display: none;
+}
+
+
+.message-content {
+font-size: 1rem;
+color: #eee;
+padding-left: 0%;
+position: relative;
+margin-left: 0%;
+}
+
+
+.members-section {
+margin-top: 0%;
+}
+
+
+
+
+.logo-container {
+display: flex;
+justify-content: center;
+align-items: center;
+padding-top: 50px;
+
+}
+
+.logo {
+width: 15vh;
+height: 15vh;
+object-fit: cover; /* rellena el espacio sin deformarse */
+border-radius: 50%; /* círculo perfecto */
+border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+background-color: #fff;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+box-shadow: 0 0 12px #ffe100;
+
+}
+
+}
+
+
+
+
+@media (min-width: 481px) and (max-width: 600px) {
+
+.team-leader {
+max-width: 50vw;
+min-width: 100vw;
+font-family: 'Arial', sans-serif;
+padding: 1rem;
+background-image: url("../assets/imagenes/cancha.jpg"); 
+background-repeat: no-repeat;
+background-size: cover; /* Esto asegura que la imagen cubra todo el contenedor */
+color: #fff;
+border-radius: 10px;
+color: black;
+z-index:-6; /* Desenfoque de la imagen */
+border: solid white;
+}
+
+
+.header {
+text-align: center;
+background-color: rgba(3, 0, 0, 0.822);
+padding: 0rem;
+border-radius: 10px;
+color: white;
+}
+
+
+
+.logo-container {
+display: flex;
+justify-content: center;
+align-items: center;
+padding-top: 1rem;
+padding-right: 0rem
+
+}
+
+.logo {
+width: 40%;
+height: 20%;
+object-fit: cover; /* rellena el espacio sin deformarse */
+border-radius: 50%; /* círculo perfecto */
+border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+background-color: #fff;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+box-shadow: 0 0 12px #ffe100;
+
+}
+
+.epic-banner {
+text-align: center;
+padding: 1rem 7rem;
+background-color: transparent;
+max-width: 5%;
+min-width: 10%;
+}
+
+.epic-name {
+font-family:initial;
+color: #ffffff; /* Dorado */
+text-shadow:
+  1px 1px 0 #000000,
+  2px 2px 0 #ffcc00,
+  3px 3px 4px #000;
+letter-spacing: 0rem;
+text-transform: uppercase;
+padding-left: 1%;
+padding-right: 10%;
+font-size: 1.5rem;
+}
+
+.description {
+font-size: 1.5rem;
+color: #bcbcbc; /* más notorio que #ccc pero aún sutil */
+font-style: italic;
+margin-top: 0%;
+border: solid transparent;
+padding: 0rem 0rem;
+font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+
+.miembros_style {
+font-weight: bold;
+font-size: 1rem;
+color: #fff7f7;
+border-top: solid white;
+border-bottom: solid white;
+padding: 0rem;
+margin-top: 150%;
+margin-right: 1rem;
+}
+
+
+.caja_hijo{
+margin-left: 0rem; 
+}
+
+
+.chat-section {
+margin-top: 0%;
+padding: 2rem;
+background-color: #000000;
+border-radius: 10px;
+}
+
+.chat-box {
+max-height: 80%;
+max-width: 200%;
+overflow-y: auto;
+margin-bottom: 0%;
+padding: 1rem;
+
+}
+
+.chat-message {
+background-color: #1a1a1a;
+border: 1px solid #333;
+border-left: 4px solid transparent;
+border-radius: 12px;
+padding: 14px;
+margin-bottom: 18px;
+color: #fff;
+position: relative;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+transition: all 0.3s ease;
+cursor: pointer;
+width: 100%;
+/* 🛠 Estas líneas son clave para textos largos */
+word-wrap: break-word;
+white-space: pre-wrap;
+overflow-wrap: break-word;
+}
+
+.chat-message:hover {
+border-color: #d4af37; /* dorado */
+border-left: 4px solid #d4af37;
+background-color: #222;
+transform: scale(1.015);
+}
+
+.message-header {
+display: flex;
+align-items: center;
+margin-bottom: 5px;
+}
+
+
+.sender-name {
+color: #ffffff; /* dorado */
+font-weight: bold;
+margin-right: 0%;
+font-size: 15px;
+}
+
+.timestamp {
+display: none;
+}
+
+
+.message-content {
+font-size: 1rem;
+color: #eee;
+padding-left: 0%;
+position: relative;
+margin-left: 0%;
+}
+
+
+.members-section {
+margin-top: 0%;
+}
+
+
+
+
+.logo-container {
+display: flex;
+justify-content: center;
+align-items: center;
+padding-top: 50px;
+
+}
+
+.logo {
+width: 15vh;
+height: 15vh;
+object-fit: cover; /* rellena el espacio sin deformarse */
+border-radius: 50%; /* círculo perfecto */
+border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+background-color: #fff;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+box-shadow: 0 0 12px #ffe100;
+
+}
+
+
+
+}
+@media (min-width: 601px) and (max-width: 768px) {
+
+.team-leader {
+max-width: 50vw;
+min-width: 100vw;
+font-family: 'Arial', sans-serif;
+padding: 1rem;
+background-image: url("../assets/imagenes/cancha.jpg"); 
+background-repeat: no-repeat;
+background-size: cover; /* Esto asegura que la imagen cubra todo el contenedor */
+color: #fff;
+border-radius: 10px;
+color: black;
+z-index:-6; /* Desenfoque de la imagen */
+border: solid white;
+}
+
+
+.header {
+text-align: center;
+background-color: rgba(3, 0, 0, 0.822);
+padding: 0rem;
+border-radius: 10px;
+color: white;
+}
+
+
+
+.logo-container {
+display: flex;
+justify-content: center;
+align-items: center;
+padding-top: 1rem;
+padding-right: 0rem
+
+}
+
+.logo {
+width: 40%;
+height: 20%;
+object-fit: cover; /* rellena el espacio sin deformarse */
+border-radius: 50%; /* círculo perfecto */
+border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+background-color: #fff;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+box-shadow: 0 0 12px #ffe100;
+
+}
+
+.epic-banner {
+text-align: center;
+padding: 1rem 5rem;
+background-color: transparent;
+max-width: 5%;
+min-width: 10%;
+}
+
+.epic-name {
+font-family:initial;
+color: #ffffff; /* Dorado */
+text-shadow:
+  1px 1px 0 #000000,
+  2px 2px 0 #ffcc00,
+  3px 3px 4px #000;
+letter-spacing: 0rem;
+text-transform: uppercase;
+padding-left: 1%;
+padding-right: 10%;
+font-size: 2rem;
+}
+
+.description {
+font-size: 2rem;
+color: #bcbcbc; /* más notorio que #ccc pero aún sutil */
+font-style: italic;
+margin-top: 0%;
+border: solid transparent;
+padding: 0rem 0rem;
+font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+
+.miembros_style {
+font-weight: bold;
+font-size: 1rem;
+color: #fff7f7;
+border-top: solid white;
+border-bottom: solid white;
+padding: 0rem;
+margin-top: 150%;
+margin-right: 1rem;
+}
+
+
+.caja_hijo{
+margin-left: 10rem; 
+}
+
+
+.chat-section {
+margin-top: 0%;
+padding: 2rem;
+background-color: #000000;
+border-radius: 10px;
+}
+
+.chat-box {
+max-height: 80%;
+max-width: 200%;
+overflow-y: auto;
+margin-bottom: 0%;
+padding: 1rem;
+
+}
+
+.chat-message {
+background-color: #1a1a1a;
+border: 1px solid #333;
+border-left: 4px solid transparent;
+border-radius: 12px;
+padding: 14px;
+margin-bottom: 18px;
+color: #fff;
+position: relative;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+transition: all 0.3s ease;
+cursor: pointer;
+width: 100%;
+/* 🛠 Estas líneas son clave para textos largos */
+word-wrap: break-word;
+white-space: pre-wrap;
+overflow-wrap: break-word;
+}
+
+.chat-message:hover {
+border-color: #d4af37; /* dorado */
+border-left: 4px solid #d4af37;
+background-color: #222;
+transform: scale(1.015);
+}
+
+.message-header {
+display: flex;
+align-items: center;
+margin-bottom: 5px;
+}
+
+
+.sender-name {
+color: #ffffff; /* dorado */
+font-weight: bold;
+margin-right: 0%;
+font-size: 15px;
+}
+
+.timestamp {
+display: none;
+}
+
+
+.message-content {
+font-size: 1rem;
+color: #eee;
+padding-left: 0%;
+position: relative;
+margin-left: 0%;
+}
+
+
+.members-section {
+margin-top: 0%;
+}
+
+
+
+
+.logo-container {
+display: flex;
+justify-content: center;
+align-items: center;
+padding-top: 50px;
+
+}
+
+.logo {
+width: 15vh;
+height: 15vh;
+object-fit: cover; /* rellena el espacio sin deformarse */
+border-radius: 50%; /* círculo perfecto */
+border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+background-color: #fff;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+box-shadow: 0 0 12px #ffe100;
+
+}
+
+}
+@media (min-width: 769px) and (max-width: 900px) {
+.team-leader {
+max-width: 50vw;
+min-width: 100vw;
+font-family: 'Arial', sans-serif;
+padding: 1rem;
+background-image: url("../assets/imagenes/cancha.jpg"); 
+background-repeat: no-repeat;
+background-size: cover; /* Esto asegura que la imagen cubra todo el contenedor */
+color: #fff;
+border-radius: 10px;
+color: black;
+z-index:-6; /* Desenfoque de la imagen */
+border: solid white;
+}
+
+
+.header {
+text-align: center;
+background-color: rgba(3, 0, 0, 0.822);
+padding: 0rem;
+border-radius: 10px;
+color: white;
+}
+
+
+
+.logo-container {
+display: flex;
+justify-content: center;
+align-items: center;
+padding-top: 1rem;
+padding-right: 0rem
+
+}
+
+.logo {
+width: 50%;
+height: 50%;
+object-fit: cover; /* rellena el espacio sin deformarse */
+border-radius: 50%; /* círculo perfecto */
+border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+background-color: #fff;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+box-shadow: 0 0 12px #ffe100;
+
+}
+
+.epic-banner {
+text-align: center;
+padding: 1rem 5rem;
+background-color: transparent;
+max-width: 5%;
+min-width: 10%;
+}
+
+.epic-name {
+font-family:initial;
+color: #ffffff; /* Dorado */
+text-shadow:
+  1px 1px 0 #000000,
+  2px 2px 0 #ffcc00,
+  3px 3px 4px #000;
+letter-spacing: 0rem;
+text-transform: uppercase;
+padding-left: 1%;
+padding-right: 10%;
+font-size: 3rem;
+}
+
+.description {
+font-size: 2.5rem;
+color: #bcbcbc; /* más notorio que #ccc pero aún sutil */
+font-style: italic;
+margin-top: 0%;
+border: solid transparent;
+padding: 0rem 0rem;
+font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+
+.miembros_style {
+font-weight: bold;
+font-size: 1rem;
+color: #fff7f7;
+border-top: solid white;
+border-bottom: solid white;
+padding: 0rem;
+margin-top: 150%;
+margin-right: 5rem;
+}
+
+
+.caja_hijo{
+margin-left: 10rem; 
+}
+
+
+.chat-section {
+margin-top: 0%;
+padding: 2rem;
+background-color: #000000;
+border-radius: 10px;
+}
+
+.chat-box {
+max-height: 80%;
+max-width: 200%;
+overflow-y: auto;
+margin-bottom: 0%;
+padding: 1rem;
+
+}
+
+.chat-message {
+background-color: #1a1a1a;
+border: 1px solid #333;
+border-left: 4px solid transparent;
+border-radius: 12px;
+padding: 14px;
+margin-bottom: 18px;
+color: #fff;
+position: relative;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+transition: all 0.3s ease;
+cursor: pointer;
+width: 100%;
+/* 🛠 Estas líneas son clave para textos largos */
+word-wrap: break-word;
+white-space: pre-wrap;
+overflow-wrap: break-word;
+}
+
+.chat-message:hover {
+border-color: #d4af37; /* dorado */
+border-left: 4px solid #d4af37;
+background-color: #222;
+transform: scale(1.015);
+}
+
+.message-header {
+display: flex;
+align-items: center;
+margin-bottom: 5px;
+}
+
+
+.sender-name {
+color: #ffffff; /* dorado */
+font-weight: bold;
+margin-right: 0%;
+font-size: 15px;
+}
+
+.timestamp {
+display: none;
+}
+
+
+.message-content {
+font-size: 1rem;
+color: #eee;
+padding-left: 0%;
+position: relative;
+margin-left: 0%;
+}
+
+
+.members-section {
+margin-top: 0%;
+}
+
+
+
+
+.logo-container {
+display: flex;
+justify-content: center;
+align-items: center;
+padding-top: 50px;
+
+}
+
+.logo {
+width: 15vh;
+height: 15vh;
+object-fit: cover; /* rellena el espacio sin deformarse */
+border-radius: 50%; /* círculo perfecto */
+border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+background-color: #fff;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+box-shadow: 0 0 12px #ffe100;
+
+}
+}
+
+@media (min-width: 1025px) and (max-width: 1440px) {
+
+  
+
+
+
+
+}
+@media (min-width: 1441px) and (max-width: 1920px) {
+
+
+
+
+}
+@media (min-width: 1921px) and (max-width: 2560px) {
+
+
+
+
+}
+@media (min-width: 2561px) and (max-width: 3840px) {
+
+
+
+
+}
+@media (min-width: 3841px) and (max-width: 5120px) {
+
+
+
+
+}
+
 
   
   </style>

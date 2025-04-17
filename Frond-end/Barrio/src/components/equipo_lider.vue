@@ -10,18 +10,19 @@
   <img :src="team.logo" alt="Logo del equipo" class="logo" v-if="team.logo" />
 </div>
 
-      <router-link class="linktorneos" to="/galeria">
-        <img class="api5" src="../assets/imagenes/galeria.png" alt="galeria">
-      </router-link>
 
         <div class="epic-banner">
   <h1 class="epic-name">{{ team.name }}</h1>
           <p class="description">{{ team.description }}</p>
+
+
+
+
       </div> <!-- Descripción debajo del nombre -->
       <div class="caja_hijo">
       
       <p class="miembros_style">
-  Miembros: <br class="numeros">
+  Miembros <br class="numeros">
   <span class="contador_style">{{ team.integrantes_actuales }}/{{ team.numero_integrantes }}</span>
 </p>
 
@@ -638,7 +639,6 @@ verPerfil(documento) {
       alert("No hay un equipo asociado para eliminar.");
       return;
     }
-
     // Hacer la petición DELETE
     const deleteResponse = await axios.delete(`http://127.0.0.1:8000/equipos/eliminar/${id_delete}`);
 
@@ -851,7 +851,6 @@ border: solid white;
   border: solid rgb(102, 102, 102);
   padding: 8px 12px;
   max-width: 500px;
-  
   font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
 }
 
@@ -930,20 +929,6 @@ border: solid white;
   padding: 20px;
   margin-top: 6%;
 }
-
-.modal-content {
-  background-color: rgb(255, 254, 254);
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 400px;
- 
-  width: 100%;
-  box-shadow: 0 0 10px white;
-  text-align: center;
-  
-}
-
-
 
 
 .button_info-btn {
@@ -1110,7 +1095,7 @@ border: solid white;
 }
 
 .chat-message {
-  background-color: #1a1a1a; /* negro suave */
+  background-color: #1a1a1a;
   border: 1px solid #333;
   border-left: 4px solid transparent;
   border-radius: 12px;
@@ -1121,8 +1106,12 @@ border: solid white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
   cursor: pointer;
-  width: 600px;
+  width: 100%;
 
+  /* 🛠 Estas líneas son clave para textos largos */
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 .chat-message:hover {
   border-color: #d4af37; /* dorado */
@@ -1206,15 +1195,6 @@ border: solid white;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 400px;
-  text-align: center;
 }
 
 .button-close {
@@ -1401,7 +1381,6 @@ textarea {
   color: #fff7f7;
   border-top: solid white;
   border-bottom: solid white;
-  
   padding: 10%;
   margin-top: 10px;
 }
@@ -1419,7 +1398,7 @@ textarea {
 }
 
 .descripcion_actualizar{
-  border: solid rgb(134, 134, 134);
+  border: solid rgb(179, 179, 179);
   padding: 3%;
   margin-top: 7%;
   margin-bottom: 3%;
@@ -1526,7 +1505,7 @@ textarea {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 90%;
   background-color: rgba(0, 0, 0, 0.7); /* Fondo semitransparente */
   display: flex;
   justify-content: center;
@@ -1535,13 +1514,13 @@ textarea {
 }
 
 .modal-content {
-  background-color: #ffffff; /* Fondo del contenido */
-  padding: 20px;
+  background-color: #ffffff; 
+  padding: 6rem;
   border-radius: 10px;
   max-width: 500px;
   width: 90%;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); /* Sombra para destacar */
-  z-index: 10000; /* Asegúrate de que el contenido esté por encima del fondo */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  z-index: 10000; 
   text-align: center;
 }
 
@@ -1628,6 +1607,860 @@ textarea {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+
+@media (min-width: 320px) and (max-width: 480px) {
+
+  .team-leader {
+max-width: 50vw;
+min-width: 100vw;
+font-family: 'Arial', sans-serif;
+padding: 1rem;
+background-image: url("../assets/imagenes/cancha.jpg"); 
+background-repeat: no-repeat;
+background-size: cover; /* Esto asegura que la imagen cubra todo el contenedor */
+color: #fff;
+border-radius: 10px;
+color: black;
+z-index:-6; /* Desenfoque de la imagen */
+border: solid white;
+}
+
+
+.header {
+  text-align: center;
+  background-color: rgba(3, 0, 0, 0.822);
+  padding: 0rem;
+  border-radius: 10px;
+  color: white;
+}
+
+
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 1rem;
+  padding-right: 0rem
+  
+}
+
+.logo {
+  width: 40%;
+  height: 20%;
+  object-fit: cover; /* rellena el espacio sin deformarse */
+  border-radius: 50%; /* círculo perfecto */
+  border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 12px #ffe100;
+
+}
+
+.epic-banner {
+  text-align: center;
+  padding: 1rem 2.1rem;
+  background-color: transparent;
+  max-width: 5%;
+  min-width: 10%;
+}
+
+.epic-name {
+  font-family:initial;
+  color: #ffffff; /* Dorado */
+  text-shadow:
+    1px 1px 0 #000000,
+    2px 2px 0 #ffcc00,
+    3px 3px 4px #000;
+  letter-spacing: 0rem;
+  text-transform: uppercase;
+  padding-left: 1%;
+  padding-right: 10%;
+  font-size: 1.3rem;
+}
+
+.description {
+  font-size: 1rem;
+  color: #bcbcbc; /* más notorio que #ccc pero aún sutil */
+  font-style: italic;
+  margin-top: 0%;
+  border: solid transparent;
+  padding: 0rem 0rem;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+
+.miembros_style {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #fff7f7;
+  border-top: solid white;
+  border-bottom: solid white;
+  padding: 0rem;
+  margin-top: 150%;
+  margin-right: 1rem;
+}
+
+
+.caja_hijo{
+  margin-left: 0rem; 
+}
+
+
+.chat-section {
+  margin-top: 0%;
+  padding: 2rem;
+  background-color: #000000;
+  border-radius: 10px;
+}
+
+.chat-box {
+  max-height: 80%;
+  max-width: 200%;
+  overflow-y: auto;
+  margin-bottom: 0%;
+  padding: 1rem;
+  
+}
+
+.chat-message {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-left: 4px solid transparent;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+  color: #fff;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  width: 100%;
+  /* 🛠 Estas líneas son clave para textos largos */
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.chat-message:hover {
+  border-color: #d4af37; /* dorado */
+  border-left: 4px solid #d4af37;
+  background-color: #222;
+  transform: scale(1.015);
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+
+.sender-name {
+  color: #ffffff; /* dorado */
+  font-weight: bold;
+  margin-right: 0%;
+  font-size: 15px;
+}
+
+.timestamp {
+  display: none;
+}
+
+
+.message-content {
+  font-size: 1rem;
+  color: #eee;
+  padding-left: 0%;
+  position: relative;
+  margin-left: 0%;
+}
+
+
+.members-section {
+  margin-top: 0%;
+}
+
+
+
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 50px;
+  
+}
+
+.logo {
+  width: 15vh;
+  height: 15vh;
+  object-fit: cover; /* rellena el espacio sin deformarse */
+  border-radius: 50%; /* círculo perfecto */
+  border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 12px #ffe100;
+
+}
+
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Fondo semitransparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Asegúrate de que esté por encima de otros elementos */
+}
+
+.modal-content {
+  background-color: #ffffff; 
+  padding: 0rem;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  z-index: 10000; 
+  text-align: center;
+}
+
+
+
+
+}
+
+
+
+
+@media (min-width: 481px) and (max-width: 600px) {
+
+  .team-leader {
+max-width: 50vw;
+min-width: 100vw;
+font-family: 'Arial', sans-serif;
+padding: 1rem;
+background-image: url("../assets/imagenes/cancha.jpg"); 
+background-repeat: no-repeat;
+background-size: cover; /* Esto asegura que la imagen cubra todo el contenedor */
+color: #fff;
+border-radius: 10px;
+color: black;
+z-index:-6; /* Desenfoque de la imagen */
+border: solid white;
+}
+
+
+.header {
+  text-align: center;
+  background-color: rgba(3, 0, 0, 0.822);
+  padding: 0rem;
+  border-radius: 10px;
+  color: white;
+}
+
+
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 1rem;
+  padding-right: 0rem
+  
+}
+
+.logo {
+  width: 40%;
+  height: 20%;
+  object-fit: cover; /* rellena el espacio sin deformarse */
+  border-radius: 50%; /* círculo perfecto */
+  border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 12px #ffe100;
+
+}
+
+.epic-banner {
+  text-align: center;
+  padding: 1rem 7rem;
+  background-color: transparent;
+  max-width: 5%;
+  min-width: 10%;
+}
+
+.epic-name {
+  font-family:initial;
+  color: #ffffff; /* Dorado */
+  text-shadow:
+    1px 1px 0 #000000,
+    2px 2px 0 #ffcc00,
+    3px 3px 4px #000;
+  letter-spacing: 0rem;
+  text-transform: uppercase;
+  padding-left: 1%;
+  padding-right: 10%;
+  font-size: 1.5rem;
+}
+
+.description {
+  font-size: 1.5rem;
+  color: #bcbcbc; /* más notorio que #ccc pero aún sutil */
+  font-style: italic;
+  margin-top: 0%;
+  border: solid transparent;
+  padding: 0rem 0rem;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+
+.miembros_style {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #fff7f7;
+  border-top: solid white;
+  border-bottom: solid white;
+  padding: 0rem;
+  margin-top: 150%;
+  margin-right: 1rem;
+}
+
+
+.caja_hijo{
+  margin-left: 0rem; 
+}
+
+
+.chat-section {
+  margin-top: 0%;
+  padding: 2rem;
+  background-color: #000000;
+  border-radius: 10px;
+}
+
+.chat-box {
+  max-height: 80%;
+  max-width: 200%;
+  overflow-y: auto;
+  margin-bottom: 0%;
+  padding: 1rem;
+  
+}
+
+.chat-message {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-left: 4px solid transparent;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+  color: #fff;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  width: 100%;
+  /* 🛠 Estas líneas son clave para textos largos */
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.chat-message:hover {
+  border-color: #d4af37; /* dorado */
+  border-left: 4px solid #d4af37;
+  background-color: #222;
+  transform: scale(1.015);
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+
+.sender-name {
+  color: #ffffff; /* dorado */
+  font-weight: bold;
+  margin-right: 0%;
+  font-size: 15px;
+}
+
+.timestamp {
+  display: none;
+}
+
+
+.message-content {
+  font-size: 1rem;
+  color: #eee;
+  padding-left: 0%;
+  position: relative;
+  margin-left: 0%;
+}
+
+
+.members-section {
+  margin-top: 0%;
+}
+
+
+
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 50px;
+  
+}
+
+.logo {
+  width: 15vh;
+  height: 15vh;
+  object-fit: cover; /* rellena el espacio sin deformarse */
+  border-radius: 50%; /* círculo perfecto */
+  border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 12px #ffe100;
+
+}
+
+
+
+}
+@media (min-width: 601px) and (max-width: 768px) {
+
+  .team-leader {
+max-width: 50vw;
+min-width: 100vw;
+font-family: 'Arial', sans-serif;
+padding: 1rem;
+background-image: url("../assets/imagenes/cancha.jpg"); 
+background-repeat: no-repeat;
+background-size: cover; /* Esto asegura que la imagen cubra todo el contenedor */
+color: #fff;
+border-radius: 10px;
+color: black;
+z-index:-6; /* Desenfoque de la imagen */
+border: solid white;
+}
+
+
+.header {
+  text-align: center;
+  background-color: rgba(3, 0, 0, 0.822);
+  padding: 0rem;
+  border-radius: 10px;
+  color: white;
+}
+
+
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 1rem;
+  padding-right: 0rem
+  
+}
+
+.logo {
+  width: 40%;
+  height: 20%;
+  object-fit: cover; /* rellena el espacio sin deformarse */
+  border-radius: 50%; /* círculo perfecto */
+  border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 12px #ffe100;
+
+}
+
+.epic-banner {
+  text-align: center;
+  padding: 1rem 5rem;
+  background-color: transparent;
+  max-width: 5%;
+  min-width: 10%;
+}
+
+.epic-name {
+  font-family:initial;
+  color: #ffffff; /* Dorado */
+  text-shadow:
+    1px 1px 0 #000000,
+    2px 2px 0 #ffcc00,
+    3px 3px 4px #000;
+  letter-spacing: 0rem;
+  text-transform: uppercase;
+  padding-left: 1%;
+  padding-right: 10%;
+  font-size: 2rem;
+}
+
+.description {
+  font-size: 2rem;
+  color: #bcbcbc; /* más notorio que #ccc pero aún sutil */
+  font-style: italic;
+  margin-top: 0%;
+  border: solid transparent;
+  padding: 0rem 0rem;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+
+.miembros_style {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #fff7f7;
+  border-top: solid white;
+  border-bottom: solid white;
+  padding: 0rem;
+  margin-top: 150%;
+  margin-right: 1rem;
+}
+
+
+.caja_hijo{
+  margin-left: 10rem; 
+}
+
+
+.chat-section {
+  margin-top: 0%;
+  padding: 2rem;
+  background-color: #000000;
+  border-radius: 10px;
+}
+
+.chat-box {
+  max-height: 80%;
+  max-width: 200%;
+  overflow-y: auto;
+  margin-bottom: 0%;
+  padding: 1rem;
+  
+}
+
+.chat-message {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-left: 4px solid transparent;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+  color: #fff;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  width: 100%;
+  /* 🛠 Estas líneas son clave para textos largos */
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.chat-message:hover {
+  border-color: #d4af37; /* dorado */
+  border-left: 4px solid #d4af37;
+  background-color: #222;
+  transform: scale(1.015);
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+
+.sender-name {
+  color: #ffffff; /* dorado */
+  font-weight: bold;
+  margin-right: 0%;
+  font-size: 15px;
+}
+
+.timestamp {
+  display: none;
+}
+
+
+.message-content {
+  font-size: 1rem;
+  color: #eee;
+  padding-left: 0%;
+  position: relative;
+  margin-left: 0%;
+}
+
+
+.members-section {
+  margin-top: 0%;
+}
+
+
+
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 50px;
+  
+}
+
+.logo {
+  width: 15vh;
+  height: 15vh;
+  object-fit: cover; /* rellena el espacio sin deformarse */
+  border-radius: 50%; /* círculo perfecto */
+  border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 12px #ffe100;
+
+}
+
+}
+@media (min-width: 769px) and (max-width: 900px) {
+  .team-leader {
+max-width: 50vw;
+min-width: 100vw;
+font-family: 'Arial', sans-serif;
+padding: 1rem;
+background-image: url("../assets/imagenes/cancha.jpg"); 
+background-repeat: no-repeat;
+background-size: cover; /* Esto asegura que la imagen cubra todo el contenedor */
+color: #fff;
+border-radius: 10px;
+color: black;
+z-index:-6; /* Desenfoque de la imagen */
+border: solid white;
+}
+
+
+.header {
+  text-align: center;
+  background-color: rgba(3, 0, 0, 0.822);
+  padding: 0rem;
+  border-radius: 10px;
+  color: white;
+}
+
+
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 1rem;
+  padding-right: 0rem
+  
+}
+
+.logo {
+  width: 50%;
+  height: 50%;
+  object-fit: cover; /* rellena el espacio sin deformarse */
+  border-radius: 50%; /* círculo perfecto */
+  border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 12px #ffe100;
+
+}
+
+.epic-banner {
+  text-align: center;
+  padding: 1rem 5rem;
+  background-color: transparent;
+  max-width: 5%;
+  min-width: 10%;
+}
+
+.epic-name {
+  font-family:initial;
+  color: #ffffff; /* Dorado */
+  text-shadow:
+    1px 1px 0 #000000,
+    2px 2px 0 #ffcc00,
+    3px 3px 4px #000;
+  letter-spacing: 0rem;
+  text-transform: uppercase;
+  padding-left: 1%;
+  padding-right: 10%;
+  font-size: 3rem;
+}
+
+.description {
+  font-size: 2.5rem;
+  color: #bcbcbc; /* más notorio que #ccc pero aún sutil */
+  font-style: italic;
+  margin-top: 0%;
+  border: solid transparent;
+  padding: 0rem 0rem;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+
+.miembros_style {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #fff7f7;
+  border-top: solid white;
+  border-bottom: solid white;
+  padding: 0rem;
+  margin-top: 150%;
+  margin-right: 5rem;
+}
+
+
+.caja_hijo{
+  margin-left: 10rem; 
+}
+
+
+.chat-section {
+  margin-top: 0%;
+  padding: 2rem;
+  background-color: #000000;
+  border-radius: 10px;
+}
+
+.chat-box {
+  max-height: 80%;
+  max-width: 200%;
+  overflow-y: auto;
+  margin-bottom: 0%;
+  padding: 1rem;
+  
+}
+
+.chat-message {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-left: 4px solid transparent;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+  color: #fff;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  width: 100%;
+  /* 🛠 Estas líneas son clave para textos largos */
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.chat-message:hover {
+  border-color: #d4af37; /* dorado */
+  border-left: 4px solid #d4af37;
+  background-color: #222;
+  transform: scale(1.015);
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+
+.sender-name {
+  color: #ffffff; /* dorado */
+  font-weight: bold;
+  margin-right: 0%;
+  font-size: 15px;
+}
+
+.timestamp {
+  display: none;
+}
+
+
+.message-content {
+  font-size: 1rem;
+  color: #eee;
+  padding-left: 0%;
+  position: relative;
+  margin-left: 0%;
+}
+
+
+.members-section {
+  margin-top: 0%;
+}
+
+
+
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 50px;
+  
+}
+
+.logo {
+  width: 15vh;
+  height: 15vh;
+  object-fit: cover; /* rellena el espacio sin deformarse */
+  border-radius: 50%; /* círculo perfecto */
+  border: 3px solid #ffe100; /* color verde estilo pro, puedes cambiarlo */
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 12px #ffe100;
+
+}
+}
+
+@media (min-width: 1025px) and (max-width: 1440px) {
+
+
+
+
+}
+@media (min-width: 1441px) and (max-width: 1920px) {
+
+
+
+
+}
+@media (min-width: 1921px) and (max-width: 2560px) {
+
+
+
+
+}
+@media (min-width: 2561px) and (max-width: 3840px) {
+
+
+
+
+}
+@media (min-width: 3841px) and (max-width: 5120px) {
+
+
+
+
 }
 
 </style>

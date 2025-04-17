@@ -3,7 +3,7 @@
   <header>
     <!-- Header de escritorio -->
     <div class="d-none d-md-block">
-      <Headerapp></Headerapp>
+      <headerapp></headerapp>
     </div>
 
     <!-- Header para móviles -->
@@ -442,13 +442,6 @@ const actualizarDescripcion = async () => {
   color: rgb(58, 58, 58);
   text-shadow: 0  2px rgb(238, 255, 0) ;
 }
-.lineal:hover{
-  font-size: 55%;
-  background-color: rgb(255, 255, 255);
-  text-align: center;
-  color: rgb(58, 58, 58);
-  text-shadow: 0  2px rgb(238, 255, 0) ;
-}
 .actualizar_caja{
   display: flex;
   flex-direction: column;
@@ -471,13 +464,6 @@ const actualizarDescripcion = async () => {
   border: solid white;
   color: white;
   font-size: 50%;
-  font-family:Georgia, 'Times New Roman', Times, serif;
-}
-.boton_actu:hover{
-  
-  border: solid rgb(247, 227, 0);
-  color: rgb(230, 242, 2);
-  font-size: 60%;
   font-family:Georgia, 'Times New Roman', Times, serif;
 }
 .volver_actualizar{
@@ -584,7 +570,7 @@ const actualizarDescripcion = async () => {
   .nombre{
     color:darkgrey;
   background-color: rgb(0, 0, 0);
-  font-size: 250%;
+  font-size: 215%;
   text-align: center;
   font-family: 'Times New Roman', Times, serif;
   border: 5%;
@@ -593,8 +579,8 @@ const actualizarDescripcion = async () => {
   box-shadow: 0 0 10% rgb(251, 255, 255);
   display: flex;
   flex-direction: column;
-  width: 90%;
-  margin-left: -0%;
+  width: 80%;
+  margin-left: -10%;
 }
   /* Estilos para pantallas con un ancho máximo de 480px */
   .actualizar_caja{
@@ -638,25 +624,38 @@ const actualizarDescripcion = async () => {
 
 @media (min-width: 481px) and (max-width: 600px) {
   /* Estilos para pantallas entre 481px y 600px */
+
+  .nombre{
+    color:darkgrey;
+  background-color: rgb(0, 0, 0);
+  font-size: 2.5rem;
+  text-align: center;
+  font-family: 'Times New Roman', Times, serif;
+  border: 5%;
+  border-style: solid;
+  text-decoration:underline;
+  box-shadow: 0 0 10% rgb(251, 255, 255);
+  display: flex;
+  flex-direction: column;
+  width: 120%;
+  margin-left: -30%;
+}
   .actualizar_caja{
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   margin-top: 50%;
-  margin-left: 0%;
   
 }
-
 .Actualizar_contenedor{
   background-color: rgb(0, 0, 0);
   height: auto;
-  left: 0%;
-  width: 120%;
+  width: 200%;
   text-align: center;
   border: 2%;
-  margin-left: 35%;
   font-size: 10px;
+  margin-left: -25%;
   border-style: solid;
   border-color: aliceblue;
 }
@@ -665,12 +664,27 @@ const actualizarDescripcion = async () => {
 
 @media (min-width: 601px) and (max-width: 768px) {
   /* Estilos para pantallas entre 601px y 768px */
+  .nombre{
+    color:darkgrey;
+  background-color: rgb(0, 0, 0);
+  font-size: 2rem;
+  text-align: center;
+  font-family: 'Times New Roman', Times, serif;
+  border: 5%;
+  border-style: solid;
+  text-decoration:underline;
+  box-shadow: 0 0 10% rgb(251, 255, 255);
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  margin-left: 0%;
+}
   .actualizar_caja{
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 20%;
+  margin-top: 40%;
   margin-left: 0%;
   
 }
@@ -678,11 +692,10 @@ const actualizarDescripcion = async () => {
 .Actualizar_contenedor{
   background-color: rgb(0, 0, 0);
   height: auto;
-  left: 0%;
-  width: 150%;
+  width: 200%;
   text-align: center;
   border: 2%;
-  margin-left: 20%;
+  margin-left: 10%;
   font-size: 10px;
   border-style: solid;
   border-color: aliceblue;
@@ -692,12 +705,27 @@ const actualizarDescripcion = async () => {
 
 @media (min-width: 769px) and (max-width: 1024px) {
   /* Estilos para pantallas entre 769px y 1024px */
+  .nombre{
+  color:darkgrey;
+  background-color: rgb(0, 0, 0);
+  font-size: 2.5rem;
+  text-align: center;
+  font-family: 'Times New Roman', Times, serif;
+  border: 5%;
+  border-style: solid;
+  text-decoration:underline;
+  box-shadow: 0 0 10% rgb(251, 255, 255);
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  margin-left: 0%;
+}
   .actualizar_caja{
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 10%;
+  margin-top: 40%;
   margin-left: 0%;
   
 }
@@ -705,8 +733,7 @@ const actualizarDescripcion = async () => {
 .Actualizar_contenedor{
   background-color: rgb(0, 0, 0);
   height: auto;
-  left: 0%;
-  width: 120%;
+  width: 180%;
   text-align: center;
   border: 2%;
   margin-left: 0%;
@@ -719,12 +746,27 @@ const actualizarDescripcion = async () => {
 
 @media (min-width: 1025px) and (max-width: 1280px) {
   /* Estilos para pantallas entre 1025px y 1280px */
+  .nombre{
+  color:darkgrey;
+  background-color: rgb(0, 0, 0);
+  font-size: 2.5rem;
+  text-align: center;
+  font-family: 'Times New Roman', Times, serif;
+  border: 5%;
+  border-style: solid;
+  text-decoration:underline;
+  box-shadow: 0 0 10% rgb(251, 255, 255);
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  margin-left: 0%;
+}
   .actualizar_caja{
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 10%;
+  margin-top: 40%;
   margin-left: 0%;
   
 }
@@ -732,8 +774,7 @@ const actualizarDescripcion = async () => {
 .Actualizar_contenedor{
   background-color: rgb(0, 0, 0);
   height: auto;
-  left: 0%;
-  width: 120%;
+  width: 200%;
   text-align: center;
   border: 2%;
   margin-left: 0%;
@@ -745,12 +786,27 @@ const actualizarDescripcion = async () => {
 
 @media (min-width: 1281px) and (max-width: 1440px) {
   /* Estilos para pantallas entre 1281px y 1440px */
+  .nombre{
+  color:darkgrey;
+  background-color: rgb(0, 0, 0);
+  font-size: 3rem;
+  text-align: center;
+  font-family: 'Times New Roman', Times, serif;
+  border: 5%;
+  border-style: solid;
+  text-decoration:underline;
+  box-shadow: 0 0 10% rgb(251, 255, 255);
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  margin-left: 0%;
+}
   .actualizar_caja{
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 20%;
+  margin-top: 30%;
   margin-left: 0%;
   
 }
@@ -758,8 +814,7 @@ const actualizarDescripcion = async () => {
 .Actualizar_contenedor{
   background-color: rgb(0, 0, 0);
   height: auto;
-  left: 0%;
-  width: 120%;
+  width: 200%;
   text-align: center;
   border: 2%;
   margin-left: 0%;
@@ -773,14 +828,171 @@ const actualizarDescripcion = async () => {
 
 @media (min-width: 1441px) and (max-width: 1920px) {
   /* Estilos para pantallas entre 1441px y 1920px */
+  .nombre{
+    color:darkgrey;
+  background-color: rgb(0, 0, 0);
+  font-size: 180%;
+  text-align: center;
+  font-family: 'Times New Roman', Times, serif;
+  border: 5%;
+  border-style: solid;
+  text-decoration:underline;
+  box-shadow: 0 0 10% rgb(251, 255, 255);
+  display: flex;
+  flex-direction: column;
+  width: 95%;
+  margin-left: -0%;
+}
+  /* Estilos para pantallas con un ancho máximo de 480px */
+  .actualizar_caja{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top:50%;
+  margin-left: -25%;
+  width: 150%;
+
+}
+
+.Actualizar_contenedor{
+  background-color: rgb(0, 0, 0);
+  height: auto;
+  width: 200%;
+  text-align: center;
+  border: 2%;
+  margin-left: 0%;
+  font-size: 100%;
+  border-style: solid;
+  border-color: aliceblue;
+}
+
+
+.salir{
+  height: 20%;
+  width: 10%;
+  margin-left: 90%;
+  
+
+}
+.salir:hover{
+  transform: scale(1.1);
+  color: red;
+}
+
+
 }
 
 @media (min-width: 1921px) and (max-width: 2560px) {
   /* Estilos para pantallas entre 1921px y 2560px */
+   .nombre{
+    color:darkgrey;
+  background-color: rgb(0, 0, 0);
+  font-size: 180%;
+  text-align: center;
+  font-family: 'Times New Roman', Times, serif;
+  border: 5%;
+  border-style: solid;
+  text-decoration:underline;
+  box-shadow: 0 0 10% rgb(251, 255, 255);
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  margin-left: -0%;
+}
+  /* Estilos para pantallas con un ancho máximo de 480px */
+  .actualizar_caja{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top:50%;
+  margin-left: -25%;
+  width: 150%;
+
+}
+
+.Actualizar_contenedor{
+  background-color: rgb(0, 0, 0);
+  height: auto;
+  width: 200%;
+  text-align: center;
+  border: 2%;
+  margin-left: 0%;
+  font-size: 100%;
+  border-style: solid;
+  border-color: aliceblue;
+}
+
+
+.salir{
+  height: 20%;
+  width: 10%;
+  margin-left: 90%;
+  
+
+}
+.salir:hover{
+  transform: scale(1.1);
+  color: red;
+}
 }
 
 @media (min-width: 2561px) and (max-width: 3840px) {
   /* Estilos para pantallas entre 2561px y 3840px */
+
+   /* Estilos para pantallas entre 1441px y 1920px */
+   .nombre{
+    color:darkgrey;
+  background-color: rgb(0, 0, 0);
+  font-size: 180%;
+  text-align: center;
+  font-family: 'Times New Roman', Times, serif;
+  border: 5%;
+  border-style: solid;
+  text-decoration:underline;
+  box-shadow: 0 0 10% rgb(251, 255, 255);
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  margin-left: -0%;
+}
+  /* Estilos para pantallas con un ancho máximo de 480px */
+  .actualizar_caja{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top:50%;
+  margin-left: -25%;
+  width: 150%;
+
+}
+
+.Actualizar_contenedor{
+  background-color: rgb(0, 0, 0);
+  height: auto;
+  width: 200%;
+  text-align: center;
+  border: 2%;
+  margin-left: 0%;
+  font-size: 100%;
+  border-style: solid;
+  border-color: aliceblue;
+}
+
+
+.salir{
+  height: 20%;
+  width: 10%;
+  margin-left: 90%;
+  
+
+}
+.salir:hover{
+  transform: scale(1.1);
+  color: red;
+}
 }
 
 

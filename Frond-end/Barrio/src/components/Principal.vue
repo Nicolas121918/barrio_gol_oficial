@@ -334,7 +334,6 @@ const showHeader = computed(() =>
   route.path !=='/diego' &&
   route.path !=='/diegos' && 
   route.path !=='/pay' &&
-  route.path !=='/perfiles' &&
   route.path !=='/torneoscreador' &&
   route.path !=='/targetas' && 
   route.path !=='/galeria' &&
@@ -343,7 +342,21 @@ const showHeader = computed(() =>
   route.path !== '/store' && 
   route.path !== '/vendedor' && 
   route.path !=='/crearpartido' && 
-  route.path !=='/subirvideo'
+  route.path !=='/subirvideo' &&
+  route.path !=='/creacionequipo' &&
+  route.path !=='/jugadores' &&
+  route.path !=='/videos'   &&
+  route.path !=='/stores' &&
+  route.path !=='/notificaciones' &&
+  route.path !=='/home'  &&
+  route.path !=='/actualizar_perfil' &&
+  route.path !=='/partidos_creados' &&
+  route.path !=='/torneos_finalizados' &&
+  route.path !=='/partido_finalizados'  &&
+  // cualquier ruta que emiece con '/perfiles/' se oculta el header  
+  !route.path.startsWith('/perfiles/')
+
+
 
 );
 function toggleMenu() {

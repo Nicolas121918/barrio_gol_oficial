@@ -2,7 +2,7 @@
   <header>
     <!-- Header de escritorio -->
     <div class="d-none d-md-block">
-      <Headerapp></Headerapp>
+      <headerapp></headerapp>
     </div>
 
     <!-- Header para móviles -->
@@ -72,11 +72,11 @@
 </template>
 
 <script>
-import Headerapp from './Headerapp.vue';
 import headermobile from './headermobile.vue';
+import headerapp from './headerapp.vue';
 export default {
   components: {
-    Headerapp,
+    headerapp,
     headermobile,
   },
   data() {
@@ -124,7 +124,7 @@ export default {
   text-align: center;
   width: 100%;
   max-width: 800px;
-  margin-top: 15%;
+  margin-top: 20%;
 }
 
 /* Animación de entrada */

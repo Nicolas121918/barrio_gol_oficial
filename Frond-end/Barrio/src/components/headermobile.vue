@@ -64,8 +64,10 @@
      </template>
      
      <script setup>
-     import 'bootstrap/dist/css/bootstrap.min.css';
-
+     import 'bootstrap/dist/css/bootstrap.css'
+     
+     // PARA IMPORTAR EL CODIGO DE JAVASCRIPT DE BOOTSTRAP PARA COMPONENTES QUE LO REQUIERAN Y REACTIVOS 
+      import 'bootstrap/dist/js/bootstrap.bundle.js'
      </script>
      
 <style scoped>
