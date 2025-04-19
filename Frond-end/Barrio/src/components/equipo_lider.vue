@@ -832,10 +832,6 @@ async rejectRequest(solicitud) {
       }
     },
   
-
-},
-
-
 // Modal reporte
 abrirModalReporte(mensaje) {
   console.log("Mensaje seleccionado:", mensaje); // Verifica el contenido del mensaje
@@ -982,6 +978,8 @@ verPerfil(documento) {
         this.team.logo = URL.createObjectURL(file);
       }
     },
+},
+
   
 };
 </script>

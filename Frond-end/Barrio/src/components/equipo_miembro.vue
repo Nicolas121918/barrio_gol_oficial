@@ -235,52 +235,49 @@ export default {
   await this.obtenerCantidadIntegrantes();
   await this.viewMessages();
   await this.requests();
+  this.conectarSocket(); // SOLO esto, no inicialices el socket aquí de nuevo
+},
 
-  // Inicializa el socket SOLO una vez aquí
-  this.socket = io("http://localhost:9000", {
-    path: "/socket.io/",
-    transports: ["websocket", "polling"],
-  });
-
-  this.socket.on("connect", () => {
-    console.log("🔗 Conectado al WebSocket con ID:", this.socket.id);
-    // Usa SIEMPRE this.movistore para obtener los datos actuales
-    this.socket.emit("joinRoom", this.movistore.usuario.equipo_tiene);
-    this.socket.emit("joinRoom", this.movistore.usuario.documento);
-  });
-
-  this.socket.on("nuevoMensaje", (message) => {
-    this.chats.push({
-      sender: {
-        nombre: message.sender.nombre,
-        profilePicture: this.getImagenUrl(message.sender.imagen),
-      },
-      content: message.content,
-      timestamp: message.timestamp,
+methods: {
+  conectarSocket() {
+    // SOLO UNA INSTANCIA
+    this.socket = io("http://localhost:8000", {
+      path: "/socket.io/",
+      transports: ["websocket", "polling"],
     });
-  });
 
-  this.socket.on("expulsion", (data) => {
-    console.log("Evento de expulsión recibido:", data);
-    console.log("Antes de actualizar:", JSON.stringify(this.movistore.usuario));
-    this.movistore.actualizarEquipo(0);
-    this.$router.replace('/equipos'); // Usa el nombre correcto de la ruta
-    setTimeout(() => {
-      console.log("Después de actualizar:", JSON.stringify(this.movistore.usuario));
-    }, 100);
-    alert(data.mensaje);
-  });
+    this.socket.on("connect", () => {
+      this.socket.emit("joinRoom", this.movistore.usuario.equipo_tiene);
+    });
 
-  this.socket.on("connect_error", (err) => {
-    console.error("❌ Error de conexión:", err.message);
-  });
-},
-beforeUnmount() {
-  if (this.socket) {
-    this.socket.disconnect();
-  }
-},
-  methods: {
+    this.socket.on("nuevoMensaje", (message) => {
+      // Previene duplicados
+      const exists = this.chats.some(
+        (chat) => chat.timestamp === message.timestamp && chat.content === message.content
+      );
+      if (!exists) {
+        this.chats.push({
+          sender: {
+            nombre: message.sender.nombre,
+            profilePicture: this.getImagenUrl(message.sender.imagen),
+            documento: message.sender.documento,
+          },
+          content: message.content,
+          timestamp: message.timestamp,
+        });
+      }
+    });
+
+    this.socket.on("expulsion", (data) => {
+      this.movistore.actualizarEquipo(0);
+      this.$router.replace('/equipos');
+      alert(data.mensaje);
+    });
+
+    this.socket.on("connect_error", (err) => {
+      console.error("❌ Error de conexión:", err.message);
+    });
+  },
     async sendMessage() {
       const team_Id = this.movistore.usuario.equipo_tiene;
       if (this.newMessage.trim() !== "") {
@@ -314,35 +311,6 @@ beforeUnmount() {
       } catch (error) {
         console.error("❌ Error al obtener los mensajes:", error);
       }
-    },
-    conectarSocket() {
-      this.socket = io("http://localhost:9000", {
-        path: "/socket.io/",
-        transports: ["websocket", "polling"],
-      });
-      this.socket.on("connect", () => {
-        console.log("🔗 Conectado al WebSocket con ID:", this.socket.id);
-        this.socket.emit("joinRoom", team_Id);
-    this.socket.emit("joinRoom", this.movistore.usuario.documento);
-      });
-      this.socket.on("nuevoMensaje", (message) => {
-        const exists = this.chats.some(
-          (chat) => chat.timestamp === message.timestamp && chat.content === message.content
-        );
-        if (!exists) {
-          this.chats.push({
-            sender: {
-              nombre: message.sender.nombre,
-              profilePicture: this.getImagenUrl(message.sender.imagen),
-            },
-            content: message.content,
-            timestamp: message.timestamp,
-          });
-        }
-      });
-      this.socket.on("connect_error", (err) => {
-        console.error("❌ Error de conexión:", err.message);
-      });
     },
     getImagenUrl(path) {
       return path ? `http://127.0.0.1:8000/${path}` : '';

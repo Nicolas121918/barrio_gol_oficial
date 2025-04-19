@@ -477,8 +477,8 @@ async def solicitar_union_equipo(id_equipo: int, documento_usuario: str, db: Ses
         id_equipo=id_equipo
     ).first()
     
-    if solicitud_existente:
-        return {"mensaje": "Ya has enviado una solicitud a este equipo anteriormente."}
+    """if solicitud_existente:
+        return {"mensaje": "Ya has enviado una solicitud a este equipo anteriormente."}"""
 
     # Crear nueva solicitud
     nueva_solicitud = SolicitudesIngreso(
