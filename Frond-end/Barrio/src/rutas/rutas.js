@@ -103,6 +103,7 @@ const routes=[
         component: Contacto,
         
       },
+    
       {
         path: '/torneos',// interfaz base de partidos torneos
         name: 'torneos',
@@ -115,6 +116,7 @@ const routes=[
         component: equipo,
         
       },
+      
       {
       path: "/one_video/:id",//para ver un video en especifico
       name: "One_Video",

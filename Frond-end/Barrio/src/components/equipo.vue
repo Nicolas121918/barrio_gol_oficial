@@ -1,50 +1,48 @@
+
 <template>
   <header>
+    <!-- Header de escritorio -->
+    <div class="d-none d-md-block">
+      <Headerapp></Headerapp>
+    </div>
 
-
-       <!-- Header de escritorio -->
-  <div class="d-none d-md-block">
-    <Headerapp></Headerapp>
-  </div>
-
-  <!-- Header para móviles -->
-  <div class="d-block d-md-none">
-    <headermobile></headermobile>
-    
-  </div>
-  
+    <!-- Header para móviles -->
+    <div class="d-block d-md-none">
+      <headermobile></headermobile>
+    </div>
   </header>
- 
-  <!-- Fase 1: No tiene equipo -->
-  <div v-if="movistore.usuario.equipo_tiene === 0">
-    <div class="crear-equipo-container">
-      <router-link to="/creacionequipo" class="boton-crear">+ CREA TU EQUIPO</router-link>
-    </div>
-    <div>
-      <Equipos_container></Equipos_container>
-    </div>
-  </div>
 
-  <!-- Fase 2: Es líder -->
-  <div v-else-if="movistore.usuario.esLider">
-    <equipo_lider></equipo_lider>
-  </div>
+  <!-- Forzar actualización del contenido principal cuando cambia equipo_tiene -->
+  <div :key="movistore.usuario.equipo_tiene">
+    <!-- Mostrar botón y Equipos_container si el usuario no tiene equipo -->
+    <div v-if="!movistore.usuario.equipo_tiene">
+      <div class="crear-equipo-container">
+        <router-link to="/creacionequipo" class="boton-crear">
+          + CREA TU EQUIPO
+        </router-link>
+      </div>
+      <Equipos_container />
+    </div>
 
-  <!-- Fase 3: Es miembro -->
-  <div v-else>
-    <equipo_miembro></equipo_miembro>
+    <!-- Mostrar equipo_lider si el usuario es líder -->
+    <Equipo_lider v-else-if="movistore.usuario.esLider" />
+
+    <!-- Mostrar equipo_miembro si el usuario no es líder pero tiene equipo -->
+    <Equipo_miembro v-else />
   </div>
 </template>
 
 <script>
-
-import { useUsuarios } from '@/stores/usuario';
-import Headerapp from './Headerapp.vue';
-import headermobile from './headermobile.vue';
-import Equipo_lider from './equipo_lider.vue';
-import Equipo_miembro from './equipo_miembro.vue';
-import axios from 'axios';
-import Equipos_container from './equipos_container.vue';
+import { watch, onMounted, onBeforeUnmount } from "vue";
+import { useUsuarios } from "@/stores/usuario";
+import Headerapp from "./Headerapp.vue";
+import headermobile from "./headermobile.vue";
+import Equipo_lider from "./equipo_lider.vue";
+import Equipo_miembro from "./equipo_miembro.vue";
+import Equipos_container from "./equipos_container.vue";
+import axios from "axios";
+import { io } from "socket.io-client";
+import { useRouter, useRoute } from "vue-router";
 
 export default {
   components: {
@@ -56,27 +54,67 @@ export default {
   },
   setup() {
     const movistore = useUsuarios();
+    const router = useRouter();
+    const route = useRoute();
 
-    console.log("✅ Usuario encontrado:", movistore.usuario);
+    // --- WebSocket para expulsión ---
+    let socket = null;
 
-    // Si el usuario tiene equipo, verificar si es líder
-    if (movistore.usuario.equipo_tiene !== 0) {
-      axios.get(`http://localhost:8000/es_lider/${movistore.usuario.documento}`)
-        .then(response => {
+    onMounted(() => {
+      socket = io("http://localhost:9000");
+      // Unirse a la sala personal del usuario
+      socket.emit("joinRoom", movistore.usuario.documento);
+      console.log("Uniéndose a la sala:", movistore.usuario.documento);
+
+      // Listener de expulsión
+      socket.on("expulsion", (data) => {
+        if (data.documento === movistore.usuario.documento) {
+          console.log("Evento de expulsión recibido en equipo.vue:", data);
+          movistore.actualizarEquipo(0);
+          alert(data.mensaje);
+          // Si no está en /equipo, redirige
+          if (route.name !== "equipos") {
+            router.replace({ name: "equipos" });
+          }
+        }
+      });
+    });
+
+    onBeforeUnmount(() => {
+      if (socket) socket.disconnect();
+    });
+
+    // --- Lógica de líder y watcher original ---
+    const verificarLider = async () => {
+      if (movistore.usuario.equipo_tiene !== 0) {
+        try {
+          const response = await axios.get(
+            `http://localhost:8000/es_lider/${movistore.usuario.documento}`
+          );
           movistore.setUsuario({
             ...movistore.usuario,
-            esLider: response.data.esLider  // ✅ Se actualiza con la acción
+            esLider: response.data.esLider,
           });
-        })
-        .catch(error => {
+        } catch (error) {
           console.error("❌ Error al verificar si el usuario es líder:", error);
-        });
-    }
+        }
+      }
+    };
+
+    verificarLider();
+
+    watch(
+  () => movistore.usuario.equipo_tiene,
+  (nuevoValor, valorAnterior) => {
+    console.log("Watcher equipo_tiene:", valorAnterior, "->", nuevoValor);
+  },
+  { immediate: true }
+);
 
     return {
       movistore,
     };
-  }
+  },
 };
 </script>
 

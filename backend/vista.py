@@ -20,6 +20,8 @@ from schemas import Torneo,Partidos,DatosTeams
 from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import socketio
+import requests
 
 from fastapi.staticfiles import StaticFiles
 from fastapi import HTTPException
@@ -42,9 +44,14 @@ os.makedirs("logos", exist_ok=True)
 
 
 ## permisos endpoints
+
+sio = socketio.AsyncServer(
+    cors_allowed_origins=["http://localhost:5173"],  # SOLO el frontend, NO uses '*'
+    async_mode='asgi'
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=["http://localhost:5173"],  
     allow_credentials=True,
     allow_methods=["*"],  
     allow_headers=["*"],  
@@ -52,7 +59,7 @@ app.add_middleware(
 )
 Base.metadata.create_all(bind=engine)
 
-
+connections: list[WebSocket] = []
 
 ## Endpoint Para Login
 @app.post("/iniciar")
@@ -430,35 +437,38 @@ async def salir_equipo(
 
     return {"mensaje": f"{usuario.nombre} ha salido del equipo"}
 
-@app.post("/equipos/expulsar")
-async def expulsar_miembro(
-    id_team: int = Form(...),
-    documento_miembro: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    # Buscar el equipo
-    equipo = db.query(Equipos).filter(Equipos.Id_team == id_team).first()
-    if not equipo:
-        raise HTTPException(status_code=404, detail="Equipo no encontrado")
 
-    # Buscar al miembro dentro del equipo
-    miembro = db.query(Registro).filter(
-        Registro.documento == documento_miembro,
-        Registro.equipo_tiene == id_team
-    ).first()
 
-    if not miembro:
-        raise HTTPException(status_code=404, detail="Miembro no encontrado en el equipo")
+@app.post("/equipos/{id_team}/expulsar/{documento_miembro}")
+async def expulsar_miembro(id_team: int, documento_miembro: str, db: Session = Depends(get_db)):
+    # Buscar al usuario en la base de datos
+    usuario = db.query(Registro).filter(Registro.documento == documento_miembro).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    # Evitar que el capitán sea expulsado
-    if miembro.documento == equipo.capitan_documento:
-        raise HTTPException(status_code=403, detail="No puedes expulsar al capitán del equipo")
+    # Validar si el usuario pertenece al equipo
+    if usuario.equipo_tiene != id_team:
+        raise HTTPException(status_code=400, detail="El usuario no pertenece a este equipo")
 
-    # Expulsar (quitar del equipo)
-    miembro.equipo_tiene = 0
+    # Actualizar el estado del usuario para indicar que ya no tiene equipo
+    usuario.equipo_tiene = 0  # Sin equipo
     db.commit()
 
-    return {"mensaje": f"{miembro.nombre} ha sido expulsado del equipo"}
+    # Llama al servidor de sockets Node.js para emitir el evento
+    try:
+        response = requests.post(
+            f"http://localhost:9000/expulsar/{documento_miembro}",
+            json={"mensaje": "Has sido expulsado del equipo por el líder."},
+            timeout=2
+        )
+        if response.status_code != 200:
+            print("Error notificando al servidor de sockets:", response.text)
+    except Exception as e:
+        print("Error notificando al servidor de sockets:", e)
+
+    return {"mensaje": f"El usuario {usuario.nombre} ha sido expulsado del equipo"}
+
+
 @app.post("/equipos/{id_equipo}/solicitar_union")
 async def solicitar_union_equipo(id_equipo: int, documento_usuario: str, db: Session = Depends(get_db)):
     # Buscar si ya existe una solicitud del usuario al equipo
@@ -466,9 +476,9 @@ async def solicitar_union_equipo(id_equipo: int, documento_usuario: str, db: Ses
         documento_usuario=documento_usuario,
         id_equipo=id_equipo
     ).first()
-
+    
     if solicitud_existente:
-        return {"mensaje": "Ya has enviado una solicitud a este equipo."}
+        return {"mensaje": "Ya has enviado una solicitud a este equipo anteriormente."}
 
     # Crear nueva solicitud
     nueva_solicitud = SolicitudesIngreso(
@@ -483,53 +493,63 @@ async def solicitar_union_equipo(id_equipo: int, documento_usuario: str, db: Ses
 
     return {"mensaje": "Solicitud enviada correctamente."}
 
-@app.get("/solicitudes_pendientes/{id_equipo}")
-def solicitudes_pendientes_equipo(id_equipo: int, db: Session = Depends(get_db)):
-    solicitudes = (
-        db.query(SolicitudesIngreso, Registro)
-        .join(Registro, SolicitudesIngreso.documento_usuario == Registro.documento)
-        .filter(SolicitudesIngreso.id_equipo == id_equipo)
-        .filter(SolicitudesIngreso.estado == "pendiente")
-        .all()
-    )
 
-    resultados = []
-    for solicitud, usuario in solicitudes:
-        resultados.append({
-            "id_solicitud": solicitud.id,  # Aquí lo agregamos
+@app.get("/equipos/{id_equipo}/solicitudes_pendientes")
+async def obtener_solicitudes_pendientes(id_equipo: int, db: Session = Depends(get_db)):
+    solicitudes = db.query(
+        SolicitudesIngreso.id.label("id_solicitud"),
+        SolicitudesIngreso.documento_usuario,
+        SolicitudesIngreso.fecha_solicitud,
+        Registro.nombre.label("nombre_usuario"),
+        Registro.imagen.label("logo_usuario")
+    ).join(
+        Registro, SolicitudesIngreso.documento_usuario == Registro.documento
+    ).filter(
+        SolicitudesIngreso.id_equipo == id_equipo,
+        SolicitudesIngreso.estado == "pendiente"
+    ).all()
+
+    resultado = []
+    for solicitud in solicitudes:
+        resultado.append({
+            "id_solicitud": solicitud.id_solicitud,
             "documento_usuario": solicitud.documento_usuario,
-            "nombre_usuario": usuario.nombre,
-            "logo_usuario": usuario.imagen,
             "fecha_solicitud": solicitud.fecha_solicitud,
+            "nombre_usuario": solicitud.nombre_usuario,
+            "logo_usuario": solicitud.logo_usuario
         })
 
-    return resultados
+    return {"solicitudes": resultado}
+
+
 @app.post("/solicitudes_ingreso/{id_solicitud}/aceptar")
 async def aceptar_solicitud_ingreso(id_solicitud: int, db: Session = Depends(get_db)):
-    # Buscar la solicitud por ID
+    # Buscar la solicitud y el usuario como antes
     solicitud = db.query(SolicitudesIngreso).filter(SolicitudesIngreso.id == id_solicitud).first()
-    if not solicitud:
-        raise HTTPException(status_code=404, detail="Solicitud no encontrada")
-    
-    # Buscar al usuario por su documento
     usuario = db.query(Registro).filter(Registro.documento == solicitud.documento_usuario).first()
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    # Verificar si ya pertenece a un equipo
-    if usuario.equipo_tiene != 0:
-        raise HTTPException(status_code=400, detail="El usuario ya pertenece a un equipo")
-
-    # Cambiar el estado de la solicitud a "aceptada"
-    solicitud.estado = "aceptada"
-
-    # Asignar el ID del equipo al usuario
+    # Hacer las verificaciones y actualizar los datos
+    if not solicitud or not usuario:
+        raise HTTPException(status_code=404, detail="No se encontró la solicitud o el usuario")
+    
     usuario.equipo_tiene = solicitud.id_equipo
-
-    # Guardar los cambios en la base de datos
+    solicitud.estado = "aceptada"
     db.commit()
 
-    return {"mensaje": "Solicitud aceptada con éxito", "usuario": usuario.nombre, "nuevo_equipo_id": usuario.equipo_tiene}
+    # Enviar actualización a todos los clientes conectados a través del WebSocket
+    for connection in connections:
+        await connection.send_text(f"Nuevo integrante: {usuario.nombre}")
+
+    return {"mensaje": "Solicitud aceptada y miembro agregado", "usuario": usuario.nombre}
+
+
+@app.get("/usuarios/{documento}/estado_equipo")
+async def verificar_estado_equipo(documento: str, db: Session = Depends(get_db)):
+    usuario = db.query(Registro).filter(Registro.documento == documento).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    return {"equipo_tiene": usuario.equipo_tiene}
 
 ## Endpoint para listar los equipos
 @app.get("/listarteams", response_model=list[DatosTeams])
@@ -630,6 +650,7 @@ async def actualizar_foto_perfil(
     db.refresh(usuario)
     return {"message": "Foto de perfil actualizada", "ruta": file_location}
 
+
 @app.get("/equipos/{id_equipo}/lider", response_model=dict)
 async def obtener_lider_equipo(id_equipo: int, db: Session = Depends(get_db)):
     equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
@@ -639,7 +660,11 @@ async def obtener_lider_equipo(id_equipo: int, db: Session = Depends(get_db)):
     if not equipo.capitan:
         raise HTTPException(status_code=404, detail="Líder del equipo no encontrado en la base de datos")
     
-    registro = db.query(Registro).filter(Registro.equipo_tiene == id_equipo).first()
+    # Buscar el registro del líder (capitán) por documento
+    registro = db.query(Registro).filter(
+        Registro.equipo_tiene == id_equipo,
+        Registro.documento == equipo.capitan.documento
+    ).first()
     
     return {
         "lider": {
@@ -647,11 +672,12 @@ async def obtener_lider_equipo(id_equipo: int, db: Session = Depends(get_db)):
             "documento": equipo.capitan.documento,
             "correo": equipo.capitan.correo,
             "telefono": equipo.capitan.celular,
-            "imagen": registro.imagen,
-            "fecha_nacimiento" : registro.fecha_nacimiento
-        },
-    
+            "imagen": registro.imagen if registro else None,
+            "fecha_nacimiento": registro.fecha_nacimiento if registro else None
+        }
     }
+
+
 @app.get("/es_lider/{documento}")
 def verificar_si_es_lider(documento: int, db: Session = Depends(get_db)):
     # Verificar si hay un equipo donde el documento sea el del capitán
@@ -1141,19 +1167,25 @@ async def aceptar_solicitud(id_solicitud: int, db: Session = Depends(get_db)):
 
     return {"mensaje": "Solicitud aceptada, partido en juego"}
 
-@app.post("/rechazar_solicitud/{id_solicitud}")
-async def rechazar_solicitud(id_solicitud: int, db: Session = Depends(get_db)):
-    # Buscar la solicitud
-    solicitud = db.query(SolicitudUnirse).filter(SolicitudUnirse.id_solicitud == id_solicitud).first()
+@app.post("/rechazar_solicitud/{id}")
+async def rechazar_solicitud(id: int, db: Session = Depends(get_db)):
+    print(f"ID recibido para rechazar: {id}")
+
+    # Buscar la solicitud en la tabla correcta
+    solicitud = db.query(SolicitudesIngreso).filter(SolicitudesIngreso.id == id).first()
+    print("Solicitud encontrada:", solicitud)
+
     if not solicitud:
+        print("No se encontró la solicitud en la base de datos")
         raise HTTPException(status_code=404, detail="Solicitud no encontrada")
 
     # Actualizar el estado de la solicitud a rechazada
     solicitud.estado = 'rechazada'
-
     db.commit()
+    print(f"Solicitud {id} rechazada correctamente.")
 
-    return {"mensaje": "Solicitud rechazada correctamente"} 
+    return {"mensaje": "Solicitud rechazada correctamente"}
+
 
 @app.get("/solicitudes_pendientesPartidos/{id_partido}")
 async def solicitudes_pendientes(id_partido: int, db: Session = Depends(get_db)):

@@ -36,3 +36,16 @@ io.on("connection", (socket) => {
 server.listen(9000, () => {
   console.log("🚀 Servidor de WebSockets corriendo en http://localhost:9000");
 });
+
+// Endpoint para expulsar a un miembro y emitir el evento de expulsión
+app.post('/expulsar/:documento', (req, res) => {
+  const documento_miembro = req.params.documento;
+  const mensaje = req.body.mensaje || "Has sido expulsado del equipo.";
+  io.to(documento_miembro).emit("expulsion", {
+    mensaje,
+    documento: documento_miembro
+  });
+  console.log("Emitiendo evento 'expulsion' a sala:", documento_miembro);
+  res.json({ mensaje: `El usuario ${documento_miembro} ha sido expulsado.` });
+});
+

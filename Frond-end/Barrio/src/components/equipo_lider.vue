@@ -134,11 +134,11 @@
       </li>
     </ul>
     <button class="button_close" @click="closeBuzon">Cerrar</button>
-    <router-link class="link home" to="/invitar">
-      <button class="button_accept-btn" @click="closeBuzon">Invitar</button>
-    </router-link>
+      <router-link class="link home" to="/invitar">
+        <button class="button_accept-btn" @click="closeBuzon">Invitar</button>
+      </router-link>
+    </div>
   </div>
-</div>
 
     <!-- Modal de Configuración -->
     <div v-if="showConfig" class="modal config-modal">
@@ -220,6 +220,7 @@
 <script>
 import { useUsuarios } from '@/stores/usuario';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import { io } from "socket.io-client";
 
 export default {
@@ -229,6 +230,8 @@ export default {
   data() {
     return {
       chats : [],
+      solicitudes: [],
+      pollingInterval: null,
       nuevoMensaje: "",
       team: {
         logo: "",
@@ -285,9 +288,9 @@ export default {
   },
 },
 
-  async mounted() {
-  await this.obtenerDatosEquipo();
+  async mounted() { 
   await this.obtenerLiderEquipo();
+  await this.obtenerDatosEquipo();
   await this.obtenerCantidadIntegrantes();
   await this.viewMessages();
   await this.requests();
@@ -316,10 +319,48 @@ export default {
 });
 
 
+this.pollingInterval = setInterval(this.fetchSolicitudesPendientes, 3000);
+  },
+
+  unmounted() {
+    clearInterval(this.pollingInterval);
 
 },
 
 methods: {
+  async fetchSolicitudesPendientes() {
+      const movistore = useUsuarios();
+      const idEquipo = movistore.usuario.equipo_tiene;
+
+      try {
+        const response = await axios.get(`http://localhost:8000/equipos/${idEquipo}/solicitudes_pendientes`);
+    console.log("Solicitudes pendientes recibidas:", response.data.solicitudes);
+    this.team.requests = response.data.solicitudes.map(solicitud => ({
+      id_solicitud: solicitud.id_solicitud,
+      documento: solicitud.documento_usuario,
+      name: solicitud.nombre_usuario,
+      picture: solicitud.logo_usuario || 'default.png',
+      fecha: solicitud.fecha_solicitud,
+    }));
+      } catch (error) {
+        console.error("Error al obtener las solicitudes pendientes:", error.response?.data || error.message);
+      }
+    },
+
+    async aceptarSolicitud(idSolicitud) {
+  try {
+    const response = await axios.post(`http://localhost:8000/solicitudes_ingreso/${idSolicitud}/aceptar`);
+    Swal.fire("¡Éxito!", response.data.mensaje, "success");
+        await this.fetchSolicitudesPendientes();
+  } catch (error) {
+    console.error("Error al aceptar la solicitud:", error);
+    Swal.fire("Error", error.response?.data?.detail || "No se pudo aceptar la solicitud.", "error");
+  }
+},
+
+
+
+
   async sendMessage() {
     const movistore = useUsuarios();
     const team_Id = movistore.usuario.equipo_tiene;
@@ -372,6 +413,15 @@ methods: {
       transports: ["websocket", "polling"],
     });
 
+    // Escuchar el evento de expulsión
+  this.socket.on("expulsion", (data) => {
+    console.log("Evento de expulsión recibido:", data);
+    alert(data.mensaje);
+
+    // Actualizar el estado del usuario para mostrar la vista de "Unirse a un equipo"
+    this.usuario.equipo_tiene = 0;
+  });
+
     this.socket.on("connect", () => {
       console.log("🔗 Conectado al WebSocket con ID:", this.socket.id);
     });
@@ -400,6 +450,9 @@ methods: {
       console.error("❌ Error de conexión:", err.message);
     });
   },
+
+  
+  
     getImagenUrl(path) {
     return path ? `http://127.0.0.1:8000/${path}` : '';
   },
@@ -425,35 +478,55 @@ methods: {
       }
     },
 
-
+    async obtenerCantidadIntegrantes() {
+  try {
+    const movistore = useUsuarios();
+    const response = await axios.get(`http://127.0.0.1:8000/equipos/${movistore.usuario.equipo_tiene}/integrantes`);
     
+    this.team.integrantes_actuales = response.data; // Aquí guardamos la cantidad actual
+    console.log("Cantidad de integrantes actualizada:", this.team.integrantes_actuales); // Agrega este log
+  } catch (error) {
+    console.error("Error al obtener cantidad de integrantes:", error);
+    this.team.integrantes_actuales = 0;
+  }
+},
 
-    async obtenerDatosEquipo() {
+  
+
+async obtenerDatosEquipo() {
   try {
     const movistore = useUsuarios();
     const response = await axios.get(`http://127.0.0.1:8000/equipos/${movistore.usuario.equipo_tiene}/detalle/`);
+    const liderDocumento = response.data.equipo.lider_documento;
+
     this.team = {
+      ...this.team, // Mantiene el líder cargado por obtenerLiderEquipo
       logo: `http://127.0.0.1:8000/${response.data.equipo.logo}`,
       name: response.data.equipo.nombre,
       description: response.data.equipo.descripcion,
       numero_integrantes: response.data.equipo.numero_integrantes,
       integrantes_actuales: 0,
-      puntos: response.data.equipo.puntos, // Asegúrate de que el backend envíe los puntos
-      nivel: response.data.equipo.nivel,  // Asegúrate de que el backend envíe el nivel
-      members: response.data.miembros.map(m => ({
-        documento: m.documento,
-        name: m.nombre,
-        role: "Miembro",
-        profilePicture: m.imagen,
-        fecha_nacimiento: m.fecha_nacimiento,
-      })),
+      puntos: response.data.equipo.puntos,
+      nivel: response.data.equipo.nivel,
+      // NO toques leader aquí
+      members: response.data.miembros
+        .filter(m => m.documento !== liderDocumento)
+        .map(m => ({
+          documento: m.documento,
+          name: m.nombre,
+          role: "Miembro",
+          profilePicture: m.imagen,
+          fecha_nacimiento: m.fecha_nacimiento,
+        })),
       tournaments: ["Torneo A", "Torneo B"],
       chat: [],
     };
   } catch (error) {
     console.error("Error al obtener datos del equipo:", error);
   }
-},      
+},
+
+
     openMemberMenu(member) {
       this.selectedMember = member;
       this.showMemberMenu = true;
@@ -462,6 +535,7 @@ methods: {
       this.showMemberMenu = false;
       this.selectedMember = null;
     },
+
 
     async confirmExpel(documento, nombre) {
   const movistore = useUsuarios();
@@ -480,15 +554,12 @@ methods: {
 
   if (confirm(`¿Estás seguro de expulsar a ${nombre}?`)) {
     try {
-      const formData = new FormData();
-      formData.append("id_team", movistore.usuario.equipo_tiene);
-      formData.append("documento_miembro", documento);
+      const id_team = movistore.usuario.equipo_tiene;
 
-      console.log("Enviando FormData:", Object.fromEntries(formData));
-
-      const response = await axios.post("http://127.0.0.1:8000/equipos/expulsar", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+      // Realizar la solicitud al backend
+      const response = await axios.post(
+        `http://127.0.0.1:8000/equipos/${id_team}/expulsar/${documento}`
+      );
 
       console.log("Respuesta del servidor:", response.data);
 
@@ -497,11 +568,91 @@ methods: {
 
       this.closeMemberMenu();
       alert(`${nombre} ha sido expulsado del equipo.`);
-
     } catch (error) {
       console.error("Error al expulsar:", error.response ? error.response.data : error);
       alert(error.response?.data?.detail || "Hubo un error al expulsar al miembro.");
     }
+  }
+},
+
+async acceptRequest(solicitud) {
+    try {
+        const response = await fetch(`http://localhost:8000/solicitudes_ingreso/${solicitud.id_solicitud}/aceptar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Error en la solicitud:", errorData.detail);
+            alert(`Error: ${errorData.detail}`);
+            return;
+        }
+
+        const data = await response.json();
+        console.log("Respuesta del servidor:", data);
+        alert("Solicitud aceptada con éxito");
+
+        // Refresca los datos del equipo y del líder después de aceptar la solicitud
+        await this.obtenerDatosEquipo();
+        await this.obtenerLiderEquipo();
+        await this.obtenerCantidadIntegrantes();
+        await this.fetchSolicitudesPendientes();
+
+        // Eliminar la solicitud aceptada de la lista de solicitudes pendientes
+        this.team.requests = this.team.requests.filter(req => req.id_solicitud !== solicitud.id_solicitud);
+    } catch (error) {
+        console.error("Error en fetch:", error);
+        alert("Ocurrió un error al aceptar la solicitud");
+    }
+},
+
+
+openBuzon() {
+      this.showBuzon = true;
+      this.showConfig = false; // Cerrar configuración si está abierta
+    },
+    openConfig() {
+      this.showConfig = true;
+      this.showBuzon = false; // Cerrar buzón si está abierto
+    },
+     closeBuzon() {
+      this.showBuzon = false;
+    },
+    closeConfig() {
+      this.showConfig = false;
+    },
+async requests() {
+  const usuarioStore = useUsuarios(); // Usamos el store de usuario
+  try {
+    const idEquipo = usuarioStore.usuario.equipo_tiene;
+    console.log("ID del equipo:", idEquipo);
+
+    const res = await axios.get(
+      `http://127.0.0.1:8000/equipos/${id_equipo}/solicitudes_pendientes`,
+      {
+        headers: {
+          Accept: 'application/json',
+        },
+      }
+    );
+
+    console.log("Respuesta del backend:", res.data);
+
+    this.team.requests = res.data.map(solicitud => ({
+      id_solicitud: solicitud.id_solicitud,
+      documento: solicitud.documento_usuario,
+      name: solicitud.nombre_usuario,
+      picture: solicitud.logo_usuario || 'default.png',
+      fecha: solicitud.fecha_solicitud,
+    }));
+
+    console.log("Solicitudes procesadas:", this.team.requests);
+  } catch (error) {
+    console.error("Error al obtener solicitudes-------------------:", error);
   }
 },
 
@@ -552,14 +703,7 @@ verPerfil(documento) {
   this.$router.push(`/perfiles/${documento}`); // Redirige usando el documento
 },
 
-    openBuzon() {
-      this.showBuzon = true;
-      this.showConfig = false; // Cerrar configuración si está abierta
-    },
-    openConfig() {
-      this.showConfig = true;
-      this.showBuzon = false; // Cerrar buzón si está abierto
-    },
+    
     verUsuario(documento) {
   this.$router.push({ name: 'perfiles', params: { documento } });
 },
@@ -569,16 +713,37 @@ verPerfil(documento) {
     this.team.logo = URL.createObjectURL(file); // Previsualiza
   }
 },
-    closeBuzon() {
-      this.showBuzon = false;
-    },
-    closeConfig() {
-      this.showConfig = false;
-    },
-  
-      rejectRequest(solicitud) {
-        this.team.requests = this.team.requests.filter((req) => req !== solicitud);
+   
+
+async rejectRequest(solicitud) {
+  console.log("Solicitud recibida para rechazar:", solicitud);
+  try {
+    const response = await fetch(`http://localhost:8000/rechazar_solicitud/${solicitud.id_solicitud}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({})
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      alert(`Error: ${errorData.detail}`);
+      return;
+    }
+
+    alert("Solicitud rechazada con éxito");
+    // Refresca la lista de solicitudes pendientes
+    await this.fetchSolicitudesPendientes();
+    // Elimina la solicitud rechazada del frontend (opcional, ya lo hace fetchSolicitudesPendientes)
+    this.team.requests = this.team.requests.filter(req => req.id_solicitud !== solicitud.id_solicitud);
+  } catch (error) {
+    console.error("Error al rechazar la solicitud:", error);
+    alert("Ocurrió un error al rechazar la solicitud");
+  }
+},
+
+
     async updateTeam() {
   try {
     const movistore = useUsuarios();
@@ -656,79 +821,168 @@ verPerfil(documento) {
     alert("Hubo un error al eliminar el equipo. Por favor, inténtalo de nuevo.");
   }
 },
-async obtenerCantidadIntegrantes() {
-  try {
-    const movistore = useUsuarios();
-    const response = await axios.get(`http://127.0.0.1:8000/equipos/${movistore.usuario.equipo_tiene}/integrantes`);
-    
-    this.team.integrantes_actuales = response.data; // Aquí guardamos la cantidad actual
-  } catch (error) {
-    console.error("Error al obtener cantidad de integrantes:", error);
-    this.team.integrantes_actuales = 0;
-  }
-},
-async requests() {
-  const usuarioStore = useUsuarios(); // Usamos el store de usuario
-  try {
-    const idEquipo = usuarioStore.usuario.equipo_tiene;
-    console.log("ID del equipo:", idEquipo);
 
-    const res = await axios.get(
-      `http://127.0.0.1:8000/solicitudes_pendientes/${idEquipo}`,
-      {
-        headers: {
-          Accept: 'application/json',
-        },
-      }
-    );
 
-    console.log("Respuesta del backend:", res.data);
 
-    this.team.requests = res.data.map(solicitud => ({
-      id_solicitud: solicitud.id_solicitud,
-      documento: solicitud.documento_usuario,
-      name: solicitud.nombre_usuario,
-      picture: solicitud.logo_usuario || 'default.png',
-      fecha: solicitud.fecha_solicitud,
-    }));
-
-    console.log("Solicitudes procesadas:", this.team.requests);
-  } catch (error) {
-    console.error("Error al obtener solicitudes-------------------:", error);
-  }
-},
-async acceptRequest(solicitud) {
-    try {
-      const response = await fetch(`http://localhost:8000/solicitudes_ingreso/${solicitud.id_solicitud}/aceptar`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({})
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error en la solicitud:", errorData.detail);
-        alert(`Error: ${errorData.detail}`);
-        return;
-      }
-
-      const data = await response.json();
-      console.log("Respuesta del servidor:", data);
-      alert("Solicitud aceptada con éxito");
-    } catch (error) {
-      console.error("Error en fetch:", error);
-      alert("Ocurrió un error al aceptar la solicitud");
-    }
-  },
+  
     updateLogo(event) {
       const file = event.target.files[0];
       if (file) {
         this.team.logo = URL.createObjectURL(file);
       }
     },
-  },
+  
+
+},
+
+
+// Modal reporte
+abrirModalReporte(mensaje) {
+  console.log("Mensaje seleccionado:", mensaje); // Verifica el contenido del mensaje
+  this.mensajeSeleccionado = mensaje;
+  this.mostrarModalReporte = true;
+},
+    cerrarModalReporte() {
+      this.mostrarModalReporte = false;
+      this.mensajeSeleccionado = null;
+      this.motivoReporte = "";
+      this.comentarioReporte = "";
+    },
+    async enviarReporte() {
+  if (!this.motivoReporte || !this.comentarioReporte) {
+    alert("Por favor completa todos los campos.");
+    return;
+  }
+
+  const movistore = useUsuarios(); // Obtén el estado del usuario actual
+
+  const reporte = {
+    documento_reportante: movistore.usuario.documento, // Documento del usuario actual
+    documento_reportado: this.mensajeSeleccionado.sender.documento, // Documento del remitente del mensaje
+    motivo: this.motivoReporte, // Motivo seleccionado
+    comentario: this.comentarioReporte, // Comentario adicional
+  };
+
+  console.log("Datos enviados al backend:", reporte); // Inspecciona los datos enviados
+
+  try {
+    const response = await axios.post("http://127.0.0.1:8000/reportar_usuario/", reporte, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded", // Asegúrate de que el backend reciba datos en formato Form-Encoded
+      },
+    });
+    alert(response.data.mensaje);
+    this.cerrarModalReporte();
+  } catch (error) {
+    console.error("Error al enviar el reporte:", error.response?.data || error.message);
+    alert("Hubo un error al enviar el reporte.");
+  }
+},
+
+verPerfil(documento) {
+  this.$router.push(`/perfiles/${documento}`); // Redirige usando el documento
+},
+
+    
+    verUsuario(documento) {
+  this.$router.push({ name: 'perfiles', params: { documento } });
+},
+    updateLogo(event) {
+  const file = event.target.files[0];
+  if (file) {
+    this.team.logo = URL.createObjectURL(file); // Previsualiza
+  }
+},
+   
+  
+    async updateTeam() {
+  try {
+    const movistore = useUsuarios();
+    const formData = new FormData();
+
+    // Agregar la nueva descripción si hay
+    if (this.newDescription) {
+      formData.append("nueva_descripcion", this.newDescription);
+    }
+
+    // Buscar el archivo de logo (input file)
+    const inputFile = document.getElementById("newLogo");
+    if (inputFile && inputFile.files.length > 0) {
+      formData.append("nuevo_logo", inputFile.files[0]);
+    }
+
+    const id_equipo = movistore.usuario.equipo_tiene;
+
+    const response = await axios.put(
+      `http://127.0.0.1:8000/equipos/actualizar/${id_equipo}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    console.log("Respuesta al actualizar equipo:", response.data);
+    alert("Equipo actualizado correctamente");
+
+    // Actualizar descripción en el frontend
+    this.team.description = this.newDescription;
+
+    // Cerrar la ventana de configuración
+    this.closeConfig();
+
+    // Refrescar los datos del equipo (opcional)
+    await this.obtenerDatosEquipo();
+    await this.obtenerDatosEquipo(); // Llamar al cargar el componente
+    await this.obtenerLiderEquipo();
+    await this.obtenerCantidadIntegrantes();
+  } catch (error) {
+    console.error("Error al actualizar el equipo:", error.response || error);
+    alert("Hubo un error al actualizar el equipo.");
+  }
+},
+    async deleteTeam() {
+  try {
+    const movistore = useUsuarios();
+    
+    // Obtener el ID del equipo a eliminar
+    const response = await axios.get(`http://127.0.0.1:8000/id_equipo/${movistore.usuario.documento}`);
+    const id_delete = response.data.Id_team;
+    console.log("Id del equipo a eliminar: ", id_delete);
+    
+    if (!id_delete) {
+      alert("No hay un equipo asociado para eliminar.");
+      return;
+    }
+    // Hacer la petición DELETE
+    const deleteResponse = await axios.delete(`http://127.0.0.1:8000/equipos/eliminar/${id_delete}`);
+
+    
+    console.log("Respuesta del servidor:", deleteResponse.data);
+    alert(deleteResponse.data.mensaje);
+
+    // **Actualizar el estado en Pinia**
+    movistore.usuario.equipo_tiene = 0; // Indicar que no tiene equipo
+    movistore.usuario.esLider = false; // Indicar que ya no es líder
+
+    this.$router.push('/equipos');
+  } catch (error) {
+    console.error("Error al eliminar el equipo:", error);
+    alert("Hubo un error al eliminar el equipo. Por favor, inténtalo de nuevo.");
+  }
+},
+
+
+
+  
+    updateLogo(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.team.logo = URL.createObjectURL(file);
+      }
+    },
+  
 };
 </script>
 

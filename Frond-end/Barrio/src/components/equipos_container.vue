@@ -57,7 +57,7 @@
   </div>
 </template>
 <script>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, onUnmounted} from 'vue';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import { useUsuarios } from '@/stores/usuario';
@@ -76,6 +76,7 @@ export default {
     const buscadorteams = ref('');
     const usuarios = useUsuarios(); // Usa el store de Pinia
     const movistore = useUsuarios();
+    let pollingInterval = null;
     const verEquipo = (id) => {
     router.push({ name: 'inspeccion_equipo', params: { id } });
   };
@@ -111,6 +112,32 @@ if (error.response) {
   console.error("Error desconocido:", error.message);
 }
 }
+    };
+
+    const verificarEstadoEquipo = async () => {
+      try {
+        const documento = usuarios.usuario.documento;
+        if (!documento) return;
+
+        const response = await axios.get(`http://localhost:8000/usuarios/${documento}/estado_equipo`);
+        const equipoId = response.data.equipo_tiene;
+
+        if (equipoId && equipoId !== 0) {
+          // Detener el polling
+          clearInterval(pollingInterval);
+
+          // Actualizar el estado del usuario en el store
+          usuarios.setUsuario({
+            ...usuarios.usuario,
+            equipo_tiene: equipoId,
+          });
+
+          // Redirigir a la interfaz de equipo_miembro
+          router.push({ name: 'equipo_miembro' });
+        }
+      } catch (error) {
+        console.error("Error al verificar el estado del equipo:", error);
+      }
     };
 
     const unirseEquipo = async (idEquipo) => {
@@ -155,7 +182,17 @@ try {
 }
 };
 
-    onMounted(fetchTeams);
+onMounted(() => {
+      fetchTeams();
+
+      // Iniciar el polling para verificar el estado del equipo
+      pollingInterval = setInterval(verificarEstadoEquipo, 5000); // Cada 5 segundos
+    });
+
+    onUnmounted(() => {
+      // Limpiar el intervalo cuando el componente se desmonte
+      clearInterval(pollingInterval);
+    });
 
     const filtradordeequipos = computed(() => {
       if (buscadorteams.value.trim() === "") return teams.value;

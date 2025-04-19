@@ -2,13 +2,13 @@
   <div class="padre">
     <div v-if="mostrarImagen" class="modal-overlay" @click.self="mostrarImagen = false">
     <img :src="team.logo" alt="Logo ampliado" class="logo-modal" />
-  </div>
+</div>
     <div class="team-leader">
       <!-- Encabezado: Logo y nombre del equipo -->
       <header class="header">
         <div class="logo-container" @click="mostrarImagen = true">
     <img :src="team.logo" alt="Logo del equipo" class="logo" v-if="team.logo" />
-  </div>
+</div>
 
 
 
@@ -35,25 +35,24 @@
   
     <!-- Mostrar el líder del equipo -->
     <div class="leader-section">
-      <h3 class="name">Líder:</h3>
-      <ul class="members-list2">
-        <li
-  class="member-item2 leader"
-  v-if="team.leader && team.leader.name"
-  @click="openMemberMenu(team.leader)"
->
-  <div class="member-info">
-    <img :src="getImagenUrl(team.leader.profilePicture)" alt="Foto de perfil" class="profile-picture" />
-    <span class="nombre2">{{ team.leader.name }}</span>
-    <span class="role">(Líder)</span>
-    <p class="details">
-      Fecha de Nacimiento: {{ team.leader.fecha_nacimiento || "Sin Fecha De Nacimiento" }}
-    </p>
-  </div>
-</li>
-
-      </ul>
-    </div>
+  <h3 class="name">Líder:</h3>
+  <ul class="members-list2">
+    <li
+      class="member-item2 leader"
+      v-if="team.leader && team.leader.name"
+      @click="openMemberMenu(team.leader)"
+    >
+      <div class="member-info">
+        <img :src="getImagenUrl(team.leader.profilePicture)" alt="Foto de perfil" class="profile-picture" />
+        <span class="nombre2">{{ team.leader.name }}</span>
+        <span class="role">(Líder)</span>
+        <p class="details">
+          Fecha de Nacimiento: {{ team.leader.fecha_nacimiento || "Sin Fecha De Nacimiento" }}
+        </p>
+      </div>
+    </li>
+  </ul>
+</div>
   
     <!-- Mostrar los miembros del equipo -->
     <div class="members-list-section">
@@ -169,19 +168,17 @@
 </div>
   </template>
   
-  <script>
+ 
+<script>
 import { useUsuarios } from '@/stores/usuario';
 import axios from 'axios';
 import { io } from "socket.io-client";
 
-
 export default {
-  components: {
-    useUsuarios,
-  },
   data() {
     return {
-      chats : [],
+      movistore: useUsuarios(),
+      chats: [],
       nuevoMensaje: "",
       team: {
         logo: "",
@@ -190,12 +187,11 @@ export default {
         numero_integrantes: 0,
         integrantes_actuales: 0,
         members: [],
-        leader: {}, 
-        requests: [
-        ],
+        leader: {},
+        requests: [],
         tournaments: [],
-        puntos: 0, // Puntos del equipo
-      nivel: 1,  // Nivel del equipo
+        puntos: 0,
+        nivel: 1,
       },
       mostrarModalReporte: false,
       mensajeSeleccionado: null,
@@ -208,212 +204,191 @@ export default {
       newMessage: "",
       newDescription: "",
       mostrarImagen: false,
-
+      socket: null,
     };
   },
   computed: {
-  nivel() {
-    if (!this.team.puntos || this.team.puntos < 500) return 1; // Si no tiene puntos o tiene menos de 500, está en nivel 1
-    if (this.team.puntos < 2000) return 2; // Entre 500 y 1999, nivel 2
-    if (this.team.puntos < 5000) return 3; // Entre 2000 y 4999, nivel 3
-    return 4; // 5000 o más, nivel 4
+    nivel() {
+      if (!this.team.puntos || this.team.puntos < 500) return 1;
+      if (this.team.puntos < 2000) return 2;
+      if (this.team.puntos < 5000) return 3;
+      return 4;
+    },
+    siguienteNivel() {
+      if (this.nivel === 1) return 500;
+      if (this.nivel === 2) return 2000;
+      if (this.nivel === 3) return 5000;
+      return null;
+    },
+    progreso() {
+      if (!this.siguienteNivel) return 100;
+      const niveles = [0, 500, 2000, 5000];
+      const inicio = niveles[this.nivel - 1];
+      const fin = this.siguienteNivel;
+      const porcentaje = ((this.team.puntos - inicio) / (fin - inicio)) * 100;
+      return Math.min(100, Math.max(0, porcentaje.toFixed(2)));
+    },
   },
-  siguienteNivel() {
-    if (this.nivel === 1) return 500; // Próximo nivel para nivel 1
-    if (this.nivel === 2) return 2000; // Próximo nivel para nivel 2
-    if (this.nivel === 3) return 5000; // Próximo nivel para nivel 3
-    return null; // Nivel máximo alcanzado
-  },
-  progreso() {
-    if (!this.siguienteNivel) return 100; // Si no hay siguiente nivel, progreso completo
-
-    const niveles = [0, 500, 2000, 5000];
-    const inicio = niveles[this.nivel - 1];
-    const fin = this.siguienteNivel;
-    const porcentaje = ((this.team.puntos - inicio) / (fin - inicio)) * 100;
-
-    return Math.min(100, Math.max(0, porcentaje.toFixed(2)));
-  },
-},
-
   async mounted() {
   await this.obtenerDatosEquipo();
   await this.obtenerLiderEquipo();
   await this.obtenerCantidadIntegrantes();
   await this.viewMessages();
   await this.requests();
-  this.conectarSocket(); // Llamar a la conexión WebSocket
 
-  const movistore = useUsuarios();
-  const team_Id = movistore.usuario.equipo_tiene;
-  
-  
-  this.socket = io("http://localhost:8000");
-  
-  // Unirse a la sala del equipo
-  this.socket.emit("joinRoom", team_Id);
-  
-  // Escuchar nuevos mensajes y agregarlos en tiempo real
-  this.socket.on("nuevoMensaje", (message) => {
-  console.log("📩 Nuevo mensaje recibido:", message);
-  this.chats.push({
-    sender: {
-      nombre: message.sender.nombre,
-      profilePicture: this.getImagenUrl(message.sender.imagen),
-    },
-    content: message.content,
-    timestamp: message.timestamp,
+  // Inicializa el socket SOLO una vez aquí
+  this.socket = io("http://localhost:9000", {
+    path: "/socket.io/",
+    transports: ["websocket", "polling"],
   });
-});
 
+  this.socket.on("connect", () => {
+    console.log("🔗 Conectado al WebSocket con ID:", this.socket.id);
+    // Usa SIEMPRE this.movistore para obtener los datos actuales
+    this.socket.emit("joinRoom", this.movistore.usuario.equipo_tiene);
+    this.socket.emit("joinRoom", this.movistore.usuario.documento);
+  });
+
+  this.socket.on("nuevoMensaje", (message) => {
+    this.chats.push({
+      sender: {
+        nombre: message.sender.nombre,
+        profilePicture: this.getImagenUrl(message.sender.imagen),
+      },
+      content: message.content,
+      timestamp: message.timestamp,
+    });
+  });
+
+  this.socket.on("expulsion", (data) => {
+    console.log("Evento de expulsión recibido:", data);
+    console.log("Antes de actualizar:", JSON.stringify(this.movistore.usuario));
+    this.movistore.actualizarEquipo(0);
+    this.$router.replace('/equipos'); // Usa el nombre correcto de la ruta
+    setTimeout(() => {
+      console.log("Después de actualizar:", JSON.stringify(this.movistore.usuario));
+    }, 100);
+    alert(data.mensaje);
+  });
+
+  this.socket.on("connect_error", (err) => {
+    console.error("❌ Error de conexión:", err.message);
+  });
 },
-
-methods: {
-  
-  async sendMessage() {
-    const movistore = useUsuarios();
-    const team_Id = movistore.usuario.equipo_tiene;
-    
-
-    if (this.newMessage.trim() !== "") {
-      const messageData = {
-        team_id: team_Id,
-        sender: movistore.usuario.documento,
-        content: this.newMessage,
-      };
-
-      try {
-        // Enviar el mensaje a la base de datos
-        await axios.post("http://localhost:8000/chat/send", messageData);
-
-        // Emitir el mensaje por WebSocket
-        this.socket.emit("sendMessage", messageData);
-
-        this.newMessage = "";
-      } catch (error) {
-        console.error("❌ Error al enviar el mensaje:", error);
+beforeUnmount() {
+  if (this.socket) {
+    this.socket.disconnect();
+  }
+},
+  methods: {
+    async sendMessage() {
+      const team_Id = this.movistore.usuario.equipo_tiene;
+      if (this.newMessage.trim() !== "") {
+        const messageData = {
+          team_id: team_Id,
+          sender: this.movistore.usuario.documento,
+          content: this.newMessage,
+        };
+        try {
+          await axios.post("http://localhost:8000/chat/send", messageData);
+          this.socket.emit("sendMessage", messageData);
+          this.newMessage = "";
+        } catch (error) {
+          console.error("❌ Error al enviar el mensaje:", error);
+        }
       }
-    }
-  },
-
-  async viewMessages() {
-    const movistore = useUsuarios();
-    const team_Id = movistore.usuario.equipo_tiene;
-
-
-    try {
-      // Obtener mensajes desde la base de datos
-      const response = await axios.get(`http://localhost:8000/chat/${team_Id}`);
-      this.chats = response.data.messages.map((message) => ({
-        sender: {
-          nombre: message.sender.nombre,
-          profilePicture: this.getImagenUrl(message.sender.imagen),
-          documento: message.sender.documento,
-        },
-        content: message.content,
-        timestamp: message.timestamp,
-      }));
-    } catch (error) {
-      console.error("❌ Error al obtener los mensajes:", error);
-    }
-  },
-
-  conectarSocket() {
-    this.socket = io("http://localhost:8000", {
-      path: "/socket.io/",
-      transports: ["websocket", "polling"],
-    });
-
-    this.socket.on("connect", () => {
-      console.log("🔗 Conectado al WebSocket con ID:", this.socket.id);
-    });
-
-    this.socket.on("nuevoMensaje", (message) => {
-      console.log("📩 Nuevo mensaje recibido:", message);
-
-      // Verificar si el mensaje ya existe para evitar duplicados
-      const exists = this.chats.some(
-        (chat) => chat.timestamp === message.timestamp && chat.content === message.content
-      );
-
-      if (!exists) {
-        this.chats.push({
+    },
+    async viewMessages() {
+      const team_Id = this.movistore.usuario.equipo_tiene;
+      try {
+        const response = await axios.get(`http://localhost:8000/chat/${team_Id}`);
+        this.chats = response.data.messages.map((message) => ({
           sender: {
             nombre: message.sender.nombre,
             profilePicture: this.getImagenUrl(message.sender.imagen),
+            documento: message.sender.documento,
           },
           content: message.content,
           timestamp: message.timestamp,
-        });
+        }));
+      } catch (error) {
+        console.error("❌ Error al obtener los mensajes:", error);
       }
-    });
-
-    this.socket.on("connect_error", (err) => {
-      console.error("❌ Error de conexión:", err.message);
-    });
-  },
+    },
+    conectarSocket() {
+      this.socket = io("http://localhost:9000", {
+        path: "/socket.io/",
+        transports: ["websocket", "polling"],
+      });
+      this.socket.on("connect", () => {
+        console.log("🔗 Conectado al WebSocket con ID:", this.socket.id);
+        this.socket.emit("joinRoom", team_Id);
+    this.socket.emit("joinRoom", this.movistore.usuario.documento);
+      });
+      this.socket.on("nuevoMensaje", (message) => {
+        const exists = this.chats.some(
+          (chat) => chat.timestamp === message.timestamp && chat.content === message.content
+        );
+        if (!exists) {
+          this.chats.push({
+            sender: {
+              nombre: message.sender.nombre,
+              profilePicture: this.getImagenUrl(message.sender.imagen),
+            },
+            content: message.content,
+            timestamp: message.timestamp,
+          });
+        }
+      });
+      this.socket.on("connect_error", (err) => {
+        console.error("❌ Error de conexión:", err.message);
+      });
+    },
     getImagenUrl(path) {
-    return path ? `http://127.0.0.1:8000/${path}` : '';
-  },
+      return path ? `http://127.0.0.1:8000/${path}` : '';
+    },
     async obtenerLiderEquipo() {
+      if (!this.movistore.usuario.equipo_tiene) return;
       try {
-        const movistore = useUsuarios();
-        if (!movistore.usuario.equipo_tiene) return;
-
-        const response = await axios.get(`http://127.0.0.1:8000/equipos/${movistore.usuario.equipo_tiene}/lider`);
-        
+        const response = await axios.get(`http://127.0.0.1:8000/equipos/${this.movistore.usuario.equipo_tiene}/lider`);
         this.team.leader = {
           name: response.data.lider.nombre,
           document: response.data.lider.documento,
           email: response.data.lider.correo,
           phone: response.data.lider.telefono,
           profilePicture: response.data.lider.imagen,
-          fecha_nacimiento : response.data.lider.fecha_nacimiento,
+          fecha_nacimiento: response.data.lider.fecha_nacimiento,
           role: "Líder",
         };
-
       } catch (error) {
         console.error("Error al obtener datos del líder del equipo:", error);
       }
     },
-
-
- 
-  
-    
-
     async obtenerDatosEquipo() {
-  try {
-    const movistore = useUsuarios();
-    const response = await axios.get(`http://127.0.0.1:8000/equipos/${movistore.usuario.equipo_tiene}/detalle/`);
-    this.team = {
-      logo: `http://127.0.0.1:8000/${response.data.equipo.logo}`,
-      name: response.data.equipo.nombre,
-      description: response.data.equipo.descripcion,
-      numero_integrantes: response.data.equipo.numero_integrantes,
-      integrantes_actuales: 0,
-      puntos: response.data.equipo.puntos, // Asegúrate de que el backend envíe los puntos
-      nivel: response.data.equipo.nivel,  // Asegúrate de que el backend envíe el nivel
-      members: response.data.miembros.map(m => ({
-        documento: m.documento,
-        name: m.nombre,
-        role: "Miembro",
-        profilePicture: m.imagen,
-        fecha_nacimiento: m.fecha_nacimiento,
-      })),
-      tournaments: ["Torneo A", "Torneo B"],
-      chat: [],
-    };
-  } catch (error) {
-    console.error("Error al obtener datos del equipo:", error);
-  }
-},     
-
-
-   
-
-
-
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/equipos/${this.movistore.usuario.equipo_tiene}/detalle/`);
+        this.team = {
+          logo: `http://127.0.0.1:8000/${response.data.equipo.logo}`,
+          name: response.data.equipo.nombre,
+          description: response.data.equipo.descripcion,
+          numero_integrantes: response.data.equipo.numero_integrantes,
+          integrantes_actuales: 0,
+          puntos: response.data.equipo.puntos,
+          nivel: response.data.equipo.nivel,
+          members: response.data.miembros.map(m => ({
+            documento: m.documento,
+            name: m.nombre,
+            role: "Miembro",
+            profilePicture: m.imagen,
+            fecha_nacimiento: m.fecha_nacimiento,
+          })),
+          tournaments: ["Torneo A", "Torneo B"],
+          chat: [],
+        };
+      } catch (error) {
+        console.error("Error al obtener datos del equipo:", error);
+      }
+    },
     openMemberMenu(member) {
       this.selectedMember = member;
       this.showMemberMenu = true;
@@ -422,57 +397,10 @@ methods: {
       this.showMemberMenu = false;
       this.selectedMember = null;
     },
-
-    async confirmExpel(documento, nombre) {
-  const movistore = useUsuarios();
-     // **Actualizar el estado en Pinia**
-   
-
-  if (!movistore.usuario.equipo_tiene) {
-    console.error("Error: No hay equipo seleccionado.");
-    alert("No tienes un equipo asignado.");
-    return;
-  }
-
-  if (!documento) {
-    console.error("Error: El documento del miembro es inválido.", documento);
-    alert("Error al expulsar: el documento es inválido.");
-    return;
-  }
-
-  if (confirm(`¿Estás seguro de expulsar a ${nombre}?`)) {
-    try {
-      const formData = new FormData();
-      formData.append("id_team", movistore.usuario.equipo_tiene);
-      formData.append("documento_miembro", documento);
-
-      console.log("Enviando FormData:", Object.fromEntries(formData));
-
-      const response = await axios.post("http://127.0.0.1:8000/equipos/expulsar", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-
-      console.log("Respuesta del servidor:", response.data);
-
-      // ✅ Actualizar la lista de miembros
-      this.team.members = this.team.members.filter(m => m.documento !== documento);
-      
-      this.closeMemberMenu();
-      alert(`${nombre} ha sido expulsado del equipo.`);
-
-    } catch (error) {
-      console.error("Error al expulsar:", error.response ? error.response.data : error);
-      alert(error.response?.data?.detail || "Hubo un error al expulsar al miembro.");
-    }
-  }
-},
-
-// Modal reporte
-abrirModalReporte(mensaje) {
-  console.log("Mensaje seleccionado:", mensaje); // Verifica el contenido del mensaje
-  this.mensajeSeleccionado = mensaje;
-  this.mostrarModalReporte = true;
-},
+    abrirModalReporte(mensaje) {
+      this.mensajeSeleccionado = mensaje;
+      this.mostrarModalReporte = true;
+    },
     cerrarModalReporte() {
       this.mostrarModalReporte = false;
       this.mensajeSeleccionado = null;
@@ -480,253 +408,146 @@ abrirModalReporte(mensaje) {
       this.comentarioReporte = "";
     },
     async enviarReporte() {
-  if (!this.motivoReporte || !this.comentarioReporte) {
-    alert("Por favor completa todos los campos.");
-    return;
-  }
-
-  const movistore = useUsuarios(); // Obtén el estado del usuario actual
- 
-
-  const reporte = {
-    documento_reportante: movistore.usuario.documento, // Documento del usuario actual
-    documento_reportado: this.mensajeSeleccionado.sender.documento, // Documento del remitente del mensaje
-    motivo: this.motivoReporte, // Motivo seleccionado
-    comentario: this.comentarioReporte, // Comentario adicional
-  };
-
-  console.log("Datos enviados al backend:", reporte); // Inspecciona los datos enviados
-
-  try {
-    const response = await axios.post("http://127.0.0.1:8000/reportar_usuario/", reporte, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded", // Asegúrate de que el backend reciba datos en formato Form-Encoded
-      },
-    });
-    alert(response.data.mensaje);
-    this.cerrarModalReporte();
-  } catch (error) {
-    console.error("Error al enviar el reporte:", error.response?.data || error.message);
-    alert("Hubo un error al enviar el reporte.");
-  }
-},
-
-
-
-
-verPerfil(documento) {
-  this.$router.push(`/perfiles/${documento}`); // Redirige usando el documento
-},
-
+      if (!this.motivoReporte || !this.comentarioReporte) {
+        alert("Por favor completa todos los campos.");
+        return;
+      }
+      const reporte = {
+        documento_reportante: this.movistore.usuario.documento,
+        documento_reportado: this.mensajeSeleccionado.sender.documento,
+        motivo: this.motivoReporte,
+        comentario: this.comentarioReporte,
+      };
+      try {
+        const response = await axios.post("http://127.0.0.1:8000/reportar_usuario/", reporte, {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        });
+        alert(response.data.mensaje);
+        this.cerrarModalReporte();
+      } catch (error) {
+        alert("Hubo un error al enviar el reporte.");
+      }
+    },
+    verPerfil(documento) {
+      this.$router.push(`/perfiles/${documento}`);
+    },
     openBuzon() {
       this.showBuzon = true;
-      this.showConfig = false; // Cerrar configuración si está abierta
+      this.showConfig = false;
     },
     openConfig() {
       this.showConfig = true;
-      this.showBuzon = false; // Cerrar buzón si está abierto
-    },
-    verUsuario(documento) {
-  this.$router.push({ name: 'perfiles', params: { documento } });
-},
-    updateLogo(event) {
-  const file = event.target.files[0];
-  if (file) {
-    this.team.logo = URL.createObjectURL(file); // Previsualiza
-  }
-},
-    closeBuzon() {
       this.showBuzon = false;
     },
-    closeConfig() {
-      this.showConfig = false;
+    verUsuario(documento) {
+      this.$router.push({ name: 'perfiles', params: { documento } });
     },
-
-
-    salir_equipo() {
-  const movistore = useUsuarios();
-  const formData = new FormData();
-  formData.append('documento_user', movistore.usuario.documento); // Usa el documento del usuario logueado
-
-  axios.post('http://localhost:8000/equipos/salir', formData)
-    .then(response => {
-      console.log(response.data.mensaje);
-      // ✅ Actualizar estado local
-      movistore.usuario.equipo_tiene = 0;
-      // ✅ Mostrar notificación si quieres
-      alert('Has salido del equipo exitosamente.');
-    })
-    .catch(error => {
-      console.error('Error al salir del equipo:', error);
-      alert(error.response?.data?.detail || 'No se pudo salir del equipo.');
-    });
-},
-
-
-
-
-
-
-  
-      rejectRequest(solicitud) {
-        this.team.requests = this.team.requests.filter((req) => req !== solicitud);
-      },
-    async updateTeam() {
-  try {
-    const movistore = useUsuarios();
-    const formData = new FormData();
-
-    // Agregar la nueva descripción si hay
-    if (this.newDescription) {
-      formData.append("nueva_descripcion", this.newDescription);
-    }
-
-    // Buscar el archivo de logo (input file)
-    const inputFile = document.getElementById("newLogo");
-    if (inputFile && inputFile.files.length > 0) {
-      formData.append("nuevo_logo", inputFile.files[0]);
-    }
-
-    const id_equipo = movistore.usuario.equipo_tiene;
-
-    const response = await axios.put(
-      `http://127.0.0.1:8000/equipos/actualizar/${id_equipo}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-
-    console.log("Respuesta al actualizar equipo:", response.data);
-    alert("Equipo actualizado correctamente");
-
-    // Actualizar descripción en el frontend
-    this.team.description = this.newDescription;
-
-    // Cerrar la ventana de configuración
-    this.closeConfig();
-
-    // Refrescar los datos del equipo (opcional)
-    await this.obtenerDatosEquipo();
-    await this.obtenerLiderEquipo();
-    await this.obtenerCantidadIntegrantes();
-  } catch (error) {
-    console.error("Error al actualizar el equipo:", error.response || error);
-    alert("Hubo un error al actualizar el equipo.");
-  }
-},
-    async deleteTeam() {
-  try {
-    const movistore = useUsuarios();
-    
-    // Obtener el ID del equipo a eliminar
-    const response = await axios.get(`http://127.0.0.1:8000/id_equipo/${movistore.usuario.documento}`);
-    const id_delete = response.data.Id_team;
-    console.log("Id del equipo a eliminar: ", id_delete);
-    
-    if (!id_delete) {
-      alert("No hay un equipo asociado para eliminar.");
-      return;
-    }
-
-    // Hacer la petición DELETE
-    const deleteResponse = await axios.delete(`http://127.0.0.1:8000/equipos/eliminar/${id_delete}`);
-
-    
-    console.log("Respuesta del servidor:", deleteResponse.data);
-    alert(deleteResponse.data.mensaje);
-
-    // **Actualizar el estado en Pinia**
-    movistore.usuario.equipo_tiene = 0; // Indicar que no tiene equipo
-    movistore.usuario.esLider = false; // Indicar que ya no es líder
-
-    this.$router.push('/equipos');
-  } catch (error) {
-    console.error("Error al eliminar el equipo:", error);
-    alert("Hubo un error al eliminar el equipo. Por favor, inténtalo de nuevo.");
-  }
-},
-async obtenerCantidadIntegrantes() {
-  try {
-    const movistore = useUsuarios();
-    const response = await axios.get(`http://127.0.0.1:8000/equipos/${movistore.usuario.equipo_tiene}/integrantes`);
-    
-    this.team.integrantes_actuales = response.data; // Aquí guardamos la cantidad actual
-  } catch (error) {
-    console.error("Error al obtener cantidad de integrantes:", error);
-    this.team.integrantes_actuales = 0;
-  }
-},
-async requests() {
-  const usuarioStore = useUsuarios(); // Usamos el store de usuario
-  try {
-    const idEquipo = usuarioStore.usuario.equipo_tiene;
-    console.log("ID del equipo:", idEquipo);
-
-    const res = await axios.get(
-      `http://127.0.0.1:8000/solicitudes_pendientes/${idEquipo}`,
-      {
-        headers: {
-          Accept: 'application/json',
-        },
-      }
-    );
-
-    console.log("Respuesta del backend:", res.data);
-
-    this.team.requests = res.data.map(solicitud => ({
-      id_solicitud: solicitud.id_solicitud,
-      documento: solicitud.documento_usuario,
-      name: solicitud.nombre_usuario,
-      picture: solicitud.logo_usuario || 'default.png',
-      fecha: solicitud.fecha_solicitud,
-    }));
-
-    console.log("Solicitudes procesadas:", this.team.requests);
-  } catch (error) {
-    console.error("Error al obtener solicitudes-------------------:", error);
-  }
-},
-
-
-async acceptRequest(solicitud) {
-    try {
-      const response = await fetch(`http://localhost:8000/solicitudes_ingreso/${solicitud.id_solicitud}/aceptar`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({})
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error en la solicitud:", errorData.detail);
-        alert(`Error: ${errorData.detail}`);
-        return;
-      }
-
-      const data = await response.json();
-      console.log("Respuesta del servidor:", data);
-      alert("Solicitud aceptada con éxito");
-    } catch (error) {
-      console.error("Error en fetch:", error);
-      alert("Ocurrió un error al aceptar la solicitud");
-    }
-  },
     updateLogo(event) {
       const file = event.target.files[0];
       if (file) {
         this.team.logo = URL.createObjectURL(file);
       }
     },
-
-    
-  },
+    closeBuzon() {
+      this.showBuzon = false;
+    },
+    closeConfig() {
+      this.showConfig = false;
+    },
+    salir_equipo() {
+      const formData = new FormData();
+      formData.append('documento_user', this.movistore.usuario.documento);
+      axios.post('http://localhost:8000/equipos/salir', formData)
+        .then(response => {
+          this.movistore.actualizarEquipo(0);
+          alert('Has salido del equipo exitosamente.');
+        })
+        .catch(error => {
+          alert(error.response?.data?.detail || 'No se pudo salir del equipo.');
+        });
+    },
+    rejectRequest(solicitud) {
+      this.team.requests = this.team.requests.filter((req) => req !== solicitud);
+    },
+    async updateTeam() {
+      try {
+        const formData = new FormData();
+        if (this.newDescription) {
+          formData.append("nueva_descripcion", this.newDescription);
+        }
+        const inputFile = document.getElementById("newLogo");
+        if (inputFile && inputFile.files.length > 0) {
+          formData.append("nuevo_logo", inputFile.files[0]);
+        }
+        const id_equipo = this.movistore.usuario.equipo_tiene;
+        const response = await axios.put(
+          `http://127.0.0.1:8000/equipos/actualizar/${id_equipo}`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        alert("Equipo actualizado correctamente");
+        this.team.description = this.newDescription;
+        this.closeConfig();
+        await this.obtenerDatosEquipo();
+        await this.obtenerLiderEquipo();
+        await this.obtenerCantidadIntegrantes();
+      } catch (error) {
+        alert("Hubo un error al actualizar el equipo.");
+      }
+    },
+    async deleteTeam() {
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/id_equipo/${this.movistore.usuario.documento}`);
+        const id_delete = response.data.Id_team;
+        if (!id_delete) {
+          alert("No hay un equipo asociado para eliminar.");
+          return;
+        }
+        const deleteResponse = await axios.delete(`http://127.0.0.1:8000/equipos/eliminar/${id_delete}`);
+        this.movistore.actualizarEquipo(0);
+        this.$router.push('/equipos');
+      } catch (error) {
+        alert("Hubo un error al eliminar el equipo. Por favor, inténtalo de nuevo.");
+      }
+    },
+    async obtenerCantidadIntegrantes() {
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/equipos/${this.movistore.usuario.equipo_tiene}/integrantes`);
+        this.team.integrantes_actuales = response.data;
+      } catch (error) {
+        this.team.integrantes_actuales = 0;
+      }
+    },
+    async requests() {
+      try {
+        const idEquipo = this.movistore.usuario.equipo_tiene;
+        const res = await axios.get(
+          `http://127.0.0.1:8000/solicitudes_pendientes/${idEquipo}`,
+          { headers: { Accept: 'application/json' } }
+        );
+        this.team.requests = res.data.map(solicitud => ({
+          id_solicitud: solicitud.id_solicitud,
+          documento: solicitud.documento_usuario,
+          name: solicitud.nombre_usuario,
+          picture: solicitud.logo_usuario || 'default.png',
+          fecha: solicitud.fecha_solicitud,
+        }));
+      } catch (error) {
+        // Manejo de error
+      }
+    },
+    updateLogo(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.team.logo = URL.createObjectURL(file);
+      }
+    },
+  }
 };
-  </script>
+</script>
+
   
   <style scoped>
   /* Estilos generales */
