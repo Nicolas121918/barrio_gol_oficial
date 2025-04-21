@@ -7,7 +7,7 @@
     <!-- Encabezado: Logo y nombre del equipo -->
     <header class="header">
       <div class="logo-container" @click="mostrarImagen = true">
-  <img :src="team.logo" alt="Logo del equipo" class="logo" v-if="team.logo" />
+  
 </div>
 
 
@@ -89,9 +89,9 @@
 
     <!-- Modal para editar integrante -->
     <div v-if="showMemberMenu" class="modal">
-      <div class="modal-content">
+      <div class="modal-content3">
         <h3 class="edit">Opciones para {{ selectedMember.name }}</h3>
-        <button @click="verUsuario(solicitud.documento_usuario)" class="button_info-btn2">ver perfil</button>
+        <button @click="verUsuario(selectedMember.documento)" class="button_info-btn2">ver perfil</button>
         <button id="espacio" class="button_danger"
   @click="confirmExpel(selectedMember.documento, selectedMember.name)"
   v-if="!selectedMember.isLeader"
@@ -118,7 +118,7 @@
     
     <!-- Modal de Buzón -->
     <div v-if="showBuzon" class="modal buzón-modal">
-  <div id="caja" class="modal-content buzón-content">
+  <div id="caja" class="modal-content2 buzón-content">
     <h3>Buzón de Solicitudes</h3>
     <ul class="request-list">
       <li v-for="(solicitud, index) in team.requests" :key="index" class="request-item">
@@ -135,14 +135,15 @@
     </ul>
     <button class="button_close" @click="closeBuzon">Cerrar</button>
       <router-link class="link home" to="/invitar">
-        <button class="button_accept-btn" @click="closeBuzon">Invitar</button>
+        <button class="button_accept-btn2" @click="closeBuzon">Invitar</button>
       </router-link>
     </div>
   </div>
 
     <!-- Modal de Configuración -->
-    <div v-if="showConfig" class="modal config-modal">
-      <div class="modal-content config-content">
+    <div v-if="showConfig" class="modal config-modal">    
+      <div class="modal-content6 config-content">
+        
         <h3 class="confi">Configuración</h3>
         <div class="descripcion_actualizar">
         <label class="confi2" for="newLogo">Actualizar logo:</label>
@@ -189,7 +190,7 @@
   </div>
 </div>
 <div v-if="mostrarModalReporte" class="modal-overlay">
-  <div class="modal-content">
+  <div class="modal-content4">
     <h3 class="modal-title">Reportar Mensaje</h3>
     
     <p class="modal-text">
@@ -244,7 +245,7 @@ export default {
         requests: [
         ],
         tournaments: [],
-        puntos: 0, // Puntos del equipo
+        puntos: 300, // Puntos del equipo
       nivel: 1,  // Nivel del equipo
       },
       mostrarModalReporte: false,
@@ -1204,13 +1205,11 @@ border: solid white;
   box-shadow: 0 0 10px white;
 }
 .button_info-btn2 {
-  background-color: #6a6a6a;
+  background-color: #0976cf;
   color: #ffffff;
-  padding: 5px;
+  padding: 7px;
   border: none;
-  font-family:Arial, Helvetica, sans-serif;
   font-size: 15px;
-  font-weight: bold;
   margin-right: 15px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
@@ -1218,7 +1217,7 @@ border: solid white;
 }
 
 .button_info-btn2:hover {
-  background-color: #a3a3a3;
+  background-color: #3f01b4;
   color: white;
   transform: scale(1.05);
   box-shadow: 0 0 10px white;
@@ -1649,12 +1648,43 @@ textarea {
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
 }
 
-.descripcion_actualizar{
-  border: solid rgb(179, 179, 179);
+.descripcion_actualizar {
+  border: 2px solid rgb(179, 179, 179);
   padding: 3%;
   margin-top: 7%;
   margin-bottom: 3%;
+  border-radius: 12px;
+  background-color: #1c1c1c;
+  color: #f0f0f0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.05);
 }
+
+.descripcion_actualizar:hover {
+  border-color: #ffffff;
+  background-color: #2a2a2a;
+  box-shadow: 0 6px 12px rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px);
+}
+.descripcion_actualizar {
+  border: 2px solid rgb(179, 179, 179);
+  padding: 3%;
+  margin-top: 7%;
+  margin-bottom: 3%;
+  border-radius: 12px;
+  background-color: #1c1c1c;
+  color: #f0f0f0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.05);
+}
+
+.descripcion_actualizar:hover {
+  border-color: #ffffff;
+  background-color: #2a2a2a;
+  box-shadow: 0 6px 12px rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px);
+}
+
 .logo-preview {
   width: 100px;
   height: 100px;
@@ -1765,8 +1795,8 @@ textarea {
   z-index: 9999; /* Asegúrate de que esté por encima de otros elementos */
 }
 
-.modal-content {
-  background-color: #ffffff; 
+.modal-conten2 {
+  background-color: #000000; 
   padding: 6rem;
   border-radius: 10px;
   max-width: 500px;
@@ -2073,7 +2103,8 @@ border: solid white;
   z-index: 9999; /* Asegúrate de que esté por encima de otros elementos */
 }
 
-.modal-content {
+.modal-content{
+
   background-color: #ffffff; 
   padding: 0rem;
   border-radius: 10px;
@@ -2713,6 +2744,71 @@ border: solid white;
 
 
 
+}
+.modal-content2{
+
+  padding: 20px;
+  min-width: 40%;
+}
+.button_accept-btn2 {
+  font-family: cursive;
+  background-color: #28a745; /* verde bonito */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button_accept-btn2:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}
+
+.button_accept-btn2:active {
+  transform: scale(0.95);
+  background-color: #1e7e34;
+}
+.modal-content3 {
+  background-color: #201e2f;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* separación entre los elementos */
+  padding: 24px 32px;
+  border: 2px solid rgb(255, 213, 0); /* borde más visible */
+  border-radius: 16px; /* esquinas redondeadas */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* sombra para dar profundidad */
+  justify-content: center;
+  align-items: center;
+  color: white;
+  max-width: 500px;
+  margin: auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.modal-content6 {
+  background: linear-gradient(135deg, #1c1c1c, #2e2e2e);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 28px 36px;
+  border: 2px solid #ffffff22;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.05);
+  justify-content: center;
+  align-items: center;
+  color: #f5f5f5;
+  max-width: 550px;
+  margin: auto;
+  font-family: 'Poppins', sans-serif;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modal-content6:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 30px rgba(255, 255, 255, 0.1);
 }
 
 </style>

@@ -36,12 +36,13 @@
     </div>
 
     <!-- Modal del Logo -->
-    <div v-if="mostrarModal" class="modal-fondo" @click="cerrarModal">
+   
+  </div>
+  <div v-if="mostrarModal" class="modal-fondo" @click="cerrarModal">
       <div class="modal-contenido" @click.stop>
         <img v-if="mostrarLogoGrande" :src="getImagenUrl(equipo.logoTeam)" class="imagen-logo-grande" />
       </div>
     </div>
-  </div>
 </template>
 
 <script>

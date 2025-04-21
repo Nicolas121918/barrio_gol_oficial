@@ -32,6 +32,7 @@
           <div v-if="torneosFiltradosTerminados.length" class="lista-torneos">
             <div v-for="torneo in torneosFiltradosTerminados" :key="torneo.id_torneo" class="card">
               <div class="card-header">
+                
                 <img :src="torneo.torneo_logo" alt="Logo torneo" class="logo-torneo" />
                 <h3 class="nombre-torneo">{{ torneo.nombre }}</h3>
               </div>
@@ -113,10 +114,11 @@
         this.mostrarModal = true;
       },
       getImageUrl(imagePath) {
-        return imagePath
-          ? `http://127.0.0.1:8000/${imagePath}`  // Si la imagen está disponible
-          : 'default.png';  // Imagen por defecto si no está disponible
-      },
+  if (!imagePath || imagePath === "") {
+    return 'https://thumbs.dreamstime.com/b/sin-foto-ni-icono-de-imagen-en-blanco-cargar-im%C3%A1genes-o-falta-marca-no-disponible-pr%C3%B3xima-se%C3%B1al-silueta-naturaleza-simple-marco-215973362.jpg';
+  }
+  return `http://127.0.0.1:8000/${imagePath}`;
+},
       cerrarModal() {
         this.mostrarModal = false;
       },
@@ -133,6 +135,7 @@
         console.log('Ingresar a torneo', id);
       },
       async cargarTorneos() {
+    
     const usuarioStore = useUsuarios();
     try {
       if (usuarioStore.usuario && usuarioStore.usuario.documento) {
@@ -181,6 +184,7 @@ font-family: 'Segoe UI', sans-serif;
 font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 min-width: 1200px;
 max-width: 1200px;
+
 }
 
 .seccion-titulo {

@@ -575,6 +575,9 @@ async def contar_integrantes(id_equipo: int, db: Session = Depends(get_db)):
 
     return conteo
 
+from datetime import datetime
+
+
 @app.get("/actualizar_puntos_nivel/{id_equipo}")
 def actualizar_puntos_y_nivel(id_equipo: int, db: Session = Depends(get_db)):
     equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()

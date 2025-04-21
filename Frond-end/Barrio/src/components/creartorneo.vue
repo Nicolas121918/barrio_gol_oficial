@@ -13,15 +13,17 @@
       <input v-model="form.nombre" type="text" required />
 
       <div>
-    <label>Tipo de torneo:</label>
-    <br>
-    <br>
-    <select v-model="form.tipo_torneo" required>
-      <option disabled value="">Seleccione una opción</option>
-      <option value="relampago">Relámpago</option>
-      <option value="todos">Todos contra todos</option>
-      <option value="personalizado">Personalizado</option>
-    </select>
+        <br>
+        <label>Tipo de torneo:</label>
+        <br>
+
+<select v-model="form.tipo_torneo" required>
+  <option value="personalizado">Personalizado</option>
+  <option disabled value="">Seleccione una opción</option>
+  <option  disabled value="relampago">Relámpago</option>
+  <option  disabled value="todos">Todos contra todos</option>
+  
+</select>
 
     <div v-if="form.tipo_torneo">
       <p v-if="form.tipo_torneo === 'relampago'">
@@ -35,15 +37,7 @@
       </p>
     </div>
   </div>
-      <label>Tipo de fútbol:</label>
-<select v-model="form.tipo_futbol" required>
-  <option disabled value="">Seleccione una opción</option>
-  <option>Fútbol 11</option>
-  <option>Futbol sala(futsal)</option>
-  <option>Fútbol 7</option>
-  <option>Fútbol playa</option>
-  <option>Fútbol Indoor</option>
-</select>
+  
 
 
       <label>Fecha de inicio:</label>
@@ -174,20 +168,22 @@
   import { useUsuarios } from '@/stores/usuario';
   import { useRouter } from 'vue-router';
   import Swal from 'sweetalert2';
+  import listaCiudadesJson from '../assets/ciudades.json'
+const listaCiudades = ref(listaCiudadesJson)
   const imagenPrevia1 = ref("");
 const imagenPrevia2 = ref("");
-
-  const mostrarVistaPrevia1 = (event) => {
+const mostrarVistaPrevia1 = (event) => {
   const archivo = event.target.files[0];
   if (archivo && archivo.type.startsWith('image/')) {
     const lector = new FileReader();
     lector.onload = () => {
       imagenPrevia1.value = lector.result;
-      console.log("Imagenes : " , imagenPrevia1, "error")
     };
     lector.readAsDataURL(archivo);
+    form.value.imagen_cancha = archivo; // <-- Aquí se guarda en el formulario
   } else {
-    imagenPrevia1.value = lector;
+    imagenPrevia1.value = null;
+    form.value.imagen_cancha = null;
   }
 };
 
@@ -197,26 +193,22 @@ const mostrarVistaPrevia2 = (event) => {
     const lector = new FileReader();
     lector.onload = () => {
       imagenPrevia2.value = lector.result;
-      console.log(imagenPrevia2, "error")
     };
     lector.readAsDataURL(archivo);
+    form.value.torneo_logo = archivo; // <-- Aquí también
   } else {
     imagenPrevia2.value = null;
+    form.value.torneo_logo = null;
   }
 };
 
+
   const router = useRouter();
   const usuariosStore = useUsuarios();
-  const listaCiudades = ref([
-  'Bogotá, Cundinamarca',
-  'Medellín, Antioquia',
-  'Cali, Valle del Cauca',
-  // Puedes agregar más aquí
-])
 function validarCiudad() {
   if (!listaCiudades.value.includes(form.value.lugar)) {
-    alert("Por favor selecciona una ciudad válida de la lista.");
-    form.value.lugar = '';
+    alert("Por favor selecciona una ciudad válida de la lista.")
+    form.value.lugar = ''
   }
 }
   const form = ref({
@@ -271,6 +263,7 @@ const comisionEstimado = computed(() => {
   const total = form.value.costo_inscripcion * form.value.numero_participantes;
   return Math.floor(total * 0.01); // 1% del total
 });
+
 
 // Convertir string con puntos a número real
 const actualizarCosto = (event) => {
@@ -497,4 +490,5 @@ fade-enter-active, .fade-leave-active {
   color: #d4af37;
   font-family:Georgia, 'Times New Roman', Times, serif;
 }
+
 </style>

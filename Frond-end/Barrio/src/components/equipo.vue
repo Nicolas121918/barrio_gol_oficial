@@ -20,6 +20,10 @@
         <router-link to="/creacionequipo" class="boton-crear">
           + CREA TU EQUIPO
         </router-link>
+        <router-link to="/stores" class="boton-crear2">
+          solicitudes
+        </router-link>
+
       </div>
       <Equipos_container />
     </div>
@@ -170,6 +174,50 @@ export default {
   display: flex;
   justify-content: center;
   margin-bottom: 15px;
+}
+
+
+
+.boton-crear2{
+  display: inline-block;
+  background-color: rgb(0, 213, 255);
+  color: black;
+  font-weight: bold;
+  padding: 15px 25px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 80%;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+  border: 2px solid black;
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+  text-transform: uppercase;
+  font-family: 'Audiowide', cursive;
+  position: relative;
+  overflow: hidden;
+  margin-top: 20%;
+  margin-left: 20%;
+}
+
+.boton-crear2::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: skewX(-45deg);
+  transition: left 0.5s;
+}
+
+.boton-crear2:hover::before {
+  left: 100%;
+}
+
+.boton-crear2:hover {
+  background-color: #6137d4;
+  transform: scale(1.1) rotate(-2deg);
+  box-shadow: 0 6px 15px rgba(255, 215, 0, 0.7);
 }
 
 </style>

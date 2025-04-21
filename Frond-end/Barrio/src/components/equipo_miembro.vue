@@ -27,8 +27,22 @@
   </p>
   
     </div>
+
       </header>
-  
+  <div class="nivel-container">
+  <h2 class="nivel-titulo">Nivel: {{ nivel }}</h2>
+
+  <div class="barra-progreso">
+    <div
+      class="progreso"
+      :style="{ width: progreso + '%' }"
+    ></div>
+  </div>
+
+  <p class="nivel-detalle">
+    Puntos: {{ team.puntos }} / {{ siguienteNivel || '∞' }}
+  </p>
+</div>
       <!-- Lista de integrantes -->
       <section class="members-section">
     <h2 class="name2">Integrantes:</h2>
@@ -187,11 +201,12 @@ export default {
         numero_integrantes: 0,
         integrantes_actuales: 0,
         members: [],
-        leader: {},
-        requests: [],
+        leader: {}, 
+        requests: [
+        ],
         tournaments: [],
-        puntos: 0,
-        nivel: 1,
+        puntos: 300, // Puntos del equipo
+      nivel: 1,  // Nivel del equipo
       },
       mostrarModalReporte: false,
       mensajeSeleccionado: null,
@@ -2241,4 +2256,68 @@ box-shadow: 0 0 12px #ffe100;
 
 
   
+.nivel-container {
+  max-width: 420px;
+  margin: 1px auto;
+  padding: 5px;
+  border-radius: 20px;
+  font-family: 'Rajdhani', sans-serif;
+  color: #fff;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.nivel-titulo {
+  font-size: 30px;
+  color: #ffd700;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
+}
+
+.barra-progreso {
+  width: 100%;
+  height: 26px;
+  background-color: #444;
+  border: 1px solid #888;
+  border-radius: 30px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.progreso {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #ffd700 0%,
+    #fff3b0 50%,
+    #ffd700 100%
+  );
+  background-size: 200% 100%;
+  animation: shineProgress 2s linear infinite;
+  border-radius: 30px 0 0 30px;
+  transition: width 0.6s ease-in-out;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+@keyframes shineProgress {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.nivel-detalle {
+  font-size: 16px;
+  color: #ccc;
+  margin-top: 14px;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 1px;
+}
   </style>
