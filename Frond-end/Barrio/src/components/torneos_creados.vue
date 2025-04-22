@@ -1,4 +1,18 @@
   <template>
+
+    <header> 
+
+  <!-- Header de escritorio -->
+  <div class="d-none d-md-block">
+    <headerapp></headerapp>
+  </div>
+  <!-- Header para móviles -->
+  <div class="d-block d-md-none">
+    <headermobile></headermobile>
+  </div>
+  
+    </header>
+
     <router-link to="/torneos" class="btn-volver">
       Volver
     </router-link>
@@ -8,11 +22,11 @@
       <div class="secciones-torneos">
         <!-- Sección: En juego -->
         <section class="torneo-columna">
-          <h2 class="titulo-principal2">Torneos en juego y en espera</h2>
+          <h2 class="titulo-principal2">Torneos en Sorteo y en espera</h2>
           <div v-if="torneosFiltradosEnJuego.length" class="lista-torneos">
             <div v-for="torneo in torneosFiltradosEnJuego" :key="torneo.id_torneo" class="card">
               <div class="card-header">
-                <img :src="getImageUrl(torneo.torneo_logo)" alt="Logo torneo" class="logo-torneo" />
+                <img :src="getImagenUrl(torneo.torneo_logo)" alt="Logo torneo" class="logo-torneo" />
                 <h3 class="nombre-torneo">{{ torneo.nombre }}</h3>
               </div>
               <p>Lugar: {{ torneo.lugar }}</p>
@@ -33,7 +47,7 @@
             <div v-for="torneo in torneosFiltradosTerminados" :key="torneo.id_torneo" class="card">
               <div class="card-header">
                 
-                <img :src="torneo.torneo_logo" alt="Logo torneo" class="logo-torneo" />
+                <img :src="getImagenUrl(torneo.torneo_logo)" alt="Logo torneo" class="logo-torneo" />
                 <h3 class="nombre-torneo">{{ torneo.nombre }}</h3>
               </div>
               <p>Lugar: {{ torneo.lugar }}</p>
@@ -52,12 +66,12 @@
         <div class="modal-contenido">
           <button class="btn-cerrar" @click="cerrarModal">X</button>
           <div class="modal-header">
-            <img :src="torneoSeleccionado.torneo_logo" alt="Logo del torneo" class="logo-modal" />
+            <img :src="getImagenUrl(torneoSeleccionado.torneo_logo)" alt="Logo del torneo" class="logo-modal" />
             <h2>{{ torneoSeleccionado.nombre }}</h2>
           </div>
           <div class="modal-info">
             <p><strong class="letraa">Tipo de Torneo:</strong> {{ torneoSeleccionado.tipo_torneo }}</p>
-            <p><strong class="letraa">Tipo de Fútbol:</strong> {{ torneoSeleccionado.tipo_futbol }}</p>
+            <p><strong class="letraa">Tipo de Fútbol:</strong> {{ torneoSeleccionado.tp_futbol }}</p>
             <p><strong class="letraa">Fecha de Inicio:</strong> {{ torneoSeleccionado.fecha_inicio }}</p>
             <div class="ubicacion">
               <p><strong class="letraa">Ubicación:</strong> {{ torneoSeleccionado.lugar }}</p>
@@ -65,7 +79,7 @@
             </div>
             <div class="cancha">
               <p><strong class="letraa">Imagen de la Cancha:</strong></p>
-              <img :src="getImageUrl(torneoSeleccionado.imagen_cancha)" alt="Imagen cancha" class="img-cancha" />
+              <img :src="getImagenUrl(torneoSeleccionado.imagen_cancha)" alt="Imagen cancha" class="img-cancha" />
             </div>
             <p><strong class="letraa">Premiación:</strong> {{ torneoSeleccionado.premiacion }}</p>
             <p><strong class="letraa">Reglas:</strong> {{ torneoSeleccionado.reglas }}</p>
@@ -80,19 +94,27 @@
   <script>
   import { useUsuarios } from '@/stores/usuario';
   import axios from 'axios';
-
+  import Headerapp from './Headerapp.vue';
+  import headermobile from './headermobile.vue';
+import Statustorneos from './statustorneos.vue';
   export default {
+    components: {
+      Headerapp,
+      headermobile
+
+    },
     data() {
       return {
         mostrarModal: false,
         torneoSeleccionado: {},
         busqueda: '',
         torneos: [],
+        
       };
     },
     computed: {
       torneosEnJuegoYEspera() {
-        return this.torneos.filter(t => t.estado === 'en espera' || t.estado === 'en_juego');
+        return this.torneos.filter(t => t.estado === 'en espera' || t.estado === 'en sorteo');
       },
       torneosTerminados() {
         return this.torneos.filter(t => t.estado === 'terminado');
@@ -113,12 +135,11 @@
         this.torneoSeleccionado = torneo;
         this.mostrarModal = true;
       },
-      getImageUrl(imagePath) {
-  if (!imagePath || imagePath === "") {
-    return 'https://thumbs.dreamstime.com/b/sin-foto-ni-icono-de-imagen-en-blanco-cargar-im%C3%A1genes-o-falta-marca-no-disponible-pr%C3%B3xima-se%C3%B1al-silueta-naturaleza-simple-marco-215973362.jpg';
-  }
-  return `http://127.0.0.1:8000/${imagePath}`;
-},
+
+      getImagenUrl(path) {
+      return path ? `http://127.0.0.1:8000/${path}` : '';
+    },
+
       cerrarModal() {
         this.mostrarModal = false;
       },
@@ -128,14 +149,17 @@
       },
       ingresarTorneo(id_torneo) {
         // Redirigir a la ruta dinámica del torneo con el id_torneo
-        this.$router.push({ name: 'torneo_sala_espera', params: { id_torneo: id_torneo } });
+        this.$router.push({ name: 'statustorneos', params: { id_torneo: id_torneo } })
+
       },
 
       ingresarTorneo2(id) {
         console.log('Ingresar a torneo', id);
       },
+
+      
+      // Método para cargar los torneos desde la API
       async cargarTorneos() {
-    
     const usuarioStore = useUsuarios();
     try {
       if (usuarioStore.usuario && usuarioStore.usuario.documento) {
@@ -184,7 +208,10 @@ font-family: 'Segoe UI', sans-serif;
 font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 min-width: 1200px;
 max-width: 1200px;
+}
 
+p{
+  color: white;
 }
 
 .seccion-titulo {
@@ -312,7 +339,7 @@ left: 0;
 
 .mensaje-vacio {
 font-style: italic;
-color: #aaa;
+color: #ffffff;
 margin-bottom: 3rem;
 text-align: center;
 font-size: 1.1rem;
@@ -370,7 +397,6 @@ font-family: 'Segoe UI', sans-serif;
 font-size: 2rem;
 color: #FFD700; /* Dorado */
 text-align: center;
-margin-bottom: 2rem;
 padding: 1rem;
 background: linear-gradient(to right, #111, #1a1a1a);
 border-bottom: 3px solid #222;
@@ -383,7 +409,6 @@ text-shadow:
 
 font-family: Arial, Helvetica, sans-serif;
 letter-spacing: 1px;
-
 border-radius: 10px;
 }
 
@@ -417,6 +442,7 @@ border-radius: 10px;
 text-decoration: none;
 transition: all 0.3s ease;
 box-shadow: 2px 2px 5px #000;
+margin: 15%;
 }
 
 .btn-volver:hover {
@@ -654,6 +680,155 @@ color: #ccc;
 .modal-contenido {
   max-height: 90vh; /* Agregado para limitar la altura */
   overflow-y: auto; /* Activar scroll vertical si el contenido es largo */
+}
+/* Pantallas extra grandes (más de 1400px) */
+@media (min-width: 1400px) {
+  .contenedor-torneos {
+    max-width: 1400px;
+    padding: 3rem;
+  }
+}
+
+/* Laptops y pantallas grandes */
+@media (max-width: 1200px) {
+  .contenedor-torneos {
+    max-width: 1000px;
+    padding: 2rem;
+    min-width: unset;
+  }
+}
+
+/* Tablets en horizontal */
+@media (max-width: 992px) {
+  .contenedor-torneos {
+    max-width: 90%;
+    padding: 1.5rem;
+  }
+
+  .lista-torneos {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .titulo-principal,
+  .titulo-principal2 {
+    font-size: 1.8rem;
+  }
+
+  .nombre-torneo {
+    font-size: 1rem;
+  }
+
+  .modal-contenido {
+    padding: 1.5rem;
+  }
+}
+
+/* Tablets en vertical y móviles grandes */
+@media (max-width: 768px) {
+  .contenedor-torneos {
+    padding: 1rem;
+  }
+
+  .secciones-torneos {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .torneo-columna {
+    min-width: 100%;
+  }
+
+  .botones {
+    flex-direction: column;
+  }
+
+  .botones button {
+    font-size: 0.9rem;
+  }
+
+  .titulo-principal,
+  .titulo-principal2 {
+    font-size: 1.5rem;
+  }
+
+  .modal-contenido {
+    width: 95%;
+  }
+
+  .buscador {
+    max-width: 100%;
+  }
+}
+
+/* Móviles medianos */
+@media (max-width: 576px) {
+  .contenedor-torneos {
+    padding: 0.8rem;
+  }
+
+  .lista-torneos {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .nombre-torneo {
+    font-size: 0.9rem;
+    padding: 3px 8px;
+  }
+
+  .titulo-principal,
+  .titulo-principal2 {
+    font-size: 1.3rem;
+    padding: 0.8rem;
+  }
+
+  .modal-titulo {
+    font-size: 1.2rem;
+  }
+
+  .btn-volver {
+    font-size: 0.9rem;
+    margin: 20% auto;
+    padding: 0.5rem 1rem;
+  }
+
+  .buscador {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 400px) {
+  .titulo-principal,
+  .titulo-principal2 {
+    font-size: 1.1rem;
+  }
+
+  .nombre-torneo {
+    font-size: 0.8rem;
+  }
+
+  .modal-contenido {
+    padding: 1rem;
+  }
+
+  .botones button {
+    padding: 8px 10px;
+  }
+
+  .modal-titulo {
+    font-size: 1rem;
+  }
+
+
+  .btn-volver {
+    margin-top: 25%;
+}
 }
 
 

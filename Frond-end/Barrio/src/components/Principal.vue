@@ -354,7 +354,12 @@ const showHeader = computed(() =>
   route.path !=='/torneos_finalizados' &&
   route.path !=='/partido_finalizados'  &&
   // cualquier ruta que emiece con '/perfiles/' se oculta el header  
-  !route.path.startsWith('/perfiles/')
+  !route.path.startsWith('/perfiles/') && 
+  !route.path.startsWith('/torneo_sala_espera') &&
+  !route.path.startsWith('/inspeccion_equipo') &&
+  route.path !== '/torneosensorteo'  &&
+  route.path !== '/solicitud_teams' 
+
 
 
 

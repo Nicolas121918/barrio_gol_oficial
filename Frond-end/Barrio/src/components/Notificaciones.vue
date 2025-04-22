@@ -69,6 +69,8 @@ onMounted(() => {
     clearInterval(interval);
   });
 });
+
+
 import Swal from 'sweetalert2';
 
 const eliminarpqr = () => {

@@ -1,4 +1,14 @@
 <template>
+  <header>
+         <!-- Header de escritorio -->
+  <div class="d-none d-md-block">
+    <headerapp></headerapp>
+  </div>
+  <!-- Header para móviles -->
+  <div class="d-block d-md-none">
+    <headermobile></headermobile>
+  </div>
+  </header>
     <div>
       <h1 class="titulo">Todos los Partidos Jugados</h1>
   
@@ -62,8 +72,14 @@
   <script>
   import axios from 'axios';
   import { useRouter } from 'vue-router';
+  import Headerapp from './Headerapp.vue';
+  import headermobile from './headermobile.vue';
   
   export default {
+    components: {
+      Headerapp,
+      headermobile
+    },
     data() {
       return {
         busqueda: "", // Búsqueda de equipos
@@ -166,6 +182,7 @@ body {
   letter-spacing: 2px;
   font-weight: 700;
   animation: fadeIn 1s ease-out;
+  margin-top: 30%;
 }
 
 /* Buscador */

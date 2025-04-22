@@ -20,7 +20,7 @@
         <router-link to="/creacionequipo" class="boton-crear">
           + CREA TU EQUIPO
         </router-link>
-        <router-link to="/stores" class="boton-crear2">
+        <router-link to="/solicitud_teams" class="boton-crear2">
           solicitudes
         </router-link>
 
@@ -122,46 +122,38 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .crear-equipo-container {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
+  margin-top: 10rem;
 }
 
-.boton-crear {
+.boton-crear,
+.boton-crear2 {
   display: inline-block;
-  background-color: gold;
   color: black;
   font-weight: bold;
-  padding: 15px 25px;
+  padding: 1rem 1.5rem;
   border-radius: 12px;
   text-decoration: none;
-  font-size: 1.2rem;
+  font-size: 1rem;
   transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
   border: 2px solid black;
-  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
   text-transform: uppercase;
   font-family: 'Audiowide', cursive;
   position: relative;
   overflow: hidden;
-  margin-top: 20%;
+  margin-top: 10%;
+  max-width: 90%;
+  box-sizing: border-box;
+  word-wrap: break-word;
 }
 
-.boton-crear::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: skewX(-45deg);
-  transition: left 0.5s;
-}
-
-.boton-crear:hover::before {
-  left: 100%;
+/* Estilo botón dorado */
+.boton-crear {
+  background-color: gold;
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
 }
 
 .boton-crear:hover {
@@ -170,34 +162,22 @@ export default {
   box-shadow: 0 6px 15px rgba(255, 215, 0, 0.7);
 }
 
-.busqueda-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-}
-
-
-
-.boton-crear2{
-  display: inline-block;
+/* Estilo botón azul */
+.boton-crear2 {
   background-color: rgb(0, 213, 255);
-  color: black;
-  font-weight: bold;
-  padding: 15px 25px;
-  border-radius: 12px;
-  text-decoration: none;
-  font-size: 80%;
-  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
-  border: 2px solid black;
-  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
-  text-transform: uppercase;
-  font-family: 'Audiowide', cursive;
-  position: relative;
-  overflow: hidden;
-  margin-top: 20%;
-  margin-left: 20%;
+  font-size: 0.9rem;
+  margin-left: 5%;
+  box-shadow: 0 4px 10px rgba(0, 213, 255, 0.3);
 }
 
+.boton-crear2:hover {
+  background-color: #6137d4;
+  transform: scale(1.1) rotate(-2deg);
+  box-shadow: 0 6px 15px rgba(0, 213, 255, 0.7);
+}
+
+/* Efecto brillo animado */
+.boton-crear::before,
 .boton-crear2::before {
   content: '';
   position: absolute;
@@ -210,14 +190,46 @@ export default {
   transition: left 0.5s;
 }
 
+.boton-crear:hover::before,
 .boton-crear2:hover::before {
   left: 100%;
 }
 
-.boton-crear2:hover {
-  background-color: #6137d4;
-  transform: scale(1.1) rotate(-2deg);
-  box-shadow: 0 6px 15px rgba(255, 215, 0, 0.7);
+/* Contenedor de búsqueda */
+.busqueda-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
 }
 
+/* Responsivo */
+@media (max-width: 768px) {
+  .boton-crear,
+  .boton-crear2 {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.95rem;
+    margin-top: 10%;
+    margin-left: 0;
+  }
+
+  .crear-equipo-container {
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .boton-crear,
+  .boton-crear2 {
+    width: 90%;
+    font-size: 0.85rem;
+    padding: 0.7rem 1rem;
+    margin-top: 1rem;
+  }
+
+  .busqueda-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}
 </style>

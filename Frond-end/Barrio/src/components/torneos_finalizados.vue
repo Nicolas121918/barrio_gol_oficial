@@ -1,4 +1,16 @@
 <template>
+  <header>
+
+
+         <!-- Header de escritorio -->
+  <div class="d-none d-md-block">
+    <headerapp></headerapp>
+  </div>
+  <!-- Header para móviles -->
+  <div class="d-block d-md-none">
+    <headermobile></headermobile>
+  </div>
+  </header>
 
     <div class="contenedor">
       <router-link to="/torneos" class="btn-volver">
@@ -59,7 +71,13 @@
   </template>
   
   <script>
+  import Headerapp from './Headerapp.vue';
+  import headermobile from './headermobile.vue';
   export default {
+    components: {
+      Headerapp,
+      headermobile
+    },
     data() {
       return {
         search: '',
@@ -123,7 +141,7 @@
     color: #ffffff;
     padding: 2rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  
+    margin-top: 30%;
   }
   
   /* Título principal */

@@ -31,16 +31,16 @@ from sqlalchemy import func
 
 app = FastAPI()
 
-
-app.mount("/media", StaticFiles(directory="media"), name="media")
-app.mount("/micarpeta", StaticFiles(directory="micarpeta"), name="micarpeta")
-app.mount("/logosteams", StaticFiles(directory="logosteams"), name="logosteams")
-app.mount("/videos", StaticFiles(directory="videos"), name="videos")
-app.mount("/logosteams", StaticFiles(directory="logosteams"), name="logosteams")
+app.mount("/imagenes", StaticFiles(directory="imagenes"), name="imagenes")
+app.mount("/imagenes_cancha_torneos", StaticFiles(directory="imagenes_cancha_torneos"), name="logospartidos")
+app.mount("/imagenescancha", StaticFiles(directory="imagenescancha"), name="imagenescancha")
+app.mount("/logos", StaticFiles(directory="logos"), name="logos")
 app.mount("/logostorneos", StaticFiles(directory="logostorneos"), name="logostorneos")
 app.mount("/logospartidos", StaticFiles(directory="logospartidos"), name="logospartidos")
-os.makedirs("imagenes", exist_ok=True)
-os.makedirs("logos", exist_ok=True)
+app.mount("/logosteams", StaticFiles(directory="logosteams"), name="logosteams")
+app.mount("/media", StaticFiles(directory="media"), name="media")
+app.mount("/micarpeta", StaticFiles(directory="micarpeta"), name="micarpeta")
+app.mount("/videos", StaticFiles(directory="videos"), name="videos")
 
 
 ## permisos endpoints
@@ -1389,8 +1389,8 @@ router = APIRouter()
 async def crear_torneo(
     nombre: str = Form(...),
     documento_creador: str = Form(...),
+    tp_futbol: str = Form(...),
     tipo_torneo: str = Form(...),
-    tipo_futbol: str = Form(...),
     fecha_inicio: str = Form(...),
     ubicacion: str = Form(...),
     como_llegar: str = Form(...),
@@ -1426,7 +1426,7 @@ async def crear_torneo(
         nombre=nombre,
         documento_creador=documento_creador,
         tipo_torneo=tipo_torneo,
-        tipo_futbol=tipo_futbol,
+        tp_futbol=tp_futbol,
         fecha_inicio=fecha_inicio,
         ubicacion=ubicacion,
         como_llegar=como_llegar,
@@ -1479,16 +1479,68 @@ async def obtener_torneos_en_estado(documento_creador: str, db: Session = Depend
     # Filtrar los torneos por el documento del creador y los estados 'en espera' o 'en_juego'
     torneos = db.query(Torneos).filter(
         Torneos.documento_creador == documento_creador, 
-        Torneos.estado.in_(['en espera', 'en_juego'])
+        Torneos.estado.in_(['en espera', 'en sorteo'])
     ).all()
 
     if not torneos:
-        return {"mensaje": "No se encontraron torneos en espera o en juego para este creador."}
+        return {"mensaje": "No se encontraron torneos en espera o en sorteo para este creador."}
 
-    return {"mensaje": "Torneos en espera o en juego encontrados", "torneos": torneos}
+    return {"mensaje": "Torneos en espera o en sorteo encontrados", "torneos": torneos}
 
-from fastapi import Form
-#listar torneos con informacion del creador:
+
+
+# endpoint para actualizar el estado de los torneos 
+@app.put("/actualizar_estado_torneo/{id_torneo}")
+async def actualizar_estado_torneo(id_torneo: int, nuevo_estado: str, db: Session = Depends(get_db)):
+    # Buscar el torneo por su ID
+    torneo = db.query(Torneos).filter(Torneos.id_torneo == id_torneo).first()
+    if not torneo:
+        raise HTTPException(status_code=404, detail="Torneo no encontrado")
+
+    # Actualizar el estado del torneo
+    torneo.estado = nuevo_estado
+    db.commit()
+    db.refresh(torneo)
+
+    return {"mensaje": "Estado del torneo actualizado", "nuevo_estado": torneo.estado}
+
+
+
+#endpoint para obtener el estado de un torneo por su ID
+@app.get("/estado_torneo/{id_torneo}")
+async def obtener_estado_torneo(id_torneo: int, db: Session = Depends(get_db)):
+    torneo = db.query(Torneos).filter(Torneos.id_torneo == id_torneo).first()
+    if not torneo:
+        raise HTTPException(status_code=404, detail="Torneo no encontrado")
+
+    return {"estado": torneo.estado}
+
+
+
+
+@app.get("/equiposensorteo/{id_equipo}")
+async def obtener_equipos_en_sorteo(id_equipo: int, db: Session = Depends(get_db)):
+    # Obtener los equipos con join hacia la tabla Equipo
+    solicitudes = db.query(SolicitudesTorneo).filter(SolicitudesTorneo.id_equipo == id_equipo).all()
+
+    if not solicitudes:
+        raise HTTPException(status_code=404, detail="No se encontraron solicitudes para este equipo.")
+
+    # Obtener el equipo con ese ID (puede que quieras traer más detalles)
+    equipo = db.query(SolicitudesTorneo).filter(SolicitudesTorneo.id_equipo == id_equipo).first()
+
+    if not equipo:
+        raise HTTPException(status_code=404, detail="No se encontró el equipo con ese ID.")
+
+    return {
+        "mensaje": "Equipos encontrados",
+        "equipo": equipo,
+        "solicitudes": solicitudes
+    }
+
+
+
+#listar torneos con informacion de el creador y el torneo:
 @app.get("/listar_torneos")
 async def listar_torneos(db: Session = Depends(get_db)):
     torneos_con_creador = (
@@ -1512,10 +1564,15 @@ async def listar_torneos(db: Session = Depends(get_db)):
             "documento_creador": torneo.documento_creador,
             "tipo_torneo": torneo.tipo_torneo,
             "tipo_futbol": torneo.tipo_futbol,
+            "torneo_logo": torneo.torneo_logo,
+            "numero_participantes": torneo.numero_participantes,
             "creador": {
                 "nombre": nombre_creador,
                 "imagen": imagen_creador,
-                "documento": documento_creador
+                "documento": documento_creador,
+                "torneo_logo": torneo.torneo_logo,
+                "numero_participantes": torneo.numero_participantes,
+
             }
         }
         for torneo, nombre_creador, imagen_creador, documento_creador in torneos_con_creador
@@ -1582,7 +1639,6 @@ def enviar_solicitud(id_torneo: int, id_equipo: str, db: Session = Depends(get_d
 async def gestionar_solicitud(id_solicitud: int, estado: str, db: Session = Depends(get_db)):
     if estado not in ["aceptado", "rechazado"]:
         raise HTTPException(status_code=400, detail="Estado inválido")
-
     solicitud = db.query(SolicitudesTorneo).filter(SolicitudesTorneo.id_solicitud == id_solicitud).first()
     if not solicitud:
         raise HTTPException(status_code=404, detail="Solicitud no encontrada")
@@ -1606,14 +1662,6 @@ async def gestionar_solicitud(id_solicitud: int, estado: str, db: Session = Depe
     return {"mensaje": f"Solicitud {estado} con éxito", "solicitud": solicitud.id_solicitud}
 
 
-@app.get("/listartorneosi/{documento_creador}", response_model=List[Torneo])
-async def listar_torneos(documento_creador: str, db: Session = Depends(get_db)):
-    # Limpiar el documento del usuario a buscar
-    documento_creador = documento_creador.strip()
-    lista_Torneos = db.query(Torneos).filter(Torneos.Documento_Creador_Torneo == documento_creador).all() 
-    if not lista_Torneos:
-        raise HTTPException(status_code=404, detail="No hay Torneos disponibles para este creador")
-    return lista_Torneos
 
 @app.get("/solicitudes_pendientestorneo/{id_torneo}")
 async def solicitudes_pendientestorneo(id_torneo: int, db: Session = Depends(get_db)):
@@ -1660,7 +1708,9 @@ async def solicitudes_aceptadas(id_torneo: int, db: Session = Depends(get_db)):
             "id_equipo": equipo.Id_team,
             "nombre_equipo": equipo.nombreteam,
             "logo_equipo": equipo.logoTeam,
-            "estado": solicitud.estado
+            "estado": solicitud.estado,
+            "logoTeam": equipo.logoTeam,
+            
         })
 
     return resultado

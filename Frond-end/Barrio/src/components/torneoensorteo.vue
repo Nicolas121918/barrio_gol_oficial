@@ -1,162 +1,180 @@
 <template>
   <header>
-    <Headerapp></Headerapp>
+    <!-- Header de escritorio -->
+    <div class="d-none d-md-block">
+      <headerapp></headerapp>
+    </div>
+    <!-- Header para móviles -->
+    <div class="d-block d-md-none">
+      <headermobile></headermobile>
+    </div>
   </header>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <div class="torneo-container">
-      <!-- Parte 1: Equipos -->
-      <!-- Parte 4: VS (Equipos enfrentados) -->
-      <div v-if="!finalizarTorneo" class="vs-section">
-        <h2 class="titulo">COMPETIDORES </h2>
-        <h4>selecciona dos competidores</h4>
-        <div class="enfrentamiento">
-          
-          <div v-for="(equipo, index) in enfrentamientos" :key="index" class="equipo-vs">
-            <img :src="equipo.logo" alt="logo" class="equipo-logo" />
-            <p class="equipo-nombre">{{ equipo.nombre }}</p>
-            
-            
-            <button @click="eliminarDeEnfrentamiento(equipo)" class="btn eliminar-vs-btn">-</button>
-          </div>
-          
+
+  <div class="torneo-container">
+    <!-- Parte 1: Equipos -->
+    <!-- Parte 4: VS (Equipos enfrentados) -->
+    <div v-if="!finalizarTorneo" class="vs-section">
+      <h2 class="titulo">COMPETIDORES </h2>
+      <h4>selecciona dos competidores</h4>
+      <div class="enfrentamiento">
+        <div v-for="(equipo, index) in enfrentamientos" :key="index" class="equipo-vs">
+          <img :src="equipo.logoTeam" alt="logo" class="equipo-logo" />
+          <p class="equipo-nombre">{{ equipo.nombre }}</p>
+          <button @click="eliminarDeEnfrentamiento(equipo)" class="btn eliminar-vs-btn">-</button>
         </div>
-        <div class="divisor">
+      </div>
+      <div class="divisor">
         <input type="datetime-local" v-model="fecha" class="fecha-input" />
         <button @click="agendarPartido" class="btn agendar-btn">Agendar</button>
       </div>
-      </div>
-      <h2 class="titulo">Equipos</h2>
-      <div v-if="!finalizarTorneo" class="equipos-section">
-        
-        <div class="equipos-container">
-          <div v-for="(equipo, index) in equipos" :key="index" class="equipo-item">
-            <img :src="equipo.logo" alt="logo" class="equipo-logo" />
-            <p class="equipo-nombre">{{ equipo.nombre }}</p>
-            <div class="acciones">
-              <button @click="agregarAEnfrentamiento(equipo)" class="btn agregar-btn">+</button>
-              <button @click="eliminarEquipo(index)" class="btn eliminar-btn">Eliminar</button>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Parte 5: Partidos Programados (con logos) -->
-      <h2 class="titulo">Partidos Programados</h2>
-      <div v-if="partidosProgramados.length && !finalizarTorneo" class="partidos-section">
-        
-        <div v-for="(partido, index) in partidosProgramados" :key="index" class="partido-item">
-          <div class="equipo-vs">
-            <img :src="partido.equipo1.logo" alt="logo" class="equipo-logo" />
-            <p class="partido-nombres">{{ partido.equipo1.nombre }} vs {{ partido.equipo2.nombre }}</p>
-            <img :src="partido.equipo2.logo" alt="logo" class="equipo-logo" />
-          </div>
-          <p class="partido-fecha">Fecha: {{ partido.fecha }}</p>
-          <div class="acciones">
-            <button @click="cancelarPartido(index)" class="btn-cancelar-btn">Cancelar Encuentro</button>
-            <router-Link to="/jugadorestorneo"><button class="btn-iniciar-btn" >Iniciar</button></router-Link>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Parte 6: Equipos Eliminados -->
-      <h2 class="titulo">Equipos Eliminados</h2>
-      <div v-if="eliminados.length && !finalizarTorneo" class="eliminados-section">
-        
-        <div v-for="(equipo, index) in eliminados" :key="index" class="equipo-eliminado">
-          <p class="equipo-nombre">{{ equipo.nombre }}</p>
-          <img :src="equipo.logo" alt="logo" class="equipo-logo" />
-          <button @click="repetirEquipo(index)" class="btn repichaje-btn">Repichaje</button>
-        </div>
-      </div>
-     <br>
-      <!-- Parte 1: Finalizar Torneo -->
-       <div class="CAJA">     
-      <div v-if="!finalizarTorneo" class="terminar-torneo">
-        <router-Link to="/gana"><button @click="finalizarTorneo" class="finalizar-torneo-btn">Finalizar Torneo</button></router-Link>
-      </div>
     </div>
-    </div>
-  </template>
-  
-  <script>
-  import Headerapp from './Headerapp.vue';
-  export default {
-    components : {
-      Headerapp
 
+    <h2 class="titulo">Equipos</h2>
+    <div v-if="!finalizarTorneo" class="equipos-section">
+      <div class="equipos-container">
+        <div v-for="(equipo, index) in equipos" :key="index" class="equipo-item">
+          <img :src="getImagenUrl(equipo.logoTeam)" alt="logo" class="equipo-logo" />
+          <p class="equipo-nombre">{{ equipo.nombre }}</p>
+          <div class="acciones">
+            <button @click="agregarAEnfrentamiento(equipo)" class="btn agregar-btn">+</button>
+            <button @click="eliminarEquipo(index)" class="btn eliminar-btn">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parte 5: Partidos Programados (con logos) -->
+    <h2 class="titulo">Partidos Programados</h2>
+    <div v-if="partidosProgramados.length && !finalizarTorneo" class="partidos-section">
+      <div v-for="(partido, index) in partidosProgramados" :key="index" class="partido-item">
+        <div class="equipo-vs">
+          <img :src="partido.equipo1.logo" alt="logo" class="equipo-logo" />
+          <p class="partido-nombres">{{ partido.equipo1.nombre }} vs {{ partido.equipo2.nombre }}</p>
+          <img :src="partido.equipo2.logo" alt="logo" class="equipo-logo" />
+        </div>
+        <p class="partido-fecha">Fecha: {{ partido.fecha }}</p>
+        <div class="acciones">
+          <button @click="cancelarPartido(index)" class="btn-cancelar-btn">Cancelar Encuentro</button>
+          <router-link to="/jugadorestorneo"><button class="btn-iniciar-btn">Iniciar</button></router-link>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parte 6: Equipos Eliminados -->
+    <h2 class="titulo">Equipos Eliminados</h2>
+    <div v-if="eliminados.length && !finalizarTorneo" class="eliminados-section">
+      <div v-for="(equipo, index) in eliminados" :key="index" class="equipo-eliminado">
+        <p class="equipo-nombre">{{ equipo.nombre }}</p>
+        <img :src="equipo.logo" alt="logo" class="equipo-logo" />
+        <button @click="repetirEquipo(index)" class="btn repichaje-btn">Repichaje</button>
+      </div>
+    </div>
+
+    <br>
+
+    <!-- Parte 7: Finalizar Torneo -->
+    <div class="CAJA">
+      <div v-if="!finalizarTorneo" class="terminar-torneo">
+        <router-link to="/gana"><button @click="finalizarTorneoAccion" class="finalizar-torneo-btn">Finalizar Torneo</button></router-link>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+import Headerapp from './Headerapp.vue';
+import headermobile from './headermobile.vue';
+import { useRoute } from 'vue-router';
+const route = useRoute();
+export default {
+  components: {
+    Headerapp,
+    headermobile
+  },
+  data() {
+    return {
+      equipos: [],
+      enfrentamientos: [],
+      partidosProgramados: [],
+      eliminados: [],
+      fecha: '',
+      equipoGanador: null,
+      finalizarTorneo: false,
+      
+    };
+  },
+  mounted() {
+    this.getequipos();
+  },
+  methods: {
+    getImagenUrl : (path) => {
+  return path ? `http://127.0.0.1:8000/${path}` : '';
+},
+    
+    async getequipos() {
+      const idEquipo = route.params.id_Equipo; // Obtener el ID del torneo de la ruta
+      try {
+        const response = await axios.get(`http://localhost:8000/equiposensorteo/${idEquipo}`);
+        this.equipos = response.data.equipos;
+      } catch (error) {
+        console.error("Error al obtener los equipos:", error);
+      }
     },
-    data() {
-      return {
-        equipos: [
-          { nombre: 'Equipo A', logo: 'https://static.vecteezy.com/system/resources/previews/010/553/129/original/logo-football-vector.jpg' },
-          { nombre: 'Equipo B', logo: 'https://static.vecteezy.com/system/resources/previews/014/631/119/original/football-club-team-emblem-soccer-badge-shield-logo-football-team-game-club-shield-background-free-vector.jpg' },
-          { nombre: 'Equipo C', logo: 'https://i.pinimg.com/originals/4e/11/9f/4e119ff9e3ed89c1d68e69f00dc1fdd5.jpg' },
-          // Otros equipos...
-        ],
-        enfrentamientos: [],
-        partidosProgramados: [],
-        eliminados: [],
-        fecha: '',
-        equipoGanador: null,
-        finalizarTorneo: false,
-      };
+    agregarAEnfrentamiento(equipo) {
+      if (this.enfrentamientos.length < 2 && !this.enfrentamientos.includes(equipo)) {
+        this.enfrentamientos.push(equipo);
+      }
     },
-    methods: {
-      agregarAEnfrentamiento(equipo) {
-        if (this.enfrentamientos.length < 2 && !this.enfrentamientos.includes(equipo)) {
-          this.enfrentamientos.push(equipo);
-        }
-      },
-      eliminarEquipo(index) {
-        const equipoEliminado = this.equipos.splice(index, 1)[0];
-        this.eliminados.push(equipoEliminado);
-      },
-      eliminarDeEnfrentamiento(equipo) {
-        const index = this.enfrentamientos.indexOf(equipo);
-        if (index > -1) {
-          this.enfrentamientos.splice(index, 1); // Eliminar del "VS"
-          // Solo agregar a "equipos" si no está ya presente
-          if (!this.equipos.includes(equipo)) {
-            this.equipos.push(equipo);
-          }
-        }
-      },
-      agendarPartido() {
-        if (this.enfrentamientos.length === 2 && this.fecha) {
-          this.partidosProgramados.push({
-            equipo1: this.enfrentamientos[0],
-            equipo2: this.enfrentamientos[1],
-            fecha: this.fecha
-          });
-          this.enfrentamientos = [];
-          this.fecha = '';
-        }
-      },
-      cancelarPartido(index) {
-        this.partidosProgramados.splice(index, 1);
-      },
-      repetirEquipo(index) {
-        const equipo = this.eliminados.splice(index, 1)[0];
-        this.equipos.push(equipo);
-      },
-      finalizarTorneo() {
-        this.finalizarTorneo = true;
-        if (this.equipos.length === 1) {
-          this.equipoGanador = this.equipos[0].nombre;
-        }
-      },
-      confirmarGanador() {
-        if (this.equipoGanador) {
-          alert('El ganador es: ${this.equipoGanador');
-          this.equipos = [];
-          this.partidosProgramados = [];
-          this.eliminados = [];
+    eliminarEquipo(index) {
+      const equipoEliminado = this.equipos.splice(index, 1)[0];
+      this.eliminados.push(equipoEliminado);
+    },
+    eliminarDeEnfrentamiento(equipo) {
+      const index = this.enfrentamientos.indexOf(equipo);
+      if (index > -1) {
+        this.enfrentamientos.splice(index, 1);
+        if (!this.equipos.includes(equipo)) {
+          this.equipos.push(equipo);
         }
       }
+    },
+    agendarPartido() {
+      if (this.enfrentamientos.length === 2 && this.fecha) {
+        this.partidosProgramados.push({
+          equipo1: this.enfrentamientos[0],
+          equipo2: this.enfrentamientos[1],
+          fecha: this.fecha
+        });
+        this.enfrentamientos = [];
+        this.fecha = '';
+      }
+    },
+    cancelarPartido(index) {
+      this.partidosProgramados.splice(index, 1);
+    },
+    repetirEquipo(index) {
+      const equipo = this.eliminados.splice(index, 1)[0];
+      this.equipos.push(equipo);
+    },
+    finalizarTorneoAccion() {
+      this.finalizarTorneo = true;
+      if (this.equipos.length === 1) {
+        this.equipoGanador = this.equipos[0].nombre;
+      }
+    },
+    confirmarGanador() {
+      if (this.equipoGanador) {
+        alert(`El ganador es: ${this.equipoGanador}`);
+        this.equipos = [];
+        this.partidosProgramados = [];
+        this.eliminados = [];
+      }
     }
-  };
-  </script>
-  
+  }
+};
+</script>
+
   <style scoped>
   /* Estilos generales para el torneo */
   .torneo-container {
@@ -215,10 +233,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 150px; /* Ajusta el tamaño de cada equipo para que quepan de manera adecuada */
+    min-width: 25vw;
     background-color: rgb(0, 0, 0);
-    margin: 10%;
-    padding: 7%;
+    margin: 2rem;
+    padding: 2rem;
     box-shadow: white 0 0 8px;
     border: solid white 1px;
   

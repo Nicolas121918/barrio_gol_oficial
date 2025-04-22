@@ -1,5 +1,20 @@
 
 <template>
+
+
+<header>
+
+      <!-- Header de escritorio -->
+      <div class="d-none d-md-block">
+    <headerapp></headerapp>
+  </div>
+  <!-- Header para móviles -->
+  <div class="d-block d-md-none">
+    <headermobile></headermobile>
+  </div>
+
+
+</header>
   <button @click="$router.push({ name: 'torneos' })" class="boton-volver">Volver</button>
   <div class="container">
     
@@ -108,8 +123,14 @@ import { onMounted, ref } from 'vue';
 import axios from 'axios';
 import { useUsuarios } from '@/stores/usuario';
 import { useRouter } from 'vue-router';
+import Headerapp from './Headerapp.vue';
+import headermobile from './headermobile.vue';
 
 export default {
+  components: {
+    Headerapp,
+    headermobile,
+  },
   setup() {
     const router = useRouter();
     const usuariosStore = useUsuarios();
@@ -211,6 +232,8 @@ const irAComponente3 = (idPartido) => {
    color: #ffffff;
    font-family: 'Segoe UI', sans-serif;
    border: solid white 1px;
+   min-width: 50vw;
+   margin-top: 10%;
  }
  
  .partidos-section {
@@ -593,6 +616,7 @@ const irAComponente3 = (idPartido) => {
    cursor: pointer;
    transition: all 0.3s ease;
    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+   margin-top: 20%;
  }
  .sin-partidos {
   text-align: center;

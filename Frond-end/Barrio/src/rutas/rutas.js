@@ -10,7 +10,6 @@ import Eventos from "@/components/Eventos.vue";
 import subir_video from "@/components/subir_video.vue";
 import Notificaciones from "@/components/Notificaciones.vue";
 import crearequipo from "@/components/crearequipo_form.vue";
-import Diego from "@/components/resultados_partidos.vue";
 import crearpartido from "@/components/crearpartido.vue";
 import diegos from "@/components/diegos.vue";
 import { createRouter,createWebHistory } from "vue-router";
@@ -21,17 +20,13 @@ import Jugadores from "@/components/jugadores.vue";
 import Invitar from "@/components/invitar.vue";
 import Videos from "@/components/videos.vue";
 import Pagos from "@/components/pagos.vue";
-import Torneoscreador from "@/components/torneoscreador.vue";
 import ganadortorneo from "@/components/ganadortorneo.vue";
 import jugadorestorneo from "@/components/jugadorestorneo.vue";
 import targetas from "@/components/targetas.vue";
 import Galeria from "@/components/galeria.vue";
-import tienda from "@/components/test.vue";
-
 import Vender from "@/components/vender.vue";
 import Creartorneo from "@/components/creartorneo.vue";
 import One_video from "@/components/one_video.vue";
-import Store from "@/components/ReportarUsuario.vue";
 import Stores from "@/components/stores.vue";
 import Partidos_creado from "@/components/partidos_creado.vue";
 import Sala_espera_partidos from "@/components/sala_espera_partidos.vue";
@@ -42,6 +37,9 @@ import Inpeccion_equipo from "@/components/inpeccion_equipo.vue";
 import Torneos_finalizados from "@/components/torneos_finalizados.vue";
 import Torneo_sala_espera from "@/components/torneo_sala_espera.vue";
 import Galeria_insepccion from "../components/galeria_insepccion.vue";
+import Solicitud_teams from "@/components/solicitud_teams.vue";
+import Torneoensorteo from "@/components/torneoensorteo.vue";
+import statustorneos from "@/components/statustorneos.vue";
 
 
 
@@ -83,6 +81,12 @@ const routes=[
         path: '/Perfil',//perfil del usuario
         name: 'Perfil',
         component: Perfil,
+        
+      },
+      {
+        path: '/solicitud_teams',//perfil del usuario
+        name: 'soliicitud_teams',
+        component: Solicitud_teams,
         
       },
       {
@@ -228,9 +232,14 @@ const routes=[
         component: Pagos,
       },
       {
-        path: '/torneoscreador',//interfaz creadr torneo
-        name: 'torneoscreador',
-        component: Torneoscreador,
+        path: '/torneosensorteo',//interfaz creadr torneo
+        name: 'torneosensorteo',
+        component: Torneoensorteo,
+      },
+      {
+        path: '/statustorneos/:id_torneo',//interfaz creadr torneo
+        name: 'statustorneos',
+        component: statustorneos,
       },
       {
         path: '/gana',//escoger ganador torneo

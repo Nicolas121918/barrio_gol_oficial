@@ -1,4 +1,15 @@
   <template>
+    <header>
+          <!-- Header de escritorio -->
+  <div class="d-none d-md-block">
+    <headerapp></headerapp>
+  </div>
+  <!-- Header para móviles -->
+  <div class="d-block d-md-none">
+    <headermobile></headermobile>
+  </div>
+
+    </header>
     
     <form @submit.prevent="enviarFormulario" enctype="multipart/form-data" class="formulario">
       <div class="volver">
@@ -18,10 +29,10 @@
         <br>
 
 <select v-model="form.tipo_torneo" required>
+  <option  value="">Seleccione una opción</option>
   <option value="personalizado">Personalizado</option>
-  <option disabled value="">Seleccione una opción</option>
-  <option  disabled value="relampago">Relámpago</option>
-  <option  disabled value="todos">Todos contra todos</option>
+  <option   value="relampago">Relámpago</option>
+  <option  value="todos">Todos contra todos</option>
   
 </select>
 
@@ -37,11 +48,26 @@
       </p>
     </div>
   </div>
+
+
+  <label>Tipo de fútbol:</label>
+<select v-model="form.tp_futbol" required>
+  <option disabled value="">Seleccione un tipo de fútbol</option>
+  <option value="Fútbol 11">Fútbol 11 (cancha grande)</option>
+  <option value="Fútbol 7">Fútbol 7 (cancha mediana)</option>
+  <option value="Fútbol 5">Fútbol 5 (cancha pequeña)</option>
+  <option value="Fútbol Sala">Fútbol Sala (interior, reglamento FIFA)</option>
+  <option value="Playa">Fútbol Playa (arena)</option>
+</select>
+
   
 
 
       <label>Fecha de inicio:</label>
-      <input v-model="form.fecha_inicio" type="date" required />
+      <input v-model="form.fecha_inicio" type="date" required
+      :min="fecha"  max="2026-01-01"/>
+
+    
 
       <label>Ubicación:</label>
 <div style="display: flex; gap: 8px;">
@@ -134,7 +160,11 @@
 <img v-if="imagenPrevia2" :src="imagenPrevia2" style="width: 150px;height: 150px;border: solid white 1px; margin-top: 10px;" />
 
 <div  style="display: flex; align-items: center; gap: 12px; margin-top: 16px;">
+
+
   <button type="submit">Crear Torneo</button>
+
+
   <div class="vamiss" style="font-size: 0.9rem; margin-top: 10px;">
   <strong class="verde">¡Accede gratis por tiempo limitado!</strong><br>
   <span style="display: block; margin-top: 4px;">
@@ -160,15 +190,17 @@
     </form>
   </template>
   <script setup>
+  const fecha = ref('');
+  import { onBeforeUnmount } from 'vue';
   import { computed } from 'vue';
-
   import 'leaflet/dist/leaflet.css';
   import { ref } from 'vue';
   import axios from 'axios';
   import { useUsuarios } from '@/stores/usuario';
   import { useRouter } from 'vue-router';
-  import Swal from 'sweetalert2';
   import listaCiudadesJson from '../assets/ciudades.json'
+  import Headerapp from './Headerapp.vue';
+  import headermobile from '@/components/headermobile.vue';
 const listaCiudades = ref(listaCiudadesJson)
   const imagenPrevia1 = ref("");
 const imagenPrevia2 = ref("");
@@ -201,7 +233,19 @@ const mostrarVistaPrevia2 = (event) => {
     form.value.torneo_logo = null;
   }
 };
+ // Actualiza la fecha cada segundo
+ const interval = setInterval(() => {
+  const now = new Date();
+  // Formateamos a YYYY-MM-DD
+  const año = now.getFullYear();
+  const mes = String(now.getMonth() + 1).padStart(2, '0');
+  const dia = String(now.getDate()).padStart(2, '0');
+  fecha.value = `${año}-${mes}-${dia}`;
+}, 1000);
 
+onBeforeUnmount(() => {
+  clearInterval(interval);
+});
 
   const router = useRouter();
   const usuariosStore = useUsuarios();
@@ -214,7 +258,7 @@ function validarCiudad() {
   const form = ref({
     nombre: '',
     tipo_torneo: '',
-    tipo_futbol: '',
+    tp_futbol: '',
     fecha_inicio: '',
     ubicacion: '',
     como_llegar: '',
@@ -235,8 +279,8 @@ function validarCiudad() {
     form.value[tipo] = file;
   };
   const cerrarModal = () => {
-  mensaje.value = '';
-};
+    router.push('/torneos'); // Redirigir a la página de torneos
+  };
 function usarUbicacionActual() {
   if (!navigator.geolocation) {
     alert("La geolocalización no es compatible con este navegador.");
@@ -271,28 +315,29 @@ const actualizarCosto = (event) => {
   const numero = parseInt(soloNumeros, 10);
   form.value.costo_inscripcion = isNaN(numero) ? 0 : numero;
 };
-  const enviarFormulario = async () => {
-    const formData = new FormData();
-    for (const key in form.value) {
-      if (form.value[key] !== null) {
-        formData.append(key, form.value[key]);
-      }
-    }
-    formData.append("documento_creador", usuariosStore.usuario.documento);
 
-    try {
-      await axios.post("http://127.0.0.1:8000/crearTorneo", formData);
-      mensaje.value = "¡Torneo creado exitosamente!";
-      setTimeout(() => {
-        router.push('/torneo_creados');
-      }, 2000);
-    } catch (error) {
-      mensaje.value = "Hubo un error al crear el torneo.";
-      console.error(error);
-    }
+// endpoint para crear torneo   
+const enviarFormulario = async () => {
+  console.log("🟡 Función enviarFormulario ejecutada");
 
-    
-  };
+  const formData = new FormData();
+  for (const key in form.value) {
+    if (form.value[key] !== null) {
+      formData.append(key, form.value[key]);
+    }
+  }
+  formData.append("documento_creador", usuariosStore.usuario.documento);
+
+  try {
+    const response = await axios.post("http://127.0.0.1:8000/crearTorneo", formData);
+    console.log("🟢 Formulario enviado correctamente:", response);
+    mensaje.value = "¡Torneo creado exitosamente!";
+  } catch (error) {
+    console.log("🔴 Error al enviar el formulario:", error);
+    mensaje.value = "Hubo un error al crear el torneo.";
+  }
+};
+
   
   
   </script>
@@ -316,7 +361,7 @@ select {
   padding: 2rem;
   border-radius: 12px;
   max-width: 500px;
-  margin: auto;
+  margin: 30% auto ;
   box-shadow: 0 0 20px rgba(218, 165, 32, 0.3);
 }
 

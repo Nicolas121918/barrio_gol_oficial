@@ -148,10 +148,8 @@ class Torneos(Base):
     id_torneo = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(100), nullable=False)
     documento_creador = Column(String(50), ForeignKey('usuarios.documento'))
-
+    tp_futbol = Column(String(100), nullable=False)
     tipo_torneo = Column(String(100), nullable=False)
-    tipo_futbol = Column(String(100), nullable=False)
-
     fecha_inicio = Column(String(50), nullable=False)
     ubicacion = Column(String(255), nullable=False)
     como_llegar = Column(String(500), nullable=True)

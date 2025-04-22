@@ -219,9 +219,9 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  padding: 1rem;
   background: linear-gradient(145deg, #000000, #1a1a1a);
-  width: 100%;
+  min-width: 60vw;
   margin: 0 auto;
   max-width: 1100px;
   border: 2px solid white;

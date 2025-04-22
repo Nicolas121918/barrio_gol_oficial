@@ -213,20 +213,22 @@ onMounted(() => {
   },
 };
 </script>
+
 <style scoped>
 .container {
   display: flex;
   justify-content: center;
   padding: 2rem;
-
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #fff;
-  min-width: 1000px;
+  min-width: 100%;
+  box-sizing: border-box;
 }
 
 .contenido {
   width: 100%;
   max-width: 1200px;
+  padding: 0 1rem;
 }
 
 .busqueda-container {
@@ -262,17 +264,16 @@ onMounted(() => {
   gap: 1.5rem;
   padding: 0;
   list-style: none;
+  margin: 0;
 }
 
 .tarjeta-equipo {
-  background: #000000;
+  background: #000;
   border-radius: 1rem;
   padding: 1.2rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   border: 1px solid #444;
-  border: solid white;
-  
 }
 
 .tarjeta-equipo:hover {
@@ -334,5 +335,238 @@ button:hover {
   text-align: center;
   color: #ccc;
   margin-top: 2rem;
+}
+
+/* RESPONSIVE: Tablets */
+@media (max-width: 1024px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .contenido {
+    padding: 0 1rem;
+  }
+}
+
+/* RESPONSIVE: Teléfonos grandes */
+@media (max-width: 768px) {
+  .input-busqueda {
+    font-size: 0.95rem;
+    padding: 0.7rem 1rem;
+  }
+
+  .nombre-equipo {
+    font-size: 1.1rem;
+  }
+
+  .logo-equipo {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* RESPONSIVE: Teléfonos pequeños */
+@media (max-width: 480px) {
+  .container {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .input-busqueda {
+    max-width: 100%;
+    font-size: 0.9rem;
+  }
+
+  .nombre-equipo {
+    font-size: 1rem;
+  }
+
+  .texto-secundario {
+    font-size: 0.8rem;
+  }
+
+  button {
+    width: 100%;
+    padding: 0.6rem;
+    margin: 0.5rem 0;
+  }
+}
+</style>
+<style scoped>
+.container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #fff;
+  min-width: 100%;
+  box-sizing: border-box;
+}
+
+.contenido {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 1rem;
+}
+
+.busqueda-container {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.input-busqueda {
+  padding: 0.8rem 1.2rem;
+  width: 100%;
+  max-width: 400px;
+  border: 2px solid #aaa;
+  border-radius: 1rem;
+  outline: none;
+  font-size: 1rem;
+  background-color: #2b2b2b;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.input-busqueda::placeholder {
+  color: #ccc;
+}
+
+.input-busqueda:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.lista-equipos ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 0;
+  list-style: none;
+  margin: 0;
+}
+
+.tarjeta-equipo {
+  background: #000;
+  border-radius: 1rem;
+  padding: 1.2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #444;
+}
+
+.tarjeta-equipo:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+  border-color: #d4af37;
+}
+
+.contenido-tarjeta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.logo-equipo {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #d4af37;
+  margin-bottom: 1rem;
+}
+
+.nombre-equipo {
+  font-size: 1.2rem;
+  color: #d4af37;
+  margin-bottom: 0.5rem;
+}
+
+.texto-secundario {
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-bottom: 0.3rem;
+}
+
+.descripcion {
+  font-style: italic;
+  color: #aaa;
+}
+
+button {
+  background-color: #d4af37;
+  border: none;
+  color: #000;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  margin: 0.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #b8972d;
+}
+
+.mensaje-sin-equipos {
+  text-align: center;
+  color: #ccc;
+  margin-top: 2rem;
+}
+
+/* RESPONSIVE: Tablets */
+@media (max-width: 1024px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .contenido {
+    padding: 0 1rem;
+  }
+}
+
+/* RESPONSIVE: Teléfonos grandes */
+@media (max-width: 768px) {
+  .input-busqueda {
+    font-size: 0.95rem;
+    padding: 0.7rem 1rem;
+  }
+
+  .nombre-equipo {
+    font-size: 1.1rem;
+  }
+
+  .logo-equipo {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* RESPONSIVE: Teléfonos pequeños */
+@media (max-width: 480px) {
+  .container {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .input-busqueda {
+    max-width: 100%;
+    font-size: 0.9rem;
+  }
+
+  .nombre-equipo {
+    font-size: 1rem;
+  }
+
+  .texto-secundario {
+    font-size: 0.8rem;
+  }
+
+  button {
+    width: 100%;
+    padding: 0.6rem;
+    margin: 0.5rem 0;
+  }
 }
 </style>

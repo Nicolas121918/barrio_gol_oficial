@@ -106,10 +106,8 @@ class Torneo(BaseModel):
     id_torneo: int
     nombre: str
     documento_creador: str
-
+    tp_futbol: str  # Tipo de fútbol (fútbol, fútbol sala, etc.)
     tipo_torneo: str  # Eliminación directa, liga, grupos, etc.
-    tipo_futbol: str  # Futbol 5, Futbol 7, Futbol 11, mixto, etc.
-
     fecha_inicio: str
     ubicacion: str
     como_llegar: str  # Indicaciones de llegada

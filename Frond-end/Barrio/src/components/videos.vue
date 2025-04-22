@@ -62,8 +62,8 @@
     </div>
 
     <div class="video-navigation">
-      <button @click="previousVideo" :disabled="currentIndex === 0">⬆</button>
-      <button @click="nextVideo" :disabled="currentIndex === videosurls.length - 1">⬇</button>
+      <button class="arriba" @click="previousVideo" :disabled="currentIndex === 0">⬆</button>
+      <button class="arriba" @click="nextVideo" :disabled="currentIndex === videosurls.length - 1">⬇</button>
     </div>
 
     <button class="upload-video-button" @click="subirVideo">
@@ -393,6 +393,9 @@ button:disabled {
   .app-container {
 
   margin-top: 40%;
+  .arriba{
+    display: none;
+  }
 }
 
 }
@@ -401,12 +404,17 @@ button:disabled {
 
   margin-top: 35%;
 }
+.arriba{
+  display: none;
+}
 
 }
 @media (min-width: 601px) and (max-width: 768px) {
   .app-container {
-
   margin-top: 30%;
+}
+.arriba{
+  display: none;
 }
 
 }

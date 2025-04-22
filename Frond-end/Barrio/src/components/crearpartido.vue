@@ -1,4 +1,15 @@
 <template>
+
+  <header>
+    <!-- Header de escritorio -->
+  <div class="d-none d-md-block">
+    <headerapp></headerapp>
+  </div>
+  <!-- Header para móviles -->
+  <div class="d-block d-md-none">
+    <headermobile></headermobile>
+  </div>
+  </header>
   <div class="crear-partido-container">
 
     <div class="volver-btn">
@@ -94,7 +105,9 @@
   </div>
 </template>
 <script>
+
 import Headerapp from "@/components/Headerapp.vue";
+import Headermobile from "@/components/Headermobile.vue"; 
 import { useUsuarios } from "@/stores/usuario";
 
 export default {
@@ -225,7 +238,7 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
 .crear-partido-container {
-  margin-top: 10%;
+  margin-top: 30%;
   background-color: #000;
   color: #fff;
   min-height: 100vh;

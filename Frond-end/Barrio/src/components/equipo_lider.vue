@@ -7,7 +7,7 @@
     <!-- Encabezado: Logo y nombre del equipo -->
     <header class="header">
       <div class="logo-container" @click="mostrarImagen = true">
-  
+        <img :src="team.logo" alt="Logo del equipo" class="logo" />
 </div>
 
 

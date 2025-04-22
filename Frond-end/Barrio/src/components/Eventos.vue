@@ -61,19 +61,18 @@
     <div>
       <div v-for="(item, index) in filteredTorneos" :key="index" class="card3">
         <div class="card-header-tor">
-          <img :src="getImagenUrl(item.logoTeam)" alt="Logo del Torneo" class="logo-img" />
+          <img :src="getImagenUrl(item.torneo_logo)" alt="Logo del Torneo" class="logo-img" />
           <div class="card-info-tor">
             <h2 class="titu">Nombre Torneo: {{ item.nombre }}</h2>
-            <p>Participantes Torneo: {{ item.numeroparticipantes }}</p>
-            <p>Precio de Inscripción Torneo: ${{ item.precioInscripcion }}</p>
-            <p>Precio de Arbitraje por partido: ${{ item.precioArbitrajeTorneo }}</p>
+            <p>Participantes Torneo: {{ item.numero_participantes }}</p>
+            <p>Precio de Inscripción Torneo: ${{ item.costo_inscripcion }}</p>
           </div>
         </div>
         <div class="uno_solo">
           <div class="rules-container">
             <button @mouseover="showRules('torneo', index)" @mouseleave="hideRules('torneo', index)" class="torn_boton">Ver Reglas</button>
             <div v-if="activeRules.torneo === index" class="rules-info-tor">
-              <p class="reglas">Reglas del Torneo: {{ item.reglasTorneo }}</p>
+              <p class="reglas">Reglas del Torneo: {{ item.reglas }}</p>
             </div>
           </div>
           <button class="action-button-tor" @click="inscribirTorneo(item)">Inscribir</button>
@@ -176,7 +175,7 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';  
 import { useUsuarios } from '@/stores/usuario';
 import { useRouter } from 'vue-router';
-import Headerapp from '@/components/headerapp.vue';
+import Headerapp from '@/components/Headerapp.vue';
 import headermobile from '@/components/headermobile.vue';
 const documento_equipo = ref("");
 const router = useRouter();
@@ -339,6 +338,9 @@ onMounted(() => {
 
   
   <style scoped>
+
+
+
 .letrass {
   font-family:'Times New Roman', Times, serif;
   color: rgb(173, 173, 173);
@@ -640,206 +642,6 @@ text-align: center;
   color: transparent; /* Hace el texto transparente para mostrar el fondo */
   text-shadow: none;
 }
-
-@media (max-width: 320px) {
-  /* Estilos para pantallas con un ancho máximo de 320px */
-  .titulo_torneo {
-margin-top: 20%;
-text-align: center;
-  text-shadow: 0 0 6px rgb(255, 255, 255);
-  color: #ffffff;
-  font-size: 160%;
-  width: 100%;
-  margin-left: 20%;
-}
-.main-container {
-  padding: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-top: 2%;
-  margin-left: 33%;
-  width: 65%;
-  gap: 50px;
-  text-align: center;
-
-}
-  
-}
-
-
-@media (min-width: 321px) and (max-width:480px) {
-  /* Estilos para pantallas con un ancho máximo de 320px */
-  .titulo_torneo {
-margin-top: 20%;
-text-align: center;
-  text-shadow: 0 0 6px rgb(255, 255, 255);
-  color: #ffffff;
-  font-size: 160%;
-  width: 100%;
-  margin-left: 20%;
-}
-.main-container {
-  padding: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-top: 2%;
-  margin-left: 28%;
-  width: 70%;
-  text-align: center;
-  gap: 50px;
-}
-  
-}
-
-
-
-
-@media (min-width: 481px) and (max-width: 600px) {
-  /* Estilos para pantallas entre 481px y 600px */
-  .titulo_torneo {
-margin-top: 20%;
-  text-shadow: 0 0 6px rgb(255, 255, 255);
-  color: #000000;
-  font-size: 160%;
-  margin-left: 40%;
-}
-.main-container {
-  padding: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-top: 2%;
-  margin-left: 17%;
-  width: 60%;
-  text-align: center;
-  gap: 50px;
-}
-}
-
-
-
-
-
-
-
-@media (min-width: 601px) and (max-width: 768px) {
-  /* Estilos para pantallas entre 601px y 768px */
-  .titulo_torneo {
-margin-top: 20%;
-  text-shadow: 0 0 6px rgb(255, 255, 255);
-  color: #000000;
-  font-size: 160%;
-  margin-left: 40%;
-}
-.main-container {
-  padding: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-top: 2%;
-  margin-left: 6%;
-  width: 70%;
-  text-align: center;
-  gap: 50px;
-}
-}
-
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  /* Estilos para pantallas entre 769px y 1024px */
-  .titulo_torneo {
-margin-top: 20%;
-  text-shadow: 0 0 6px rgb(255, 255, 255);
-  color: #000000;
-  font-size: 205%;
-  margin-left: 20%;
-}
-.main-container {
-  padding: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-top: 2%;
-  margin-left: 5%;
-  width: 100%;
-  text-align: center;
-  gap: 50px;
-}
-}
-
-
-@media (min-width: 1025px) and (max-width: 1280px) {
-  /* Estilos para pantallas entre 1025px y 1280px */
-  .titulo_torneo {
-margin-top: 20%;
-  text-shadow: 0 0 6px rgb(255, 255, 255);
-  color: #000000;
-  font-size: 205%;
-  margin-left: 20%;
-}
-.main-container {
-  padding: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-top: 2%;
-  margin-right: 0%;
-  width: 100%;
-  text-align: center;
-  gap: 50px;
-}
-}
-
-@media (min-width: 1281px) and (max-width: 1440px) {
-  /* Estilos para pantallas entre 1281px y 1440px */
-  .titulo_torneo {
-margin-top: 20%;
-  text-shadow: 0 0 6px rgb(255, 255, 255);
-  color: #000000;
-  font-size: 205%;
-  margin-left: 20%;
-}
-.main-container {
-  padding: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-top: 2%;
-  margin-right: 0%;
-  width: 100%;
-  gap: 50px;
-  text-align: center;
-}
-}
-
-
-
-@media (min-width: 1441px) and (max-width: 1920px) {
-  /* Estilos para pantallas entre 1441px y 1920px */
-}
-
-@media (min-width: 1921px) and (max-width: 2560px) {
-  /* Estilos para pantallas entre 1921px y 2560px */
-}
-
-@media (min-width: 2561px) and (max-width: 3840px) {
-  /* Estilos para pantallas entre 2561px y 3840px */
-}
-
-
-@media (min-width: 3841px) and (max-width: 5120px) {
-  /* Estilos para pantallas entre 3841px y 5120px */
-}
-
 
 .crear-btn {
   background-color: black;
@@ -1169,6 +971,63 @@ margin-top: 20%;
   border-radius: 10px;
   margin-top: 10px;
 }
+@media (max-width: 767px) {
+  .search-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .titulo_torneo {
+    font-size: 150%;
+  }
+
+  .view-games-button {
+    margin-top: 10px;
+  }
+
+  .uno_solo {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .buscador_torneo {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .search-input {
+    width: 100%;
+    font-size: 120%;
+  }
+
+  .crear-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .main-container {
+    padding: 0rem;
+    gap: 1rem;
+    margin-left: 0rem;
+  }
+
+  .titulo_torneo {
+    font-size: 1rem;
+  }
+
+  .search-input {
+    min-width: 20vw;
+    font-size: 1rem;
+  }
+
+  .crear-btn {
+    font-size: 14px;
+    padding: 8px 20px;
+  }
+}
+
 
   </style>
   

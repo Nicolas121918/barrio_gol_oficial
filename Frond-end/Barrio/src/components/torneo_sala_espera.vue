@@ -1,5 +1,17 @@
 <template>
- 
+
+  <header>
+      <!-- Header de escritorio -->
+    <div class="d-none d-md-block">
+      <headerapp></headerapp>
+    </div>
+
+    <!-- Header para móviles -->
+    <div class="d-block d-md-none">
+      <headermobile></headermobile>
+    </div>
+    
+  </header>
 
     <div class="torneo-container">
       <router-link to="/torneo_creados" class="btn-volver">
@@ -9,13 +21,14 @@
 <br>  
     <!-- Nombre y Logo -->
     <div class="torneo-header">
-      <img :src="getLogoUrl(torneo.logo)" alt="Logo Torneo" class="torneo-logo" />
+      <img :src="getImagenUrl(torneo.torneo_logo
+      )" alt="Logo Torneo" class="torneo-logo" />
       <h1>{{ torneo.nombre }}</h1>
     </div>
     <!-- Creador -->
     <div class="creador-box">
       <div class="creador-info">
-        <img :src="getLogoUrl(torneo.creador.logo)" alt="Logo Creador" class="creador-logo" />
+        <img :src="getImagenUrl(movistore.usuario.fileInput)" alt="Logo Creador" class="creador-logo" />
         <p>{{ torneo.creador.nombre }}</p>
       </div>
       <button class="boton" @click="verCreador">Ver perfil</button>
@@ -30,7 +43,7 @@
           class="equipo-box"
           @click="verEquipo(equipo.id_equipo)"
         >
-          <img :src="equipo.logo_equipo" class="equipo-logo" />
+          <img :src="getImagenUrl(equipo.logoTeam)" class="equipo-logo" />
           <p>{{ equipo.nombre_equipo}}</p>
         </div>
       </div>
@@ -50,8 +63,9 @@
         class="solicitud-box"
       >
         <div class="solicitud-info">
-          <img :src="solicitud.logo_equipo" class="equipo-logo" />
+          <img :src="getImagenUrl(solicitud.logo_equipo)" class="equipo-logo" />
 <p>{{ solicitud.nombre_equipo }}</p>
+
         </div>
         <div>
           <button class="boton" @click="verEquipo(solicitud.id_equipo)">Ver</button>
@@ -91,7 +105,7 @@
     <div class="especificaciones">
     <h2 class="titulo-seccion">Información del Torneo</h2>
     <div class="info-linea"><strong>Tipo torneo:</strong> {{ torneo.tipo_torneo }}</div>
-    <div class="info-linea"><strong>Tipo fútbol:</strong> {{ torneo.tipo_futbol }}</div>
+    <div class="info-linea"><strong>Tipo fútbol:</strong> {{ torneo.tp_futbol }}</div>
     <div class="info-linea"><strong>Fecha inicio:</strong> {{ torneo.fecha_inicio }}</div>
     <div class="info-linea"><strong>Categorías:</strong> {{ torneo.categorias }}</div>
     <div class="info-linea"><strong>Número participantes:</strong> {{ torneo.numero_participantes }}</div>
@@ -99,7 +113,7 @@
     <div class="info-linea"><strong>Ubicación:</strong> {{ torneo.ubicacion }}</div>
     <a :href="mapsUrl" target="_blank" class="boton maps-btn">📍 Ver en Google Maps</a>
     <div class="info-linea"><strong>Cómo llegar:</strong> {{ torneo.como_llegar }}</div>
-    <img :src="torneo.imagen_cancha" alt="Cancha" class="cancha-img" />
+    <img :src="getImagenUrl(torneo.imagen_cancha)" alt="Cancha" class="cancha-img" />
     <h2 class="titulo-seccion">Reglas y Premios</h2>
     <div class="info-linea"><strong>Premiación:</strong> {{ torneo.premiacion }}</div>
     <div class="info-linea"><strong>Reglas:</strong> {{ torneo.reglas }}</div>
@@ -109,11 +123,21 @@
   </template>
   <script>
   import axios from 'axios';
+  import Headerapp from './Headerapp.vue';
+  import headermobile from './headermobile.vue';
+  import { useUsuarios } from '@/stores/usuario';
   
   export default {
+    components: {
+      Headerapp,
+      headermobile,
+      
+    
+    },  
     data() {
       return {
         mostrarRechazadas: false,
+        movistore: useUsuarios(),
         torneo: {
           creador: {}
         },
@@ -152,6 +176,10 @@
       verCreador() {
   this.$router.push({ name: 'perfiles', params: { documento: this.torneo.creador.documento } });
 },
+
+getImagenUrl(path) {
+      return path ? `http://127.0.0.1:8000/${path}` : '';
+    },
       verEquipo(id) {
         this.$router.push({ name: 'inspeccion_equipo', params: { id } });
       },
@@ -207,13 +235,23 @@ async rechazadas(idTorneo) {
     console.error("Error al cargar aceptadas:", error);
   }
 }, 
-getLogoUrl(nombreArchivo) {
-    return new URL(`@/assets/${nombreArchivo}`, import.meta.url).href;
-  },
-      enviarInicioTorneo() {
-        // Aquí va la lógica real de inicio del torneo
-        alert("Torneo iniciado correctamente");
-      },
+
+// endpoint para actualizar el estado del torneo 
+enviarInicioTorneo() {
+  try {
+    axios.put(`http://localhost:8000/actualizar_estado_torneo/${this.torneo.id_torneo}`, null, {
+      params: {
+        nuevo_estado: 'en sorteo'
+      }
+    });
+    this.$router.push('/torneosensorteo'); // Redirige al componente de torneos en sorteo
+  alert("Torneo iniciado con éxito.");
+  } catch (error) {
+    console.error("Error al iniciar el torneo:", error);
+    alert("No se pudo actualizar el estado del torneo.");
+  }
+},
+
       verEnMaps() {
         const query = encodeURIComponent(this.torneo.ubicacion);
         window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
@@ -237,6 +275,9 @@ getLogoUrl(nombreArchivo) {
     padding: 2rem;
     border-radius: 1.5rem;
     box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+    min-width: 50vw;
+    max-width: 100vw;
+    margin-top: 20%;
   }
   
   h1, h2 {
@@ -403,7 +444,8 @@ getLogoUrl(nombreArchivo) {
   
   
   .cancha-img {
-    width: 100%;
+    width: 30%;
+    max-width: 60vw;
     border-radius: 0.75rem;
     margin-top: 1rem;
     border: 2px solid #333;
