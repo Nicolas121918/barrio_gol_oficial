@@ -232,20 +232,9 @@ const routes=[
         component: Pagos,
       },
       {
-<<<<<<< HEAD
-        path: '/torneosensorteo',//interfaz creadr torneo
-        name: 'torneosensorteo',
-        component: Torneoensorteo,
-      },
-      {
-        path: '/statustorneos/:id_torneo',//interfaz creadr torneo
-        name: 'statustorneos',
-        component: statustorneos,
-=======
         path: '/torneoscreador/:id_torneo', // interfaz creador torneo
         name: 'torneoscreador',
         component: Torneoscreador,
->>>>>>> d9034e8 (Correcciones generales)
       },
       {
         path: '/gana',//escoger ganador torneo
