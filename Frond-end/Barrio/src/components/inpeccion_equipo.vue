@@ -98,7 +98,7 @@ export default {
       }
     },
     verGaleria(id) {
-    this.$router.push({ name: 'galeria-inspeccionar', params: { id } });
+    this.$router.push({ name: 'GaleriaInsepccion', params: { id } });
   },
     getImagenUrl(path) {
       return path ? `http://127.0.0.1:8000/${path}` : "https://via.placeholder.com/150";

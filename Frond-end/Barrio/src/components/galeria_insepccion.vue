@@ -1,270 +1,152 @@
+
 <template>
-    <header>
-      <Headerapp />
-    </header>
-    <div>
-      <div class="padre">
-        <button class="botones_" @click="$router.go(-1)">Volver</button>
-        <h1>GALERÍA DE EQUIPO</h1>
-  
-        <!-- Barra de búsqueda -->
-        <div class="caja">
-          <div v-if="!isUploading">
-            <input
-              class="buscador"
-              type="text"
-              v-model="searchQuery"
-              placeholder="Buscar por descripción o usuario"
-              @input="applyFilters"
-            />
-          </div>
+  <header>
+    <Headerapp />
+  </header>
+  <div>
+    <div class="padre">
+      <button class="botones_" @click="$router.go(-1)">Volver</button>
+      <h1>GALERÍA DE EQUIPO</h1>
+
+      <!-- Barra de búsqueda -->
+      <div class="caja">
+        <div>
+          <input
+            class="buscador"
+            type="text"
+            v-model="searchQuery"
+            placeholder="Buscar por descripción"
+            @input="applyFilters"
+          />
         </div>
-  
-        <!-- Botón para subir publicación -->
-  
-        <!-- Formulario para subir archivo -->
-        <div v-if="isUploading">
-          <div class="children">
-            <label>
-              <input type="radio" value="video" v-model="selectedMediaType" />
-              Subir Video
-            </label>
-            <label>
-              <input type="radio" value="image" v-model="selectedMediaType" />
-              Subir Imagen
-            </label>
-            <button class="botones_2" @click="cancelUpload">Volver</button>
+      </div>
+
+      <!-- Tarjetas de publicaciones -->
+      <div v-if="filteredPosts.length" class="card-container">
+        <div v-for="(post, index) in filteredPosts" :key="index" class="card">
+          <div class="card-header">
+            <!-- Sin botón de opciones -->
           </div>
-  
-          <div class="caja_video" v-if="selectedMediaType">
-            <h3>
-              Seleccionaste:
-              {{ selectedMediaType === "video" ? "Video" : "Imagen" }}
-            </h3>
-            <br />
-            <input
-              type="file"
-              :accept="selectedMediaType === 'video' ? 'video/*' : 'image/*'"
-              @change="handleFileUpload"
-            />
-            <br />
-            <textarea
-              v-model="description"
-              placeholder="Descripción de la publicación"
-            ></textarea>
-            <button class="botones_" @click="uploadPost">Subir</button>
-          </div>
-        </div>
-  
-        <!-- Tarjetas de publicaciones -->
-        <div v-if="!isUploading && filteredPosts.length" class="card-container">
-          <div v-for="(post, index) in filteredPosts" :key="index" class="card">
-            <div class="card-header">
-              <button @click="openModal(index)">&#x22EE;</button>
-            </div>
-  
-            <div class="card-body">
-              <div v-if="post.mediaType === 'video'">
-                <video
-                  :src="post.media"
-                  controls
-                  class="media"
-                  @click="enlargeMedia(post)"
-                ></video>
-              </div>
-              <div v-else-if="post.mediaType === 'image'">
-                <img
-                  :src="post.media"
-                  alt="imagen"
-                  class="media"
-                  @click="enlargeMedia(post)"
-                />
-              </div>
-            </div>
-            <div class="card-footer">
-              <p>{{ post.description }}</p>
-            </div>
-          </div>
-        </div>
-        <!-- Modal para ampliar imagen o video -->
-        <div v-if="showMediaModal" class="modal">
-          <div class="modal-content">
-            <div v-if="currentMedia.mediaType === 'video'">
+          <div class="card-body">
+            <div v-if="post.mediaType === 'video'">
               <video
-                :src="currentMedia.media"
+                :src="post.media"
                 controls
-                autoplay
-                class="enlarged-media"
+                class="media"
+                @click="enlargeMedia(post)"
               ></video>
             </div>
-            <div v-else-if="currentMedia.mediaType === 'image'">
+            <div v-else-if="post.mediaType === 'image'">
               <img
-                :src="currentMedia.media"
-                alt="imagen ampliada"
-                class="enlarged-media"
+                :src="post.media"
+                alt="imagen"
+                class="media"
+                @click="enlargeMedia(post)"
               />
             </div>
-            <button class="botones_2" @click="closeMediaModal">Cerrar</button>
+          </div>
+          <div class="card-footer">
+            <p>{{ post.description }}</p>
           </div>
         </div>
       </div>
+      <!-- Modal para ampliar imagen o video -->
+      <div v-if="showMediaModal" class="modal">
+        <div class="modal-content">
+          <div v-if="currentMedia.mediaType === 'video'">
+            <video
+              :src="currentMedia.media"
+              controls
+              autoplay
+              class="enlarged-media"
+            ></video>
+          </div>
+          <div v-else-if="currentMedia.mediaType === 'image'">
+            <img
+              :src="currentMedia.media"
+              alt="imagen ampliada"
+              class="enlarged-media"
+            />
+          </div>
+          <button class="botones_2" @click="closeMediaModal">Cerrar</button>
+        </div>
+      </div>
     </div>
-  </template>
-  
-  <script>
-  import Headerapp from "./Headerapp.vue";
-  import axios from "axios";
-  import { useUsuarios } from "@/stores/usuario";
-  
-  
-  export default {
-    components: {
-      Headerapp,
-    },
-    data() {
-      
-      return {
-    Galeria : [],
-        isUploading: false,
-        selectedMediaType: null,
-        description: "",
-        mediaFile: null,
-        posts: [],
-        searchQuery: "",
-        filteredPosts: [],
-        showModal: false,
-        modalIndex: null,
-        showMediaModal: false,
-        currentMedia: {},
-      };
-    },
-    mounted() {
-      this.getGaleria();
-      
-    },
-    methods: {
-      
-      getGaleria() {
-    const usuariosStore = useUsuarios();
-    const idTeam = usuariosStore.usuario.equipo_tiene;
-  
-  
-    if (!idTeam) {
-      console.error("No se encontró un equipo asignado.");
-      return;
-    }
-  
-    axios
-      .get(`http://localhost:8000/galeria/${idTeam}`)
-      .then((response) => {
-  
-        // Mapea los datos del backend al formato esperado por el frontend
-        this.posts = response.data.map((post) => {
-    const mediaUrl = `http://localhost:8000${post.archivo_url}`;
-    console.log("URL generada para media:", mediaUrl);
-    return {
-      mediaType: post.tipo_media === "imagen" ? "image" : post.tipo_media, // Ajusta "imagen" a "image"
-      media: mediaUrl,
-      description: post.descripcion,
-      id: post.id,
-      idTeam: post.id_team,
-    };
-  });
-  
-        console.log("Posts después de mapear:", this.posts); // Verifica los datos mapeados
-        this.applyFilters(); // Aplica los filtros iniciales
-      })
-      .catch((err) => {
-        console.error("Error al obtener las publicaciones:", err);
-        alert("Error al cargar las publicaciones");
-      });
+  </div>
+</template>
+
+<script>
+import Headerapp from "./Headerapp.vue";
+import axios from "axios";
+import { useUsuarios } from "@/stores/usuario";
+
+export default {
+  components: {
+    Headerapp,
   },
-      
-      startUpload() {
-        this.isUploading = true;
-      },
-      cancelUpload() {
-        this.resetUpload();
-      },
-      resetUpload() {
-        this.isUploading = false;
-        this.selectedMediaType = null;
-        this.description = "";
-        this.mediaFile = null;
-      },
-      handleFileUpload(event) {
-        this.mediaFile = event.target.files[0];
-      },
-      uploadPost() {
-        const usuariosStore = useUsuarios();
-        const idTeam = usuariosStore.usuario.equipo_tiene;
-  
-        if (!this.mediaFile || !this.description || !this.selectedMediaType || !idTeam) {
-          alert("Completa todos los campos y asegúrate de tener equipo asignado");
-          return;
-        }
-  
-        const formData = new FormData();
-        formData.append("id_team", idTeam);
-        formData.append("descripcion", this.description);
-        formData.append("tipo_media", this.selectedMediaType === "video" ? "video" : "imagen");
-        formData.append("archivo", this.mediaFile);
-  
-        axios
-          .post("http://localhost:8000/galeria/subir", formData)
-          .then(() => {
-            alert("Publicación subida exitosamente");
-            this.getGaleria();
-            this.resetUpload();
-          })
-          .catch((err) => {
-            console.error(err);
-            alert("Error al subir publicación");
+  data() {
+    return {
+      Galeria: [],
+      posts: [],
+      searchQuery: "",
+      filteredPosts: [],
+      showMediaModal: false,
+      currentMedia: {},
+    };
+  },
+  mounted() {
+    this.getGaleria();
+  },
+  methods: {
+    getGaleria() {
+      // Aquí deberías recibir el idTeam como prop o parámetro, ya que no hay usuario logueado con equipo
+      // Por ejemplo, podrías recibirlo como prop: this.$props.idTeam
+      // Aquí lo dejo como ejemplo:
+      const idTeam = this.$route.params.id; // O como lo manejes en tu router
+
+      if (!idTeam) {
+        console.error("No se encontró un equipo para inspeccionar.");
+        return;
+      }
+
+      axios
+        .get(`http://localhost:8000/galeria/${idTeam}`)
+        .then((response) => {
+          this.posts = response.data.map((post) => {
+            const mediaUrl = `http://localhost:8000${post.archivo_url}`;
+            return {
+              mediaType: post.tipo_media === "imagen" ? "image" : post.tipo_media,
+              media: mediaUrl,
+              description: post.descripcion,
+              id: post.id,
+              idTeam: post.id_team,
+            };
           });
-      },
-      applyFilters() {
-        this.filteredPosts = this.posts.filter(
-          (post) =>
-            (!this.filterType || post.mediaType === this.filterType) &&
-            (post.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-              post.userName.toLowerCase().includes(this.searchQuery.toLowerCase()))
-        );
-      },
-      openModal(index) {
-        this.modalIndex = index;
-        this.showModal = true;
-      },
-      closeModal() {
-        this.showModal = false;
-        this.modalIndex = null;
-      },
-      deletePost(index) {
-        const post = this.filteredPosts[index];
-  
-        axios
-          .delete(`http://localhost:8000/galeria/${post.id}`)
-          .then(() => {
-            alert("Publicación eliminada");
-            this.getGaleria();
-            this.closeModal();
-          })
-          .catch((err) => {
-            console.error(err);
-            alert("Error al eliminar");
-          });
-      },
-      enlargeMedia(post) {
-        this.currentMedia = post;
-        this.showMediaModal = true;
-      },
-      closeMediaModal() {
-        this.showMediaModal = false;
-        this.currentMedia = {};
-      },
+          this.applyFilters();
+        })
+        .catch((err) => {
+          console.error("Error al obtener las publicaciones:", err);
+          alert("Error al cargar las publicaciones");
+        });
     },
-  };
-  </script>
-  
+    applyFilters() {
+      this.filteredPosts = this.posts.filter(
+        (post) =>
+          post.description.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    },
+    enlargeMedia(post) {
+      this.currentMedia = post;
+      this.showMediaModal = true;
+    },
+    closeMediaModal() {
+      this.showMediaModal = false;
+      this.currentMedia = {};
+    },
+  },
+};
+</script>
+
     
     <style scoped>
     .padre{

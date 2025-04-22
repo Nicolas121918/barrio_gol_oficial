@@ -9,18 +9,24 @@
       <headermobile></headermobile>
     </div>
   </header>
-
-  <div class="torneo-container">
-    <!-- Parte 1: Equipos -->
-    <!-- Parte 4: VS (Equipos enfrentados) -->
-    <div v-if="!finalizarTorneo" class="vs-section">
-      <h2 class="titulo">COMPETIDORES </h2>
-      <h4>selecciona dos competidores</h4>
-      <div class="enfrentamiento">
-        <div v-for="(equipo, index) in enfrentamientos" :key="index" class="equipo-vs">
-          <img :src="equipo.logoTeam" alt="logo" class="equipo-logo" />
-          <p class="equipo-nombre">{{ equipo.nombre }}</p>
-          <button @click="eliminarDeEnfrentamiento(equipo)" class="btn eliminar-vs-btn">-</button>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <div class="torneo-container">
+      <!-- Parte 1: Equipos -->
+       
+      <!-- Parte 4: VS (Equipos enfrentados) -->
+      <div v-if="!finalizarTorneo" class="vs-section">
+        <h2 class="titulo">COMPETIDORES </h2>
+        <h4>selecciona dos competidores</h4>
+        <div class="enfrentamiento">
+          
+          <div v-for="(equipo, index) in enfrentamientos" :key="index" class="equipo-vs">
+            <img :src="equipo.logo" alt="logo" class="equipo-logo" />
+            <p class="equipo-nombre">{{ equipo.nombre }}</p>
+            
+            
+            <button @click="eliminarDeEnfrentamiento(equipo)" class="btn eliminar-vs-btn">-</button>
+          </div>
+          
         </div>
       </div>
       <div class="divisor">
@@ -78,7 +84,7 @@
         <router-link to="/gana"><button @click="finalizarTorneoAccion" class="finalizar-torneo-btn">Finalizar Torneo</button></router-link>
       </div>
     </div>
-  </div>
+
 </template>
 
 <script>
@@ -121,21 +127,94 @@ export default {
         console.error("Error al obtener los equipos:", error);
       }
     },
-    agregarAEnfrentamiento(equipo) {
-      if (this.enfrentamientos.length < 2 && !this.enfrentamientos.includes(equipo)) {
-        this.enfrentamientos.push(equipo);
+    data() {
+      return {
+        equipos: [],
+        enfrentamientos: [],
+        partidosProgramados: [],
+        eliminados: [],
+        fecha: '',
+        equipoGanador: null,
+        finalizarTorneo: false,
+      };
+    },
+
+    async mounted() {
+    // Suponiendo que el id del torneo viene por params
+    const idTorneo = this.$route.params.id_torneo;
+    await this.cargarEquiposAceptados(idTorneo);
+  },
+
+    methods: {
+      async cargarEquiposAceptados(idTorneo) {
+    try {
+      const response = await fetch(`http://localhost:8000/solicitudes_aceptadas/${idTorneo}`);
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        this.equipos = data.map(eq => ({
+          id: eq.id_equipo,
+          nombre: eq.nombre_equipo,
+          // Convierte la ruta relativa en URL absoluta
+          logo: eq.logo_equipo ? `http://localhost:8000/${eq.logo_equipo}` : null
+        }));
+      } else {
+        this.equipos = [];
       }
-    },
-    eliminarEquipo(index) {
-      const equipoEliminado = this.equipos.splice(index, 1)[0];
-      this.eliminados.push(equipoEliminado);
-    },
-    eliminarDeEnfrentamiento(equipo) {
-      const index = this.enfrentamientos.indexOf(equipo);
-      if (index > -1) {
-        this.enfrentamientos.splice(index, 1);
-        if (!this.equipos.includes(equipo)) {
-          this.equipos.push(equipo);
+    } catch (error) {
+      console.error("Error al cargar equipos aceptados:", error);
+      this.equipos = [];
+    }
+  },
+
+      agregarAEnfrentamiento(equipo) {
+        if (this.enfrentamientos.length < 2 && !this.enfrentamientos.includes(equipo)) {
+          this.enfrentamientos.push(equipo);
+        }
+      },
+      eliminarEquipo(index) {
+        const equipoEliminado = this.equipos.splice(index, 1)[0];
+        this.eliminados.push(equipoEliminado);
+      },
+      eliminarDeEnfrentamiento(equipo) {
+        const index = this.enfrentamientos.indexOf(equipo);
+        if (index > -1) {
+          this.enfrentamientos.splice(index, 1); // Eliminar del "VS"
+          // Solo agregar a "equipos" si no está ya presente
+          if (!this.equipos.includes(equipo)) {
+            this.equipos.push(equipo);
+          }
+        }
+      },
+      agendarPartido() {
+        if (this.enfrentamientos.length === 2 && this.fecha) {
+          this.partidosProgramados.push({
+            equipo1: this.enfrentamientos[0],
+            equipo2: this.enfrentamientos[1],
+            fecha: this.fecha
+          });
+          this.enfrentamientos = [];
+          this.fecha = '';
+        }
+      },
+      cancelarPartido(index) {
+        this.partidosProgramados.splice(index, 1);
+      },
+      repetirEquipo(index) {
+        const equipo = this.eliminados.splice(index, 1)[0];
+        this.equipos.push(equipo);
+      },
+      finalizarTorneo() {
+        this.finalizarTorneo = true;
+        if (this.equipos.length === 1) {
+          this.equipoGanador = this.equipos[0].nombre;
+        }
+      },
+      confirmarGanador() {
+        if (this.equipoGanador) {
+          alert('El ganador es: ${this.equipoGanador');
+          this.equipos = [];
+          this.partidosProgramados = [];
+          this.eliminados = [];
         }
       }
     },

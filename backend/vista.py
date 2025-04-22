@@ -393,30 +393,37 @@ async def obtener_info_equipo(id_equipo: int, db: Session = Depends(get_db)):
 async def obtener_equipo_detalle(id_equipo: int, db: Session = Depends(get_db)):
     equipo = db.query(Equipos).filter(Equipos.Id_team == id_equipo).first()
     if not equipo:
-            raise HTTPException(status_code=404, detail="Equipo no encontrado")
+        raise HTTPException(status_code=404, detail="Equipo no encontrado")
 
-        # Obtener el documento del capitán
-    documento_capitan = equipo.capitan_documento  # Aquí ya tenemos el documento correcto
+    documento_capitan = equipo.capitan_documento
 
-        # Filtrar miembros excluyendo al capitán
     miembros = db.query(Registro).filter(
-            Registro.equipo_tiene == id_equipo, 
-            Registro.documento != documento_capitan  # Excluir al capitán por su documento
-        ).all()
+        Registro.equipo_tiene == id_equipo, 
+        Registro.documento != documento_capitan
+    ).all()
 
     return {
-            "equipo": {
-                "id": equipo.Id_team,
-                    "nombre": equipo.nombreteam,
-                "descripcion": equipo.Descripcion,
-                "numero_integrantes": equipo.numeropeople,
-                "capitan": equipo.capitanteam,  # Mantiene el nombre del capitán en los detalles
-                "ubicacion": equipo.location,
-                "logo": equipo.logoTeam,
-                
-            },
-            "miembros": [{"nombre": miembro.nombre, "documento": miembro.documento, "imagen":miembro.imagen , "fecha_nacimiento" : miembro.fecha_nacimiento} for miembro in miembros]
-        }
+        "equipo": {
+            "id": equipo.Id_team,
+            "nombre": equipo.nombreteam,
+            "descripcion": equipo.Descripcion,
+            "numero_integrantes": equipo.numeropeople,
+            "capitan": equipo.capitanteam,
+            "ubicacion": equipo.location,
+            "logo": equipo.logoTeam,
+            "puntos": equipo.puntos,   # <-- AGREGA ESTO
+            "nivel": equipo.nivel      # <-- Y ESTO (si tienes el campo)
+        },
+        "miembros": [
+            {
+                "nombre": miembro.nombre,
+                "documento": miembro.documento,
+                "imagen": miembro.imagen,
+                "fecha_nacimiento": miembro.fecha_nacimiento
+            } for miembro in miembros
+        ]
+    }
+
 @app.post("/equipos/salir")
 async def salir_equipo(
     documento_user: str = Form(...),  # Cambié int -> str porque en el modelo es String(50)
@@ -1476,10 +1483,10 @@ async def obtener_torneos_finalizados(documento_creador: str, db: Session = Depe
 
 @app.get("/torneosEnJuego/{documento_creador}")
 async def obtener_torneos_en_estado(documento_creador: str, db: Session = Depends(get_db)):
-    # Filtrar los torneos por el documento del creador y los estados 'en espera' o 'en_juego'
+    # Filtrar los torneos por el documento del creador y los estados 'en espera' o 'en juego'
     torneos = db.query(Torneos).filter(
         Torneos.documento_creador == documento_creador, 
-        Torneos.estado.in_(['en espera', 'en sorteo'])
+        Torneos.estado.in_(['en espera', 'en juego'])  # <-- ambos con espacio
     ).all()
 
     if not torneos:
@@ -1635,33 +1642,50 @@ def enviar_solicitud(id_torneo: int, id_equipo: str, db: Session = Depends(get_d
         print("Error:", e)
         raise HTTPException(status_code=500, detail="el equipo ya envio solicitud.")
     
+
 @app.put("/gestionarSolicitud/{id_solicitud}")
 async def gestionar_solicitud(id_solicitud: int, estado: str, db: Session = Depends(get_db)):
-    if estado not in ["aceptado", "rechazado"]:
+    if estado not in ["aceptado", "rechazado", "iniciar"]:
         raise HTTPException(status_code=400, detail="Estado inválido")
     solicitud = db.query(SolicitudesTorneo).filter(SolicitudesTorneo.id_solicitud == id_solicitud).first()
-    if not solicitud:
+    if not solicitud and estado != "iniciar":
         raise HTTPException(status_code=404, detail="Solicitud no encontrada")
 
     # Solo el creador del torneo puede gestionar las solicitudes
-    torneo = db.query(Torneos).filter(Torneos.id_torneo == solicitud.id_torneo).first()
-    if not torneo:
-        raise HTTPException(status_code=404, detail="Torneo no encontrado")
+    torneo = db.query(Torneos).filter(Torneos.id_torneo == (solicitud.id_torneo if solicitud else None)).first() if estado != "iniciar" else None
+
+    # Si el estado es "iniciar", buscamos el torneo por id_solicitud como id_torneo
+    if estado == "iniciar":
+        torneo = db.query(Torneos).filter(Torneos.id_torneo == id_solicitud).first()
+        if not torneo:
+            raise HTTPException(status_code=404, detail="Torneo no encontrado")
+        if torneo.estado == "en juego":
+            return {"mensaje": "El torneo ya está en juego"}
+        torneo.estado = "en juego"
+        db.commit()
+        db.refresh(torneo)
+        return {"mensaje": "Torneo iniciado manualmente", "torneo": torneo.id_torneo}
 
     if estado == "aceptado":
-        # Actualizar el estado de la solicitud y el estado del torneo si es necesario
         solicitud.estado = "aceptado"
         if len([s for s in torneo.solicitudes if s.estado == "aceptado"]) >= torneo.numero_participantes:
-            torneo.estado = "en juego"  # Por ejemplo, cambia el estado cuando se llena el número de participantes
+            torneo.estado = "en juego"  # Cambia el estado cuando se llena el número de participantes
     elif estado == "rechazado":
         solicitud.estado = "rechazado"
 
     db.commit()
     db.refresh(solicitud)
-
     return {"mensaje": f"Solicitud {estado} con éxito", "solicitud": solicitud.id_solicitud}
 
 
+@app.get("/listartorneosi/{documento_creador}", response_model=List[Torneo])
+async def listar_torneos(documento_creador: str, db: Session = Depends(get_db)):
+    # Limpiar el documento del usuario a buscar
+    documento_creador = documento_creador.strip()
+    lista_Torneos = db.query(Torneos).filter(Torneos.Documento_Creador_Torneo == documento_creador).all() 
+    if not lista_Torneos:
+        raise HTTPException(status_code=404, detail="No hay Torneos disponibles para este creador")
+    return lista_Torneos
 
 @app.get("/solicitudes_pendientestorneo/{id_torneo}")
 async def solicitudes_pendientestorneo(id_torneo: int, db: Session = Depends(get_db)):

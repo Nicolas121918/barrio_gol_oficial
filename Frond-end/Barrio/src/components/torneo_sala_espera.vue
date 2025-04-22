@@ -43,7 +43,7 @@
           class="equipo-box"
           @click="verEquipo(equipo.id_equipo)"
         >
-          <img :src="getImagenUrl(equipo.logoTeam)" class="equipo-logo" />
+        <img :src="getLogoEquipoUrl(equipo.logo_equipo)" class="equipo-logo" />
           <p>{{ equipo.nombre_equipo}}</p>
         </div>
       </div>
@@ -63,7 +63,7 @@
         class="solicitud-box"
       >
         <div class="solicitud-info">
-          <img :src="getImagenUrl(solicitud.logo_equipo)" class="equipo-logo" />
+          <img :src="getLogoEquipoUrl(solicitud.logo_equipo)" class="equipo-logo" />
 <p>{{ solicitud.nombre_equipo }}</p>
 
         </div>
@@ -91,7 +91,7 @@
           class="solicitud-box"
         >
           <div class="solicitud-info">
-            <img :src="solicitud.logo_equipo" class="equipo-logo" />
+            <img :src="getLogoEquipoUrl(solicitud.logo_equipo)" class="equipo-logo" />
             <p>{{ solicitud.nombre_equipo }}</p>
             <button class="boton" @click="verEquipo(solicitud.id_equipo)">Ver</button>
           </div>
@@ -235,27 +235,30 @@ async rechazadas(idTorneo) {
     console.error("Error al cargar aceptadas:", error);
   }
 }, 
+getLogoUrl(nombreArchivo) {
+    return new URL(`@/assets/${nombreArchivo}`, import.meta.url).href;
+  },
 
-// endpoint para actualizar el estado del torneo 
-enviarInicioTorneo() {
-  try {
-    axios.put(`http://localhost:8000/actualizar_estado_torneo/${this.torneo.id_torneo}`, null, {
-      params: {
-        nuevo_estado: 'en sorteo'
-      }
-    });
-    this.$router.push('/torneosensorteo'); // Redirige al componente de torneos en sorteo
-  alert("Torneo iniciado con éxito.");
-  } catch (error) {
-    console.error("Error al iniciar el torneo:", error);
-    alert("No se pudo actualizar el estado del torneo.");
-  }
+  getLogoEquipoUrl(logoEquipo) {
+  if (!logoEquipo) return '';
+  // Si ya es una URL absoluta, la retorna tal cual
+  if (logoEquipo.startsWith('http')) return logoEquipo;
+  // Si es relativa, la convierte a absoluta
+  return `http://localhost:8000/${logoEquipo}`;
 },
 
-      verEnMaps() {
-        const query = encodeURIComponent(this.torneo.ubicacion);
-        window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
-      }
+  async enviarInicioTorneo() {
+  try {
+    // Usamos el endpoint de gestionarSolicitud, pero mandamos el id del torneo y estado=iniciar
+    const response = await axios.put(`http://localhost:8000/gestionarSolicitud/${this.torneo.id_torneo}?estado=iniciar`);
+    alert(response.data.mensaje);
+    // Redirige incluyendo el id_torneo como parámetro
+    this.$router.push({ name: 'torneoscreador', params: { id_torneo: this.torneo.id_torneo } });
+  } catch (error) {
+    alert("No se pudo iniciar el torneo");
+    console.error(error);
+  }
+}
     }
   };
   </script>

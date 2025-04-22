@@ -114,8 +114,11 @@ import Statustorneos from './statustorneos.vue';
     },
     computed: {
       torneosEnJuegoYEspera() {
-        return this.torneos.filter(t => t.estado === 'en espera' || t.estado === 'en sorteo');
-      },
+  return this.torneos.filter(t =>
+    t.estado === 'en espera' ||
+    t.estado === 'en juego' 
+  );
+},
       torneosTerminados() {
         return this.torneos.filter(t => t.estado === 'terminado');
       },
@@ -156,41 +159,36 @@ import Statustorneos from './statustorneos.vue';
       ingresarTorneo2(id) {
         console.log('Ingresar a torneo', id);
       },
+     async cargarTorneos() {
+  const usuarioStore = useUsuarios();
+  try {
+    if (usuarioStore.usuario && usuarioStore.usuario.documento) {
+      const documentoCreador = usuarioStore.usuario.documento;
 
-      
-      // Método para cargar los torneos desde la API
-      async cargarTorneos() {
-    const usuarioStore = useUsuarios();
-    try {
-      if (usuarioStore.usuario && usuarioStore.usuario.documento) {
-        const documentoCreador = usuarioStore.usuario.documento;
+      // Obtener torneos terminados
+      const responseTerminados = await axios.get(`http://127.0.0.1:8000/torneosFinalizados/${documentoCreador}`);
+      let terminados = responseTerminados.data.torneos || [];
 
-        // Obtener torneos terminados
-        const responseTerminados = await axios.get(`http://127.0.0.1:8000/torneosFinalizados/${documentoCreador}`);
-        console.log("Torneos terminados:", responseTerminados.data); // Asegurémonos de ver la respuesta completa
+      // Obtener torneos en espera y en juego
+      const responseEnJuego = await axios.get(`http://127.0.0.1:8000/torneosEnJuego/${documentoCreador}`);
+      let enJuego = responseEnJuego.data.torneos || [];
 
-        if (responseTerminados.data && responseTerminados.data.torneos) {
-          this.torneos = responseTerminados.data.torneos || [];
-        } else {
-          console.error('No se encontraron torneos terminados.');
-        }
+      // Normaliza los estados
+      const normalizarEstado = estado =>
+        estado ? estado.replace(/_/g, ' ').toLowerCase().trim() : '';
 
-        // Obtener torneos en espera y en juego
-        const responseEnJuego = await axios.get(`http://127.0.0.1:8000/torneosEnJuego/${documentoCreador}`);
-        console.log("Torneos en juego:", responseEnJuego.data); // Asegurémonos de ver la respuesta completa
-
-        if (responseEnJuego.data && responseEnJuego.data.torneos) {
-          this.torneos = [...this.torneos, ...responseEnJuego.data.torneos];
-        } else {
-          console.error('No se encontraron torneos en juego.');
-        }
-      } else {
-        console.error('No se encontró el documento del usuario');
-      }
-    } catch (error) {
-      console.error("Error al cargar los torneos:", error);
+      this.torneos = [
+        ...terminados.map(t => ({ ...t, estado: normalizarEstado(t.estado) })),
+        ...enJuego.map(t => ({ ...t, estado: normalizarEstado(t.estado) }))
+      ];
+      console.log("Torneos cargados:", this.torneos);
+    } else {
+      console.error('No se encontró el documento del usuario');
     }
+  } catch (error) {
+    console.error("Error al cargar los torneos:", error);
   }
+},
     },
     mounted() {
       this.cargarTorneos();

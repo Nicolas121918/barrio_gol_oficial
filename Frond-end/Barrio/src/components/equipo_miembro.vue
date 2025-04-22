@@ -20,14 +20,19 @@
 
   
         <div class="caja_hijo">
-        
-        <p class="miembros_style">
-    Miembros: <br class="numeros">
+  <p class="miembros_style">
+    Miembros <br class="numeros">
     <span class="contador_style">{{ team.integrantes_actuales }}/{{ team.numero_integrantes }}</span>
   </p>
-  
-    </div>
-
+  <!-- Enlace a la galería con imagen debajo del contador de miembros -->
+  <router-link
+    :to="{ name: 'galeria' }"
+    class="galeria-link-btn"
+    title="Ver galería"
+  >
+    <img src="../assets/imagenes/galeria.png" alt="Galería" class="galeria-icon" />
+  </router-link>
+</div>
       </header>
   <div class="nivel-container">
   <h2 class="nivel-titulo">Nivel: {{ nivel }}</h2>
@@ -133,7 +138,7 @@
       <div class="chat-box">
         <div v-for="(message, index) in chats" :key="index" class="chat-message">
           <div class="message-header">
-            <img :src="message.sender.profilePicture" alt="Foto de perfil" class="profile-pic" />
+            <img :src="message.sender.profilePicture" alt="Foto de perfil" class="profile-pic" style="cursor:pointer" @click="verPerfil(message.sender.documento)"/>
             <strong class="sender-name">{{ message.sender.nombre }}</strong>
             <span class="timestamp">{{ message.timestamp }}</span>
           </div>
@@ -2320,4 +2325,35 @@ box-shadow: 0 0 12px #ffe100;
   z-index: 1;
   letter-spacing: 1px;
 }
+
+.galeria-link-btn {
+  display: inline-block;
+  margin-top: 12px;
+  margin-bottom: 10px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  transition: box-shadow 0.2s;
+}
+.galeria-link-btn:focus,
+.galeria-link-btn:hover {
+  box-shadow: 0 0 10px #ffd700;
+  outline: none;
+}
+
+.galeria-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.galeria-link-btn:hover .galeria-icon {
+  transform: scale(1.12) rotate(-6deg);
+  box-shadow: 0 0 16px #ffd700;
+  background: #fffbe6;
+}
+
   </style>

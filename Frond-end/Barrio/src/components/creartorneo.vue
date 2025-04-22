@@ -28,12 +28,12 @@
         <label>Tipo de torneo:</label>
         <br>
 
-<select v-model="form.tipo_torneo" required>
-  <option  value="">Seleccione una opción</option>
-  <option value="personalizado">Personalizado</option>
-  <option   value="relampago">Relámpago</option>
-  <option  value="todos">Todos contra todos</option>
-  
+        <label>Tipo de fútbol:</label>
+<select v-model="form.tipo_futbol" required>
+  <option disabled value="">Seleccione una opción</option>
+  <option value="Fútbol 5">Fútbol 5</option>
+  <option value="Fútbol 7">Fútbol 7</option>
+  <option value="Fútbol 11">Fútbol 11</option>
 </select>
 
     <div v-if="form.tipo_torneo">
