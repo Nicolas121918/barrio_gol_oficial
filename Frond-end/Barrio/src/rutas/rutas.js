@@ -40,6 +40,7 @@ import Galeria_insepccion from "../components/galeria_insepccion.vue";
 import Solicitud_teams from "@/components/solicitud_teams.vue";
 import Torneoensorteo from "@/components/torneoensorteo.vue";
 import statustorneos from "@/components/statustorneos.vue";
+import Torneoscreador from "@/components/torneoscreador.vue";
 
 
 

@@ -7,11 +7,7 @@
     <!-- Encabezado: Logo y nombre del equipo -->
     <header class="header">
       <div class="logo-container" @click="mostrarImagen = true">
-<<<<<<< HEAD
-        <img :src="team.logo" alt="Logo del equipo" class="logo" />
-=======
       <img :src="team.logo" alt="Logo del equipo" class="logo" v-if="team.logo" />
->>>>>>> d9034e8 (Correcciones generales)
 </div>
 
 
