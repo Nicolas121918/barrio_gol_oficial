@@ -484,8 +484,8 @@ async def solicitar_union_equipo(id_equipo: int, documento_usuario: str, db: Ses
         id_equipo=id_equipo
     ).first()
     
-    """if solicitud_existente:
-        return {"mensaje": "Ya has enviado una solicitud a este equipo anteriormente."}"""
+    if solicitud_existente:
+        return {"mensaje": "Ya has enviado una solicitud a este equipo anteriormente."} 
 
     # Crear nueva solicitud
     nueva_solicitud = SolicitudesIngreso(
@@ -513,7 +513,8 @@ async def obtener_solicitudes_pendientes(id_equipo: int, db: Session = Depends(g
         Registro, SolicitudesIngreso.documento_usuario == Registro.documento
     ).filter(
         SolicitudesIngreso.id_equipo == id_equipo,
-        SolicitudesIngreso.estado == "pendiente"
+        SolicitudesIngreso.estado == "pendiente",
+        Registro.equipo_tiene == 0  # Solo usuarios sin equipo
     ).all()
 
     resultado = []
@@ -528,17 +529,20 @@ async def obtener_solicitudes_pendientes(id_equipo: int, db: Session = Depends(g
 
     return {"solicitudes": resultado}
 
-
 @app.post("/solicitudes_ingreso/{id_solicitud}/aceptar")
 async def aceptar_solicitud_ingreso(id_solicitud: int, db: Session = Depends(get_db)):
-    # Buscar la solicitud y el usuario como antes
     solicitud = db.query(SolicitudesIngreso).filter(SolicitudesIngreso.id == id_solicitud).first()
-    usuario = db.query(Registro).filter(Registro.documento == solicitud.documento_usuario).first()
+    if not solicitud:
+        raise HTTPException(status_code=404, detail="No se encontró la solicitud")
 
-    # Hacer las verificaciones y actualizar los datos
-    if not solicitud or not usuario:
-        raise HTTPException(status_code=404, detail="No se encontró la solicitud o el usuario")
-    
+    usuario = db.query(Registro).filter(Registro.documento == solicitud.documento_usuario).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="No se encontró el usuario")
+
+    # Verificar si el usuario ya tiene equipo
+    if usuario.equipo_tiene and usuario.equipo_tiene != 0:
+        raise HTTPException(status_code=400, detail="El usuario ya pertenece a un equipo")
+
     usuario.equipo_tiene = solicitud.id_equipo
     solicitud.estado = "aceptada"
     db.commit()

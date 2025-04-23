@@ -43,9 +43,6 @@ import statustorneos from "@/components/statustorneos.vue";
 import Torneoscreador from "@/components/torneoscreador.vue";
 
 
-
-
-
 const routes=[
     {
         path: '/contactanos',//sobre nosotros

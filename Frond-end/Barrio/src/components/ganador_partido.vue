@@ -8,7 +8,7 @@
             <div class="resul empate-logos">
   <div class="equipo2">
     <img :src="teamAWinnerLogo" alt="Logo equipo A" class="team-logo-modal4" />
-    <p>{{ teamA.name }} - {{ teamA.score }} goles</p>
+    <p>{{ teamA.name  }} - {{ teamA.score }} goles</p>
   </div>
   <div class="equipo">
     <img :src="teamBWinnerLogo" alt="Logo equipo B" class="team-logo-modal4" />
@@ -102,18 +102,18 @@
          this.nombrepartido = data.nombre_partido;
  
          if (data.resultado === "Empate") {
-           this.teamA = {
-            
-             name: data.equipos[0].nombre,
-             logo: data.equipos[0].logo,
-             score: data.equipos[0].goles,
-           };
-           this.teamB = {
-             name: data.equipos[1].nombre,
-             logo: data.equipos[1].logo,
-             score: data.equipos[1].goles,
-           };
-         } else {
+  this.teamA = {
+    name: data.equipos[0].nombre,
+    logo: data.equipos[0].logo,
+    score: data.equipos[0].goles,
+  };
+  this.teamB = {
+    name: data.equipos[1].nombre,
+    logo: data.equipos[1].logo,
+    score: data.equipos[1].goles,
+  };
+}
+ else {
            this.teamA = {
              name: data.ganador.nombre,
              logo: data.ganador.logo,

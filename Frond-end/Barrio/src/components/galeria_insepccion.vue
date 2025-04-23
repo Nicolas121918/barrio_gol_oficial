@@ -238,7 +238,7 @@ export default {
       text-align: center;
       color: rgb(255, 255, 255);
       background-color: white;
-    
+      width: 40%;
     }
     .enlarged-media {
       max-width: 100%;

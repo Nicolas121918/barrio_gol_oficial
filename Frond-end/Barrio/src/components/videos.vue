@@ -46,12 +46,6 @@
         class="like-button-modern"
         :class="{ 'zoom-in': likedIndex === index }"
       >
-        <img
-          :src="likedVideos[video.id] ? '/imagenes/balondeoro.png' : '/imagenes/corazon.png'"
-          alt="Like"
-          class="like-icon-large"
-          @error="setFallback(video.id)"
-        />
         <span class="like-count">{{ video.likes }}</span>
       </button>
     </div>
@@ -282,6 +276,7 @@ export default {
 .uploader-name {
   font-size: 1.2rem;
   font-weight: bold;
+  color: #ffc107;
 }
 
 .descripcion {
@@ -291,6 +286,7 @@ export default {
 
 .descripcion2 {
   font-size: 12px;
+  color: white;
 }
 
 .like-button {
@@ -327,7 +323,7 @@ button:disabled {
   justify-content: space-between;
   align-items: flex-end;
   padding: 10px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent 90%);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.7), transparent 99%);
   border-radius: 16px;
 }
 
@@ -365,14 +361,57 @@ button:disabled {
 }
 
 .like-button-modern {
-  background: transparent;
+  background: linear-gradient(145deg, #ffd93b, #ffb800);
   border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  color: #fff;
+  font-weight: bold;
   cursor: pointer;
-  color: white;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  position: relative;
 }
+
+.like-button-modern:hover {
+  background: linear-gradient(145deg, #ffe45c, #ffc107);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+  transform: scale(1.1);
+}
+
+.like-button-modern:active {
+  transform: scale(0.95);
+}
+
+/* Estilo del número */
+.like-count {
+  font-size: 1.2rem;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Animación de zoom */
+.zoom-in {
+  animation: zoomIn 0.4s ease;
+}
+
+@keyframes zoomIn {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 
 .like-icon-large {
   width: 30px;
@@ -489,6 +528,44 @@ button:disabled {
     font-size: 12px;
   }
 }
+.arriba {
+  background: linear-gradient(145deg, #111, #222);
+  border: 2px solid #ffc400;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 1.6rem;
+  color: #ffc400;
+  cursor: pointer;
+  box-shadow: 0 6px 12px rgba(255, 196, 0, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px;
+}
+
+.arriba:hover {
+  background: #000;
+  color: #ffe600;
+  transform: scale(1.1);
+  box-shadow: 0 10px 20px rgba(255, 230, 0, 0.4);
+}
+
+.arriba:active {
+  transform: scale(0.95);
+  box-shadow: 0 4px 8px rgba(255, 230, 0, 0.3);
+}
+
+.arriba:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  border-color: #555;
+  color: #555;
+}
+
 
 
 

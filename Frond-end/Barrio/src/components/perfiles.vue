@@ -198,7 +198,7 @@ export default {
       event.target.pause();
     },
     verVideo(id) {
-      this.$router.push(`/one_video/${id}`);
+      this.$router.push(`/videos`);
     },
     toggleTeamInfo() {
       this.isTeamInfoClicked = !this.isTeamInfoClicked;
@@ -449,21 +449,87 @@ export default {
   gap: 1rem;
   width: 100%;
 }
-
 .video-card {
-  width: 50%;  
-  background-color: #030303;
-  border: 2px solid white;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 0 10px #949494;
-  transition: 0.3s;
+  background: #111;
+  border-radius: 20px;
+  padding: 16px;
+  margin: 20px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 8px 20px rgba(255, 221, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .video-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 20px #ffc400;
+  transform: scale(1.03);
+  box-shadow: 0 12px 25px rgba(255, 221, 0, 0.35);
 }
+
+.video-content {
+  width: 100%;
+  text-align: center;
+}
+
+.video {
+  width: 270px;
+  height: 250px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease;
+  border: solid white 1px;
+}
+
+.video:hover {
+  transform: scale(1.01);
+}
+
+.descr {
+  margin-top: 12px;
+  color: #fff;
+  font-size: 1rem;
+  font-family: 'Segoe UI', sans-serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.likes {
+  margin-top: 8px;
+  color: #ffc400;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: bold;
+}
+
+.likeee {
+  width: 20px;
+  height: 20px;
+}
+
+/* Botón "Ver" */
+.boton_ver {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background-color: #ffc400;
+  color: #111;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.boton_ver:hover {
+  background-color: #ffe600;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 230, 0, 0.4);
+}
+
 
 .usuarios {
   display: flex;
@@ -471,6 +537,31 @@ export default {
   flex-wrap: wrap;
   justify-content: center;
   gap: 1rem;
+}
+
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.large-image {
+  max-width: 350px;
+  max-height: 350px;
+  width: auto;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 0 30px #ffd700;
+  border: 3px solid #fff;
+  background: #222;
+  object-fit: contain;
 }
 
 
@@ -500,6 +591,11 @@ export default {
   .profile-picture {
     width: 100px;
     height: 100px;
+  }
+
+  .large-image {
+    max-width: 90vw;
+    max-height: 60vw;
   }
 
   .user-details h2 {

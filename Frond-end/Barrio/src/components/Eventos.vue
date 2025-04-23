@@ -26,36 +26,48 @@
           </button>
           <div v-if="mostrarOpciones" class="modal-overlay" @click.self="mostrarOpciones = false">
             <div class="modal-menu">
-              <router-link to="/creartorneo" class="dropdown-option" @click="mostrarOpciones = false">
-                ➕ Crear Torneo
-              </router-link>
-              <router-link to="/crearpartido" class="dropdown-option" @click="mostrarOpciones = false">
-                ⚽ Crear Partido
-              </router-link>
-            </div>
+  <span class="dropdown-option deshabilitado">
+    🔒 Crear Torneo <small class="proximamente">(Próximamente)</small>
+  </span>
+  <router-link to="/crearpartido" class="dropdown-option" @click="mostrarOpciones = false">
+    ⚽ Crear Partido
+  </router-link>
+</div>
+
           </div>
         </div>
         <div class="relative inline-block text-left">
-          <button @click="mostrarMenu = !mostrarMenu" class="boton-creados">
-            Creados▼
-          </button>
-          <div v-if="mostrarMenu" class="menu-creados absolute right-0 mt-2 w-48 bg-black text-white border border-gold rounded shadow-lg z-50">
-            <div @click="irATorneos" class="opcion-menu">Torneos Creados</div>
-            <hr class="border-gold my-1" />
-            <div @click="irAPartidos" class="opcion-menu">Partidos Creados</div>
-          </div>
-        </div>
-        <div class="relative inline-block text-left" @mouseleave="mostrarMenu2 = false">
-          <button @click="mostrarMenu2 = !mostrarMenu2" class="boton-creados">
-            Eventos  finalizados▼
-          </button>
-          <div v-if="mostrarMenu2" class="menu-creados absolute right-0 mt-2 w-48 bg-black text-white border border-gold rounded shadow-lg z-50">
-            <hr class="border-gold my-1" />
-            <div @click="irATorneos2" class="opcion-menu">Torneos Finalizados</div>
-            <hr class="border-gold my-1" />
-            <div @click="irAFinalizados" class="opcion-menu"> Partidos Finalizados</div>
-          </div>
-        </div>
+  <button @click="mostrarMenu = !mostrarMenu" class="boton-creados">
+    Creados▼
+  </button>
+  <div v-if="mostrarMenu" class="menu-creados absolute right-0 mt-2 w-48 bg-black text-white border border-gold rounded shadow-lg z-50">
+    
+    <div class="opcion-menu deshabilitado">
+      🔒 Torneos Creados <small class="proximamente">(Próximamente)</small>
+    </div>
+
+    <hr class="border-gold my-1" />
+
+    <div @click="irAPartidos" class="opcion-menu">⚽ Partidos Creados</div>
+  </div>
+</div>
+<div class="relative inline-block text-left" @mouseleave="mostrarMenu2 = false">
+  <button @click="mostrarMenu2 = !mostrarMenu2" class="boton-creados">
+    Eventos finalizados▼
+  </button>
+  <div v-if="mostrarMenu2" class="menu-creados absolute right-0 mt-2 w-48 bg-black text-white border border-gold rounded shadow-lg z-50">
+    
+    <hr class="border-gold my-1" />
+    
+    <div class="opcion-menu deshabilitado">
+      🔒 Torneos Finalizados <small class="proximamente">(Próximamente)</small>
+    </div>
+    
+    <hr class="border-gold my-1" />
+    
+    <div @click="irAFinalizados" class="opcion-menu">⚽ Partidos Finalizados</div>
+  </div>
+</div>
       </div>
     </div>
     <div>
@@ -1028,6 +1040,22 @@ text-align: center;
   }
 }
 
+.deshabilitado {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+  color: gray;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.proximamente {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: #aaa;
+  margin-left: 0.5rem;
+}
 
   </style>
   

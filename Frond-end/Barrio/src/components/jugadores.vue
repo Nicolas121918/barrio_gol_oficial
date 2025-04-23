@@ -36,7 +36,7 @@
             @click="openModal(getImagenUrl(profile.imagen))"
           />
           <div class="profile-info">
-            <h3 v-html="highlightName(profile.nombre)"></h3>
+            <h3 class="tituloo" v-html="highlightName(profile.nombre)"></h3>
             <p class="profile-city">Ciudad: {{ profile.ciudad }}</p>
             <p class="profile-position">Posición: {{ profile.posicion }}</p>
           </div>
@@ -225,7 +225,8 @@ closeModal() {
   padding: 15px;
   border: 2px solid #ccc;
   border-radius: 10px;
-  background-color: #222222;
+  background: linear-gradient(to bottom, #222222, #111111);
+
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
   width: 100%;
@@ -237,6 +238,8 @@ closeModal() {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   background-color: #f4f4f4;
   color: black;
+  border: solid rgb(255, 213, 0) 1px;
+  box-shadow: 0 0 20px rgb(255, 238, 0);
 }
 
 .profile-card.highlight {
@@ -255,11 +258,16 @@ closeModal() {
   height: 70px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #000000;
+  border: 2px solid #ffffff;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
+.tituloo{
+  color: rgb(255, 213, 0);
+ font-family: Georgia, 'Times New Roman', Times, serif;
+ font-size: 50%;
+ text-decoration: underline;
+}
 .profile-photo:hover {
   transform: scale(1.05);
   box-shadow: 0 0 10px gold;
@@ -339,8 +347,9 @@ closeModal() {
 }
 
 .modal-image {
-  max-width: 80vh;
-  max-height: 90vh;
+
+  width: 80vh;
+  height: 70vh;
   border: 5px solid white;
   border-radius: 10px;
   margin: auto;
@@ -421,10 +430,10 @@ closeModal() {
     height: 70px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #000000;
+    border: 2px solid #ffffff;
     cursor: pointer;
   }
-  
+
   .profile-info {
     flex-grow: 1;
   }
@@ -586,10 +595,10 @@ closeModal() {
     height: 70px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #000000;
+    border: 2px solid #ffffff;
     cursor: pointer;
   }
-  
+
   .profile-info {
     flex-grow: 1;
   }
@@ -749,9 +758,10 @@ closeModal() {
     height: 70px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #000000;
+    border: 2px solid #ffffff;
     cursor: pointer;
   }
+
   
   .profile-info {
     flex-grow: 1;
@@ -915,10 +925,10 @@ closeModal() {
     height: 70px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #000000;
+    border: 2px solid #ffffff;
     cursor: pointer;
   }
-  
+
   .profile-info {
     flex-grow: 1;
   }
@@ -1080,10 +1090,10 @@ closeModal() {
     height: 70px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #000000;
+    border: 2px solid #ffffff;
     cursor: pointer;
   }
-  
+
   .profile-info {
     flex-grow: 1;
   }
@@ -1245,9 +1255,10 @@ closeModal() {
     height: 70px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #000000;
+    border: 2px solid #ffffff;
     cursor: pointer;
   }
+
   
   .profile-info {
     flex-grow: 1;
@@ -1410,10 +1421,9 @@ closeModal() {
     height: 70px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #000000;
+    border: 2px solid #ffffff;
     cursor: pointer;
   }
-  
   .profile-info {
     flex-grow: 1;
   }

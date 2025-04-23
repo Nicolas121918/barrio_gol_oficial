@@ -20,10 +20,6 @@
         <router-link to="/creacionequipo" class="boton-crear">
           + CREA TU EQUIPO
         </router-link>
-        <router-link to="/solicitud_teams" class="boton-crear2">
-          solicitudes
-        </router-link>
-
       </div>
       <Equipos_container />
     </div>

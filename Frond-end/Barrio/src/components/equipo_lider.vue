@@ -114,9 +114,7 @@
     <section class="submenu-section">
       <button class="button" @click="openBuzon">Buzón</button>
       <button class="button" @click="openConfig">Configuración</button>
-      <router-link class="padre" to="torneo_guardado">
-        <button class="button2" @click="">Inscritos</button>
-      </router-link>
+      
       
     </section>
 
@@ -140,9 +138,6 @@
       </li>
     </ul>
     <button class="button_close" @click="closeBuzon">Cerrar</button>
-      <router-link class="link home" to="/invitar">
-        <button class="button_accept-btn2" @click="closeBuzon">Invitar</button>
-      </router-link>
     </div>
   </div>
 
@@ -2840,6 +2835,7 @@ border: solid white;
   border-radius: 8px;
   transition: transform 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  background-color: rgb(139, 139, 139);
 }
 .galeria-link-btn:hover .galeria-icon {
   transform: scale(1.12) rotate(-6deg);

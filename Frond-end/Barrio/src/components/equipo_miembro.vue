@@ -116,10 +116,7 @@
       <!-- Botones para abrir el submenú -->
       <section class="submenu-section">
         <button class="button" @click="openConfig">Configuración</button>
-        <router-link class="padre" to="torneo_guardado">
-          <button class="button2" @click="">Inscritos</button>
-        </router-link>
-        
+  
       </section>
     
   
@@ -2334,6 +2331,7 @@ box-shadow: 0 0 12px #ffe100;
   background: none;
   cursor: pointer;
   padding: 0;
+  background-color: rgb(139, 139, 139);
   transition: box-shadow 0.2s;
 }
 .galeria-link-btn:focus,

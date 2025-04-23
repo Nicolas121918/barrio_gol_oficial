@@ -121,7 +121,7 @@
               class="enlarged-media"
             />
           </div>
-          <button class="botones_2" @click="closeMediaModal">Cerrar</button>
+          <button class="botones_3" @click="closeMediaModal">Cerrar</button>
         </div>
       </div>
     </div>
@@ -356,30 +356,45 @@ export default {
     object-fit: cover;
   }
   .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .modal-content {
-    padding: 20px;
-    border-radius: 5px;
-    text-align: center;
-    color: rgb(255, 255, 255);
-    background-color: white;
-  
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.4); /* Fondo semitransparente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 24px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  max-width: 350px;   /* Ajusta este valor según lo que consideres "necesario" */
+  width: 100%;
+  min-width: 220px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
   .enlarged-media {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-  }
+  max-width: 300px;   /* Puedes ajustar este valor según lo que consideres mediano-pequeño */
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  display: block;
+  margin: 0 auto;     /* Centra la imagen o video en el modal */
+  border-radius: 8px; /* Opcional: bordes redondeados para mejor estética */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* Opcional: sombra para resaltar */
+}
+
   .caja{
     display: flex;
     flex-direction:row;
@@ -445,7 +460,36 @@ export default {
     outline: none; /* Elimina el contorno de selección predeterminado */
     transition: all 0.3s ease; /* Transición suave para interacciones */
   }
+  .botones_3 {
+    background-color: #0ce1fd; /* Fondo morado */
+    color: rgb(0, 0, 0); /* Color del texto blanco */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente más moderna y elegante */
+    font-size: 120%; /* Tamaño de fuente ligeramente mayor */
+    font-weight: 600; /* Peso de fuente intermedio para un toque sofisticado */
+    padding: 10px; /* Más espaciado interno para un botón más grande */
+    border: 2px solid transparent; /* Borde inicial transparente */
+    text-transform: uppercase; /* Convierte el texto a mayúsculas */
+    letter-spacing: 1px; /* Espaciado entre las letras para un toque elegante */
+    cursor: pointer; /* Cambio de cursor a mano */
+    box-shadow: 0 0px 30px rgba(255, 255, 255, 0.486); /* Sombra sutil para profundidad */
+    transition: all 0.3s ease; /* Transición suave para todos los cambios */
+    margin: 1%;
+    border-radius: 40px;
+    width: 40%;
+  }
   
+  .botones_3:hover {
+    background-color: #0b41b6; /* Fondo morado más claro al pasar el ratón */
+    border-color: #fff; /* Borde blanco al pasar el ratón */
+    transform: translateY(-4px); /* Eleva el botón ligeramente al pasar el ratón */
+    color: white;
+  }
+  
+  .botones_3:active {
+    background-color: #fcfcfc; /* Fondo original morado oscuro al hacer clic */
+    transform: translateY(2px); /* Desplazamiento hacia abajo al hacer clic */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra más pequeña al hacer clic */
+  }
   .buscador:focus {
     border-color: #3498db; /* Cambia el borde a azul cuando se hace focus */
     background-color: #fff; /* Cambia el fondo a blanco cuando se hace focus */
@@ -472,7 +516,7 @@ export default {
     transition: all 0.3s ease; /* Transición suave para todos los cambios */
     margin: 1%;
     border-radius: 40px;
-    width: 20%;
+    width: 30%;
   }
   
   .botones_2:hover {
